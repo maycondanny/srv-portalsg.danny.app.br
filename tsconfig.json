@@ -1,13 +1,25 @@
 {
   "compilerOptions": {
+    "baseUrl": "./src",
     "target": "ES2020",
     "module": "commonjs",
     "outDir": "./dist",
+    "allowJs": true,
     "rootDir": "./src",
-    "strict": true,
+    "strict": false,
     "esModuleInterop": true,
+    "noEmit": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "@db/*": ["db/*"],
+      "@utils/*": ["utils/*"],
+      "@modules/*": ["modules/*"],
+      "@models/*": ["models/*"],
+      "@exceptions/*": ["exceptions/*"],
+      "@enums/*": ["enums/*"],
+      "@configs/*": ["configs/*"]
+    }
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]

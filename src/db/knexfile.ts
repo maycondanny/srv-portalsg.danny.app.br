@@ -1,36 +1,34 @@
-import { Knex } from 'knex';
+import path from 'path';
+import { types } from 'pg';
 
-const config: { [key: string]: Knex.Config } = {
-  development: {
-    client: 'pg',
-    connection: {
-      host: '127.0.0.1',
-      user: 'your_database_user',
-      password: 'your_database_password',
-      database: 'your_database_name'
-    },
-    migrations: {
-      directory: './src/db/migrations'
-    },
-    seeds: {
-      directory: './src/db/seeds'
-    }
+types.setTypeParser(types.builtins.INT4, (val) => parseInt(val, 10));
+types.setTypeParser(types.builtins.INT8, (val) => parseInt(val, 10));
+types.setTypeParser(types.builtins.NUMERIC, (val) => parseFloat(val));
+types.setTypeParser(types.builtins.BOOL, (val) => val === 't');
+
+export default {
+  client: 'pg',
+  connection: {
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT,
   },
-  production: {
-    client: 'pg',
-    connection: {
-      host: 'your_production_database_host',
-      user: 'your_production_database_user',
-      password: 'your_production_database_password',
-      database: 'your_production_database_name'
-    },
-    migrations: {
-      directory: './src/db/migrations'
-    },
-    seeds: {
-      directory: './src/db/seeds'
-    }
-  }
+  pool: {
+    min: 2,
+    max: 10,
+    acquireTimeoutMillis: 30000,
+    idleTimeoutMillis: 30000,
+    createTimeoutMillis: 30000,
+    reapIntervalMillis: 1000,
+    createRetryIntervalMillis: 200,
+    propagateCreateError: false,
+  },
+  migrations: {
+    directory: path.join(__dirname, './migrations'),
+  },
+  seeds: {
+    directory: path.join(__dirname, './seeds'),
+  },
 };
-
-export default config[process.env.NODE_ENV || 'development'];

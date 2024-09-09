@@ -1,0 +1,13 @@
+enum Status {
+  SUCESSO = 200,
+  CRIADO = 201,
+  ERRO_REQUISICAO = 400,
+  ERRO_INTERNO_SERVIDOR = 500,
+  NAO_ENCONTRADO = 404,
+  NAO_AUTORIZADO = 401,
+  RECUSADO = 403,
+}
+
+export default {
+  Status
+}
