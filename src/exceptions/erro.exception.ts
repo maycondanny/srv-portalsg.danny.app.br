@@ -1,4 +1,4 @@
-import httpStatusEnum from "@enums/http-status.enum";
+import httpStatusEnum from '@enums/http-status.enum';
 
 export default class ErroException<T> extends Error {
   public readonly codigo: number;

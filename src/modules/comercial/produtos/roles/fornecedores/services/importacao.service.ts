@@ -3,7 +3,7 @@ import formatacaoUtil from '@utils/formatacao.util';
 import stringUtil from '@utils/string.util';
 import _ from 'lodash';
 import { ESiglaEstado } from '@models/sigla-estado.model';
-import { CODIGOS_PIS_COFINS } from '@modules/comercial/produtos/models/produto.model';
+import produtoModel, { CODIGOS_PIS_COFINS, Produto } from '@modules/comercial/produtos/models/produto.model';
 import ErroException from '@exceptions/erro.exception';
 import { ProdutoDTO } from '../dtos/produto.dto';
 import ImportacaoRequestDTO from '../dtos/importacao.request.dto';
@@ -13,6 +13,7 @@ import { REGEX_APENAS_NUMEROS, REGEX_CONTEM_LETRA_OU_NUMERO, REGEX_TEXTO_VAZIO }
 import numberUtil from '@utils/number.util';
 import ErroCadastroProdutoDTO from '../dtos/erro-cadastro-produto.dto';
 import cadastroProdutoJob from '../jobs/cadastro-produto.job';
+import produtoMapper from '../mappers/produto.mapper';
 
 const TAMANHO_SITUACAO_TRIBUTARIA = 3;
 
@@ -28,7 +29,7 @@ async function importar({ planilha, fornecedorId }: ImportacaoRequestDTO): Promi
     const produtos = [];
 
     for (const dado of dados) {
-      const produtoDTO = mapearDTO(dado, fornecedorId);
+      const produtoDTO = produtoMapper.toDTO(obterDados(dado, fornecedorId));
       const { valido, mensagensErro } = await validacaoService.isValido(produtoDTO);
       if (valido) {
         produtos.push(produtoDTO);
@@ -54,17 +55,16 @@ async function importar({ planilha, fornecedorId }: ImportacaoRequestDTO): Promi
   }
 }
 
-function mapearDTO(dadosImportados: any, fornecedorId: number): ProdutoDTO {
-  return {
+function obterDados(dadosImportados: any, fornecedorId: number): Produto {
+  let produto: Produto = {
     codigo_produto_fornecedor: dadosImportados['CODIGO INTERNO DO PRODUTO FORNECEDOR']?.trim(),
     descritivo_pdv: dadosImportados['DESCRIÇÃO ABREVIADA'],
     descritivo: dadosImportados['DESCRIÇÃO COMPLETA'],
     origem: obterOrigem(dadosImportados['ORIGEM PRODUTO']),
+    eans: limparEans(dadosImportados['EAN']),
     estado: ESiglaEstado[stringUtil.removerEspacosLaterais(dadosImportados['UF FATURAMENTO'])],
     preco: formatacaoUtil.paraDecimal(dadosImportados['PREÇO CUSTO']),
     desconto_p: formatacaoUtil.paraDecimal(dadosImportados['DESCONTO']),
-    eans: limparEans(dadosImportados['EAN']),
-    duns: limparEans(dadosImportados['DUN']),
     pesob: formatacaoUtil.paraNumerico(dadosImportados['PESO BRUTO(KG)']),
     pesol: formatacaoUtil.paraNumerico(dadosImportados['PESO LIQUIDO']),
     altura: formatacaoUtil.paraNumerico(dadosImportados['ALTURA']),
@@ -80,12 +80,34 @@ function mapearDTO(dadosImportados: any, fornecedorId: number): ProdutoDTO {
     icms_compra: formatacaoUtil.paraNumerico(dadosImportados['ICMS']),
     ipi: formatacaoUtil.paraNumerico(dadosImportados['IPI']),
     pis_cofins: obterPisCofins(dadosImportados['PIS/COFINS']),
-    descricao: dadosImportados['DESCRIÇÃO CURTA / titulo'],
-    caracteristica: dadosImportados['DESCRIÇÃO DETALHADA DO SKU']?.trim(),
-    modo_uso: dadosImportados['MODO DE USO'],
-    imagens: tratarImagens(dadosImportados['Link para vídeos e Imagens']),
     fornecedor_id: fornecedorId,
+    ecommerce: {
+      descricao: dadosImportados['DESCRIÇÃO CURTA / titulo']?.trim(),
+      caracteristica: dadosImportados['DESCRIÇÃO DETALHADA DO SKU']?.trim(),
+      imagens: tratarImagens(dadosImportados['Link para vídeos e Imagens']),
+      modo_uso: dadosImportados['MODO DE USO']?.trim()
+    }
   };
+
+  produto.eans = produtoModel.juntarEansDuns(produto.eans, limparEans(dadosImportados['DUN']), produto.qtde_embalagem);
+
+  return produto;
+}
+
+function tratarImagens(imagens: string) {
+  if (!imagens) return null;
+  return _.chain(imagens)
+    .split(',')
+    .map((imagem) => {
+      if (REGEX_TEXTO_VAZIO.test(imagem)) {
+        return { url: imagem };
+      } else if (REGEX_CONTEM_LETRA_OU_NUMERO.test(imagem)) {
+        return { url: imagem };
+      }
+      return null;
+    })
+    .compact()
+    .value();
 }
 
 function obterPisCofins(pisCofins: string) {
@@ -117,22 +139,6 @@ function obterOrigem(origem: string) {
     return 1;
   }
   return null;
-}
-
-function tratarImagens(imagens: string) {
-  if (!imagens) return null;
-  return _.chain(imagens)
-    .split(',')
-    .map(imagem => {
-      if (REGEX_TEXTO_VAZIO.test(imagem)) {
-        return { url: imagem };
-      } else if (REGEX_CONTEM_LETRA_OU_NUMERO.test(imagem)) {
-        return { url: imagem };
-      }
-      return null;
-    })
-    .compact()
-    .value();
 }
 
 export default {

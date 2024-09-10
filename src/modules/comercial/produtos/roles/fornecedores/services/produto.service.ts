@@ -1,5 +1,6 @@
+import produtoEcommerceService from '@modules/comercial/ecommerce/services/produto.service';
 import ErroException from '@exceptions/erro.exception';
-import produtoDto, { ProdutoDTO } from '../dtos/produto.dto';
+import { ProdutoDTO } from '../dtos/produto.dto';
 import produtoMapper from '../mappers/produto.mapper';
 import validacaoService from './validacao.service';
 import httpStatusEnum from '@enums/http-status.enum';
@@ -28,7 +29,19 @@ async function cadastrar(dto: ProdutoDTO): Promise<void | ErroCadastroProdutoDTO
     }
 
     const produto = produtoMapper.toProduto(dto);
-    await produtoService.cadastrar(produto);
+    const produtoId = await produtoService.cadastrar(produto);
+
+    await produtoEcommerceService.cadastrar({
+      caracteristica: produto.ecommerce.caracteristica,
+      descricao: produto.ecommerce.descricao,
+      eans: produto.eans,
+      fornecedor_id: produto.fornecedor_id,
+      imagens: produto.ecommerce.imagens,
+      modo_uso: produto.ecommerce.modo_uso,
+      nome: produto.descritivo_pdv,
+      produto_id: produtoId,
+    });
+
     await cacheUtil.add(`${CODIGO_REFERENCIA_FORNECEDOR_CACHE}_${referencia}`, referencia, ETempoExpiracao.UMA_SEMANA);
   } catch (erro) {
     console.error(erro);
@@ -36,6 +49,18 @@ async function cadastrar(dto: ProdutoDTO): Promise<void | ErroCadastroProdutoDTO
   }
 }
 
+async function obterTodosPorFornecedor(fornecedorId: number): Promise<ProdutoDTO[]> {
+  const produtos = await produtoService.obterTodosPorFornecedor(fornecedorId);
+  return _.map(produtos, (produto) => produtoMapper.toDTO(produto));
+}
+
+async function obterPorId(id: number): Promise<ProdutoDTO> {
+  const produto = await produtoService.obterPorId(id);
+  return produtoMapper.toDTO(produto);
+}
+
 export default {
   cadastrar,
+  obterTodosPorFornecedor,
+  obterPorId,
 };

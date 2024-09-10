@@ -9,5 +9,5 @@ enum Status {
 }
 
 export default {
-  Status
-}
+  Status,
+};

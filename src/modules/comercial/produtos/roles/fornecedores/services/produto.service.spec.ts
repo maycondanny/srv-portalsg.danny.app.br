@@ -11,7 +11,7 @@ describe('ProdutoServiceTest', () => {
       descritivo: 'teste',
       descritivo_pdv: 'teste',
       altura: 1,
-      caracteristica: "dsadas",
+      caracteristica: 'dsadas',
       classificacao_fiscal: '4564654',
       comprimento: 2,
       desconto_p: 1,
@@ -36,12 +36,8 @@ describe('ProdutoServiceTest', () => {
       altura_d: 1,
       codigo_produto_fornecedor: '3213213',
       comprimento_d: 1,
-      largura_d: 1
+      largura_d: 1,
     };
-    await expect(ProdutoService.cadastrar(dto))
-      .resolves
-      .not
-      .toThrow();
+    await expect(ProdutoService.cadastrar(dto)).resolves.not.toThrow();
   });
-
 });

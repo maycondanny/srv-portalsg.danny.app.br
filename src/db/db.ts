@@ -1,8 +1,8 @@
 import knex, { Knex } from 'knex';
-import knexConfig from './knexfile';
+import config from './knexfile';
 
 const getDbInstance = (): Knex => {
-  return knex(knexConfig);
+  return knex(config);
 };
 
 export default getDbInstance;

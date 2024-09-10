@@ -2,16 +2,19 @@ import getDbInstance from '@db/db';
 import { Ean } from '../models/ean.model';
 import _ from 'lodash';
 
-async function obterPor(produtoId: number): Promise<Ean[]> {
+async function obterPorProdutoId(produtoId: number): Promise<Ean[]> {
   const db = getDbInstance();
   try {
-    return await db.select('*').into('produtos_eans as p').where('p.produto_id', '=', produtoId);
+    return await db
+      .select('p.*', 'p.codigo_ean AS codigo')
+      .into('produtos_eans as p')
+      .where('p.produto_id', '=', produtoId);
   } catch (error) {
     throw error;
   } finally {
     await db.destroy();
   }
-};
+}
 
 async function obterPorCodigos(codigos: string[]) {
   const db = getDbInstance();
@@ -27,7 +30,7 @@ async function obterPorCodigos(codigos: string[]) {
   } finally {
     await db.destroy();
   }
-};
+}
 
 async function cadastrarEmlote(eans: Partial<Ean>[]) {
   const db = getDbInstance();
@@ -40,7 +43,7 @@ async function cadastrarEmlote(eans: Partial<Ean>[]) {
   } finally {
     await db.destroy();
   }
-};
+}
 
 async function atualizar(eans: Ean[]) {
   const db = getDbInstance();
@@ -56,10 +59,10 @@ async function atualizar(eans: Ean[]) {
   } finally {
     await db.destroy();
   }
-};
+}
 
 export default {
-  obterPor,
+  obterPorProdutoId,
   obterPorCodigos,
   cadastrarEmlote,
   atualizar,

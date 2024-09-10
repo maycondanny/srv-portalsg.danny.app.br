@@ -1,10 +1,11 @@
 import { ESiglaEstado } from '@models/sigla-estado.model';
 import { Ean } from '@modules/comercial/produtos/models/ean.model';
-import { Imagem } from '@modules/comercial/produtos/models/imagem.model';
+import { Imagem } from '@modules/comercial/produtos/models/ecommerce.model';
 import numberUtil from '@utils/number.util';
 import _ from 'lodash';
 
 export interface ProdutoDTO {
+  id?: number;
   codigo_produto_fornecedor: string;
   descritivo_pdv: string;
   descritivo: string;

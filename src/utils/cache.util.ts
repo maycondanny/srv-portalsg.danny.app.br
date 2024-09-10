@@ -1,16 +1,16 @@
-import config from "@configs/cache.config";
-import { Redis } from "ioredis";
+import config from '@configs/cache.config';
+import { Redis } from 'ioredis';
 
 const redis = new Redis(config);
 
-redis.on("ready", () => console.log("Servidor de cacheamento iniciado com SUCESSO..."));
-redis.on("error", (error) => console.log("Erro nao iniciar servidor de cacheamento!", error));
+redis.on('ready', () => console.log('Servidor de cacheamento iniciado com SUCESSO...'));
+redis.on('error', (error) => console.log('Erro nao iniciar servidor de cacheamento!', error));
 
 export enum ETempoExpiracao {
   QUINZE_MINUTOS = 60 * 15,
   UMA_HORA = 60 * 60 * 1,
   SEIS_HORAS = 60 * 60 * 6,
-  UMA_SEMANA = 60 * 60 * 24 * 7
+  UMA_SEMANA = 60 * 60 * 24 * 7,
 }
 
 const obter = async (chave: string) => {
@@ -25,7 +25,7 @@ const obter = async (chave: string) => {
 
 const add = async (chave: string, valor: any, expiracao: ETempoExpiracao = ETempoExpiracao.UMA_HORA) => {
   try {
-    await redis.set(chave, JSON.stringify(valor), "EX", expiracao);
+    await redis.set(chave, JSON.stringify(valor), 'EX', expiracao);
   } catch (error) {
     console.error(`Erro ao adicionar no cache. CHAVE: [${chave}]`, error);
   }
@@ -42,5 +42,5 @@ const remover = async (chave: string) => {
 export default {
   obter,
   add,
-  remover
+  remover,
 };

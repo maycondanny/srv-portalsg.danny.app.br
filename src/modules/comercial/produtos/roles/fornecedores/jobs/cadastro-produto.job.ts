@@ -1,11 +1,12 @@
-import { Queue, Worker } from "bullmq";
-import connection from "@configs/queue.config";
-import produtoMapper from "../mappers/produto.mapper";
-import produtoService from "@modules/comercial/produtos/services/produto.service";
-import cacheUtil, { ETempoExpiracao } from "@utils/cache.util";
-import { CODIGO_REFERENCIA_FORNECEDOR_CACHE } from "@modules/comercial/produtos/models/produto.model";
+import produtoEcommerceService from '@modules/comercial/ecommerce/services/produto.service';
+import { Queue, Worker } from 'bullmq';
+import connection from '@configs/queue.config';
+import produtoMapper from '../mappers/produto.mapper';
+import produtoService from '@modules/comercial/produtos/services/produto.service';
+import cacheUtil, { ETempoExpiracao } from '@utils/cache.util';
+import { CODIGO_REFERENCIA_FORNECEDOR_CACHE } from '@modules/comercial/produtos/models/produto.model';
 
-const nome = "CPF_CadastroProdutoJob";
+const nome = 'CPF_CadastroProdutoJob';
 
 const queue = new Queue(nome, {
   connection,
@@ -15,7 +16,7 @@ const queue = new Queue(nome, {
   },
 });
 
-queue.on("error", (erro) => {
+queue.on('error', (erro) => {
   console.log(`Erro ao enviar o job para a fila ${nome}.`);
   console.log(erro);
 });
@@ -26,13 +27,25 @@ const worker = new Worker(
     let { dto } = data;
     const referencia = dto.codigo_produto_fornecedor;
     const produto = produtoMapper.toProduto(dto);
-    await produtoService.cadastrar(produto);
+    const produtoId = await produtoService.cadastrar(produto);
+
+    await produtoEcommerceService.cadastrar({
+      caracteristica: produto.ecommerce.caracteristica,
+      descricao: produto.ecommerce.descricao,
+      eans: produto.eans,
+      fornecedor_id: produto.fornecedor_id,
+      imagens: produto.ecommerce.imagens,
+      modo_uso: produto.ecommerce.modo_uso,
+      nome: produto.descritivo_pdv,
+      produto_id: produtoId,
+    });
+
     await cacheUtil.add(`${CODIGO_REFERENCIA_FORNECEDOR_CACHE}_${referencia}`, referencia, ETempoExpiracao.UMA_SEMANA);
   },
   { connection, removeOnFail: { count: 0 }, removeOnComplete: { count: 0 } }
 );
 
-worker.on("error", (erro) => {
+worker.on('error', (erro) => {
   console.log(`Erro ao processar o job ${nome}.`);
   console.log(erro);
 });

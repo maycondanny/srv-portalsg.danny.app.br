@@ -18,7 +18,7 @@ app.listen(port, () => {
 });
 
 app.use((error, req, res, next) => {
-  const codigo = error.codigo || httpStatusEnum.Status.ERRO_INTERNO_SERVIDOR
+  const codigo = error.codigo || httpStatusEnum.Status.ERRO_INTERNO_SERVIDOR;
   return res.status(codigo).json({
     nome: error.name,
     codigo: codigo,

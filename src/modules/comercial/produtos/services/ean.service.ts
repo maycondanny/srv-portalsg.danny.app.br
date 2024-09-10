@@ -1,9 +1,9 @@
-import _ from "lodash";
-import { Ean } from "../models/ean.model";
-import eanRepository from "../repositories/ean.repository";
+import _ from 'lodash';
+import { Ean } from '../models/ean.model';
+import eanRepository from '../repositories/ean.repository';
 
 async function cadastrarEmlote(produtoId: number, eans: Partial<Ean>[]) {
-  eans = _.map(eans, ean => {
+  eans = _.map(eans, (ean) => {
     const { codigo, principal } = _.pick(ean, ['codigo', 'principal']);
     const resultado = _.omit(ean, ['codigo', 'principal']);
     return {
@@ -16,6 +16,11 @@ async function cadastrarEmlote(produtoId: number, eans: Partial<Ean>[]) {
   await eanRepository.cadastrarEmlote(eans);
 }
 
-export default {
-  cadastrarEmlote
+async function obterPorProdutoId(produtoId: number): Promise<Ean[]> {
+  return await eanRepository.obterPorProdutoId(produtoId);
 }
+
+export default {
+  cadastrarEmlote,
+  obterPorProdutoId,
+};

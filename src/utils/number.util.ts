@@ -1,4 +1,4 @@
-import _ from "lodash";
+import _ from 'lodash';
 
 function isMaiorZero(valor: number) {
   if (_.isUndefined(valor) || _.isNull(valor)) return;
@@ -24,5 +24,5 @@ export default {
   isMaiorZero,
   isMaiorOuIgualZero,
   isMenorOuIgualZero,
-  isMenorZero
-}
+  isMenorZero,
+};

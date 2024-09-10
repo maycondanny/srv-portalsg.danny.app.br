@@ -1,14 +1,18 @@
 import _ from 'lodash';
-import { EMedidas } from './produto.model';
 
 export enum ETamanho {
   EAN = 13,
   DUN = 14,
 }
 
+export enum EMedidas {
+  CAIXA = 'CX',
+  UNIDADE = 'UN',
+}
+
 export enum EPrincipal {
-  SIM = "T",
-  NAO = "F"
+  SIM = 'T',
+  NAO = 'F',
 }
 
 export interface Ean {
@@ -25,9 +29,9 @@ export interface Ean {
 const obterTipoEan = (ean: any, quantidadeEmbalagem: number) => {
   return {
     id: ean.id,
-    codigo_ean: ean.codigo_ean,
-    quantidade: ean.codigo_ean.length <= ETamanho.EAN ? 1 : quantidadeEmbalagem,
-    tipo: ean.codigo_ean.length <= ETamanho.EAN ? EMedidas.UNIDADE : EMedidas.CAIXA,
+    codigo: ean.codigo,
+    quantidade: ean.codigo.length <= ETamanho.EAN ? 1 : quantidadeEmbalagem,
+    tipo: ean.codigo.length <= ETamanho.EAN ? EMedidas.UNIDADE : EMedidas.CAIXA,
   };
 };
 

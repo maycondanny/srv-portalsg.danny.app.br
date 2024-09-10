@@ -16,5 +16,5 @@ function isMaior(valor: string, tamanho: number) {
 export default {
   cortar,
   removerEspacosLaterais,
-  isMaior
+  isMaior,
 };
