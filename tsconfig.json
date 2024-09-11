@@ -18,7 +18,9 @@
       "@models/*": ["models/*"],
       "@exceptions/*": ["exceptions/*"],
       "@enums/*": ["enums/*"],
-      "@configs/*": ["configs/*"]
+      "@configs/*": ["configs/*"],
+      "@services/*": ["services/*"],
+      "@repositories/*": ["repositories/*"]
     }
   },
   "include": ["src/**/*.ts"],

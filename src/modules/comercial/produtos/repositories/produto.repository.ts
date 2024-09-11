@@ -55,8 +55,24 @@ async function obterPorId(id: number) {
   }
 }
 
+async function atualizar(produto: Partial<Produto>) {
+  const db = getDbInstance();
+
+  try {
+    await db.transaction(async (trx) => {
+      await trx.update(produto).from("produtos").where("id", produto.id);
+    });
+  } catch (erro) {
+    console.error(erro);
+    throw new Error("Não foi possivel atualizar os produtos.");
+  } finally {
+    db.destroy();
+  }
+};
+
 export default {
   cadastrar,
   obterTodosPorFornecedor,
   obterPorId,
+  atualizar
 };

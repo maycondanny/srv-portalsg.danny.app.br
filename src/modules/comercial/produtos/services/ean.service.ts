@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { Ean } from '../models/ean.model';
+import eanModel, { Ean } from '../models/ean.model';
 import eanRepository from '../repositories/ean.repository';
 
 async function cadastrarEmlote(produtoId: number, eans: Partial<Ean>[]) {
@@ -20,7 +20,13 @@ async function obterPorProdutoId(produtoId: number): Promise<Ean[]> {
   return await eanRepository.obterPorProdutoId(produtoId);
 }
 
+async function atualizar(eans: Ean[]): Promise<void> {
+  eans = _.map(eans, (ean) => ({ ...ean, codigo: eanModel.obterCodigoComZeroEsquerda(ean) }));
+  await eanRepository.atualizar(eans);
+}
+
 export default {
   cadastrarEmlote,
   obterPorProdutoId,
+  atualizar
 };

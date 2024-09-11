@@ -3,16 +3,16 @@ import eanModel, { Ean, EMedidas, EPrincipal, ETamanho } from './ean.model';
 import { REGEX_APENAS_NUMEROS } from '@utils/regex.util';
 import stringUtil from '@utils/string.util';
 import Ecommerce from './ecommerce.model';
+import numberUtil from '@utils/number.util';
+import Divergencia from './divergencia.model';
 
 export const CODIGO_REFERENCIA_FORNECEDOR_CACHE = 'CPF_CIPF';
 
+export const MARCA = 44;
 export const DEPTO_CLASSIFICAR = 80;
 export const GRUPO_CLASSIFICAR = 1;
 export const SUBGRUPO_CLASSIFICAR = 1;
 export const SECAO_CLASSIFICAR = 1;
-
-const ORIGEM_IMPORTACAO_DIRETA = 'ESTRANGEIRA_IMPORTACAO_DIRETA';
-const ORIGEM_MERCADO_INTERNO = 'ESTRANGEIRA_MERCADO_INTERNO';
 
 export const TAMANHO_DESCRICAO_ABREVIADA = 30;
 export const TAMANHO_DESCRICAO_CLASSIFICACAO = 128;
@@ -73,16 +73,15 @@ export interface Produto {
   desconto_p: number;
   st_compra: string;
   icms_compra: number;
+  tipo_tributacao?: string;
   estado: number;
   fornecedor_id: number;
   status?: number;
-  divergencias?: any[];
+  divergencias?: Divergencia[];
   eans: Ean[];
   ecommerce: Ecommerce;
-}
-
-function possuiDivergencias(produto: Produto) {
-  return produto?.divergencias?.length > 0;
+  produto_arius?: number;
+  cadastro_arius?: Date;
 }
 
 function formatarTexto(produto: Produto): Produto {
@@ -98,33 +97,33 @@ function juntarEansDuns(eans: Ean[], duns: Ean[], quantidadeCaixa: number) {
   eans = _.map(eans, (ean, index) => ({
     ...ean,
     principal: index === 0 ? EPrincipal.SIM : EPrincipal.NAO,
-    codigo: eanModel.preencherZeroEsquerda(ean.codigo, ETamanho.EAN),
+    codigo: eanModel.obterCodigoComZeroEsquerda(ean),
     quantidade: 1,
     tipo: EMedidas.UNIDADE,
   }));
   duns = _.map(duns, (dun) => ({
     ...dun,
-    codigo: eanModel.preencherZeroEsquerda(dun.codigo, ETamanho.DUN),
+    codigo: eanModel.obterCodigoComZeroEsquerda(dun),
     quantidade: quantidadeCaixa,
     tipo: EMedidas.CAIXA,
   }));
   return _.concat(eans, duns);
 }
 
-function obterDuns(produto: Produto): Ean[] {
-  return _.filter(produto.eans, ean => ean.tipo === EMedidas.CAIXA);
+function possuiDivergencias(produto: Produto) {
+  return numberUtil.isMaiorZero(produto.divergencias.length);
 }
 
-function obterEans(produto: Produto): Ean[] {
-  return _.filter(produto.eans, ean => ean.tipo === EMedidas.UNIDADE);
+function obterDuns(eans: Ean[]): Ean[] {
+  return _.filter(eans, ean => ean.tipo === EMedidas.CAIXA);
+}
+
+function obterEans(eans: Ean[]): Ean[] {
+  return _.filter(eans, ean => ean.tipo === EMedidas.UNIDADE);
 }
 
 function ehTipoCaixa(produto: Produto): boolean {
   return produto.qtde_embalagem > 0;
-}
-
-function obterOrigem(produto: Produto) {
-  return produto.origem === 0 ? ORIGEM_IMPORTACAO_DIRETA : ORIGEM_MERCADO_INTERNO;
 }
 
 function obterQuantidadeEmbalagem(produto: Produto) {
@@ -139,6 +138,10 @@ function limparNCM(ncm: string): string {
   return ncm?.trim()?.replace(REGEX_APENAS_NUMEROS, '');
 }
 
+function obterCodigosEans(eans: Ean[]): string[] {
+  return _.map(eans, ean => ean.codigo);
+}
+
 export default {
   obterDuns,
   obterEans,
@@ -147,6 +150,6 @@ export default {
   formatarTexto,
   obterQuantidadeEmbalagem,
   obterTipoEmbalagem,
-  obterOrigem,
   limparNCM,
+  obterCodigosEans
 };

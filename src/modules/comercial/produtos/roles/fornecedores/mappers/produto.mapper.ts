@@ -1,7 +1,6 @@
 import produtoModel, { Produto } from '@modules/comercial/produtos/models/produto.model';
 import _ from 'lodash';
 import { ProdutoDTO } from '../dtos/produto.dto';
-import { EMedidas } from '@modules/comercial/produtos/models/ean.model';
 
 function toProduto(dto: ProdutoDTO): Produto {
   const produto: Produto = {
@@ -52,8 +51,8 @@ function toDTO(produto: Produto): ProdutoDTO {
     estado: produto.estado,
     preco: produto.preco,
     desconto_p: produto.desconto_p,
-    eans: produtoModel.obterEans(produto),
-    duns: produtoModel.obterDuns(produto),
+    eans: produtoModel.obterEans(produto.eans),
+    duns: produtoModel.obterDuns(produto.eans),
     pesob: produto.pesob,
     pesol: produto.pesol,
     altura: produto.altura,

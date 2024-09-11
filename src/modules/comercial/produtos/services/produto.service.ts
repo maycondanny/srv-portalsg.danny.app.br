@@ -3,6 +3,8 @@ import _ from 'lodash';
 import { Produto } from '../models/produto.model';
 import produtoRepository from '../repositories/produto.repository';
 import eanService from './ean.service';
+import numberUtil from '@utils/number.util';
+import eanModel from '../models/ean.model';
 
 async function cadastrar(produto: Produto) {
   const eans = produto.eans;
@@ -16,12 +18,12 @@ async function obterTodosPorFornecedor(fornecedorId: number): Promise<Produto[]>
   try {
     if (!fornecedorId) throw new Error('Fornecedor não encontrado.');
     const produtos = await produtoRepository.obterTodosPorFornecedor(fornecedorId);
-    const resultado = _.map(produtos, async produto => {
-      const ecommerce = await produtoEcommerceService.obterPorProdutoId(produto.id)
+    const resultado = _.map(produtos, async (produto) => {
+      const ecommerce = await produtoEcommerceService.obterPorProdutoId(produto.id);
       return {
         ...produto,
-        ecommerce
-      }
+        ecommerce,
+      };
     });
     return await Promise.all(resultado);
   } catch (erro) {
@@ -43,8 +45,18 @@ async function obterPorId(id: number): Promise<Produto> {
   }
 }
 
+async function atualizar(produto: Partial<Produto>) {
+  const eans = produto.eans;
+  const produtoTratado = _.omit(produto, ['eans', 'ecommerce']);
+  await produtoRepository.atualizar(produtoTratado);
+  if (eans && numberUtil.isMaiorZero(eans.length)) {
+    await eanService.atualizar(produto.eans);
+  }
+}
+
 export default {
   cadastrar,
   obterTodosPorFornecedor,
   obterPorId,
+  atualizar,
 };

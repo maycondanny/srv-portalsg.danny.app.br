@@ -2,7 +2,7 @@ import _ from 'lodash';
 import produtoDto, { ProdutoDTO } from '../dtos/produto.dto';
 import numberUtil from '@utils/number.util';
 import cacheUtil from '@utils/cache.util';
-import produtosFornecedorService from 'services/hub/produtos-fornecedor.service';
+import produtoFornecedorService from 'services/hub/produto-fornecedor.service';
 import { ETamanho } from '@modules/comercial/produtos/models/ean.model';
 import stringUtil from '@utils/string.util';
 import { CODIGO_REFERENCIA_FORNECEDOR_CACHE } from '@modules/comercial/produtos/models/produto.model';
@@ -31,7 +31,7 @@ async function validarCodigoFornecedor(produtoDTO: ProdutoDTO, mensagensErro: st
     adicionarErro('CODIGO INTERNO DO PRODUTO FORNECEDOR já cadastrado', mensagensErro);
     return;
   }
-  const produtoFornecedor = await produtosFornecedorService.obterPorReferencia(codigo);
+  const produtoFornecedor = await produtoFornecedorService.obterPorReferencia(codigo);
   if (produtoFornecedor) {
     adicionarErro('CODIGO INTERNO DO PRODUTO FORNECEDOR já cadastrado', mensagensErro);
   }

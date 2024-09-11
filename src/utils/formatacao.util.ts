@@ -17,5 +17,5 @@ function paraDecimal(valor: string): number {
 
 export default {
   paraNumerico,
-  paraDecimal,
+  paraDecimal
 };

@@ -26,7 +26,7 @@ export interface Ean {
   updated_at?: Date;
 }
 
-const obterTipoEan = (ean: any, quantidadeEmbalagem: number) => {
+function obterTipoEan(ean: any, quantidadeEmbalagem: number) {
   return {
     id: ean.id,
     codigo: ean.codigo,
@@ -35,11 +35,25 @@ const obterTipoEan = (ean: any, quantidadeEmbalagem: number) => {
   };
 };
 
-const preencherZeroEsquerda = (codigo: string, tamanho: number) => {
-  if (codigo.length < tamanho) {
-    return codigo.padStart(tamanho, '0');
+function obterCodigoComZeroEsquerda(ean: Ean): string {
+  if (!ean.tipo) {
+    if (ean.codigo.length < ETamanho.EAN) {
+      return ean.codigo.padStart(ETamanho.EAN, '0');
+    }
+    return ean.codigo.padStart(ETamanho.DUN, '0');
   }
-  return codigo;
+  if (ean.tipo === EMedidas.CAIXA) {
+    return ean.codigo.padStart(ETamanho.DUN, '0');
+  }
+  return ean.codigo.padStart(ETamanho.EAN, '0');
 };
 
-export default { obterTipoEan, preencherZeroEsquerda };
+function isDun(ean: Ean): boolean {
+  return ean.tipo === EMedidas.CAIXA;
+}
+
+function isEan(ean: Ean): boolean {
+  return ean.tipo === EMedidas.UNIDADE;
+}
+
+export default { obterTipoEan, obterCodigoComZeroEsquerda, isEan, isDun };
