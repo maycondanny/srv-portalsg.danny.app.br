@@ -33,20 +33,14 @@ function obterTipoEan(ean: any, quantidadeEmbalagem: number) {
     quantidade: ean.codigo.length <= ETamanho.EAN ? 1 : quantidadeEmbalagem,
     tipo: ean.codigo.length <= ETamanho.EAN ? EMedidas.UNIDADE : EMedidas.CAIXA,
   };
-};
+}
 
-function obterCodigoComZeroEsquerda(ean: Ean): string {
-  if (!ean.tipo) {
-    if (ean.codigo.length < ETamanho.EAN) {
-      return ean.codigo.padStart(ETamanho.EAN, '0');
-    }
-    return ean.codigo.padStart(ETamanho.DUN, '0');
+function obterCodigoComZeroEsquerda(ean: Ean, tamanho: ETamanho): string {
+  if (tamanho === ETamanho.EAN) {
+    return ean.codigo.padStart(ETamanho.EAN, '0');
   }
-  if (ean.tipo === EMedidas.CAIXA) {
-    return ean.codigo.padStart(ETamanho.DUN, '0');
-  }
-  return ean.codigo.padStart(ETamanho.EAN, '0');
-};
+  return ean.codigo.padStart(ETamanho.DUN, '0');
+}
 
 function isDun(ean: Ean): boolean {
   return ean.tipo === EMedidas.CAIXA;

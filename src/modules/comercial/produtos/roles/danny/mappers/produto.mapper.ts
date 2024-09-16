@@ -1,8 +1,7 @@
-import produtoModel, { DEPTO_CLASSIFICAR, GRUPO_CLASSIFICAR, MARCA, Produto, SECAO_CLASSIFICAR, SUBGRUPO_CLASSIFICAR } from "@modules/comercial/produtos/models/produto.model";
-import ProdutoCadastro from "../models/produto-cadastro.model";
-import ProdutoFiscal from "../models/produto-fiscal.model";
+import { DEPTO_CLASSIFICAR, GRUPO_CLASSIFICAR, MARCA, Produto, SECAO_CLASSIFICAR, SUBGRUPO_CLASSIFICAR } from "@modules/comercial/produtos/models/produto.model";
+import ProdutoDTO from "../dtos/produto.dto";
 
-function toProdutoCadastro(produto: Produto): ProdutoCadastro {
+function toProduto(produto: Partial<ProdutoDTO>): Omit<Produto, "ecommerce"> {
   return {
     id: produto.id,
     codigo_produto_fornecedor: produto.codigo_produto_fornecedor,
@@ -29,30 +28,18 @@ function toProdutoCadastro(produto: Produto): ProdutoCadastro {
     largura_d: produto.largura_d,
     altura_d: produto.altura_d,
     eans: produto.eans,
+    duns: produto.duns,
     pis_cofins: produto.pis_cofins,
     fornecedor_id: produto.fornecedor_id,
     icms_compra: produto.icms_compra,
-    ipi: produto.ipi,
-    st_compra: produto.st_compra
-  };
-}
-
-function toProdutoFiscal(produto: Produto): ProdutoFiscal {
-  return {
-    id: produto.id,
     ipi: produto.ipi,
     st_compra: produto.st_compra,
-    pis_cofins: produto.pis_cofins,
-    classificacao_fiscal: produto.classificacao_fiscal,
-    estado: produto.estado,
-    fornecedor_id: produto.fornecedor_id,
-    icms_compra: produto.icms_compra,
-    produto_arius: produto.produto_arius,
-    tipo_tributacao: produto.tipo_tributacao
+    status: produto.status,
+    tipo_tributacao: produto.tipo_tributacao,
+    produto_arius: produto.produto_arius
   };
 }
 
 export default {
-  toProdutoCadastro,
-  toProdutoFiscal
+  toProduto
 }

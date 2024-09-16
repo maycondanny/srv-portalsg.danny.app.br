@@ -31,8 +31,20 @@ async function obterPorId(req: Request, res: Response, next: NextFunction) {
   }
 }
 
+async function atualizar(req: Request, res: Response, next: NextFunction) {
+  try {
+    await produtoService.atualizar(req.body);
+    return res.status(httpStatusEnum.Status.SUCESSO).json({
+      mensagem: "Produto atualizado com sucesso"
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 export default {
   cadastrar,
   obterTodos,
   obterPorId,
+  atualizar
 };

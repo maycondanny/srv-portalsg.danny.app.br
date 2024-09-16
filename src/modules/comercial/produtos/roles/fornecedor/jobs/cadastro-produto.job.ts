@@ -24,9 +24,8 @@ queue.on('error', (erro) => {
 const worker = new Worker(
   nome,
   async ({ data }) => {
-    let { dto } = data;
-    const referencia = dto.codigo_produto_fornecedor;
-    const produto = produtoMapper.toProduto(dto);
+    let { produto } = data;
+    const referencia = produto.codigo_produto_fornecedor;
     const produtoId = await produtoService.cadastrar(produto);
 
     await produtoEcommerceService.cadastrar({

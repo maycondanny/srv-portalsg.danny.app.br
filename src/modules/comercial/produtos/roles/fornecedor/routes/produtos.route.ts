@@ -6,5 +6,6 @@ const router = Router();
 router.post('/', produtoController.cadastrar);
 router.get('/', produtoController.obterTodos);
 router.get('/:id', produtoController.obterPorId);
+router.put('/', produtoController.atualizar);
 
 export default router;

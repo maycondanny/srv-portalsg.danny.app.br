@@ -1,16 +1,17 @@
 import produtoEcommerceService from '@modules/comercial/ecommerce/services/produto.service';
 import _ from 'lodash';
-import { Produto } from '../models/produto.model';
+import produtoModel, { Produto } from '../models/produto.model';
 import produtoRepository from '../repositories/produto.repository';
 import eanService from './ean.service';
 import numberUtil from '@utils/number.util';
-import eanModel from '../models/ean.model';
+import ErroException from '@exceptions/erro.exception';
 
 async function cadastrar(produto: Produto) {
   const eans = produto.eans;
-  const produtoTratado = _.omit(produto, ['eans', 'ecommerce']);
+  const duns = produto.duns;
+  const produtoTratado = _.omit(produto, ['eans', 'duns', 'ecommerce']);
   const produtoId = await produtoRepository.cadastrar(produtoTratado);
-  await eanService.cadastrarEmlote(produtoId, eans);
+  await eanService.cadastrarEmlote(produtoId, produtoModel.juntarEansDuns(eans, duns, produtoTratado.qtde_embalagem));
   return produtoId;
 }
 
@@ -20,9 +21,12 @@ async function obterTodosPorFornecedor(fornecedorId: number): Promise<Produto[]>
     const produtos = await produtoRepository.obterTodosPorFornecedor(fornecedorId);
     const resultado = _.map(produtos, async (produto) => {
       const ecommerce = await produtoEcommerceService.obterPorProdutoId(produto.id);
+      const eans = await eanService.obterPorProdutoId(produto.id);
       return {
         ...produto,
         ecommerce,
+        eans: produtoModel.obterEans(eans),
+        duns: produtoModel.obterDuns(eans),
       };
     });
     return await Promise.all(resultado);
@@ -38,7 +42,7 @@ async function obterPorId(id: number): Promise<Produto> {
     const produto = await produtoRepository.obterPorId(id);
     const eans = await eanService.obterPorProdutoId(produto.id);
     const ecommerce = await produtoEcommerceService.obterPorProdutoId(produto.id);
-    return { ...produto, ecommerce, eans };
+    return { ...produto, ecommerce, eans: produtoModel.obterEans(eans), duns: produtoModel.obterDuns(eans) };
   } catch (erro) {
     console.error(erro);
     throw erro;
@@ -46,11 +50,13 @@ async function obterPorId(id: number): Promise<Produto> {
 }
 
 async function atualizar(produto: Partial<Produto>) {
+  if (!produto.id) throw new ErroException('ID do produto não informado para a atualização');
   const eans = produto.eans;
-  const produtoTratado = _.omit(produto, ['eans', 'ecommerce']);
+  const duns = produto.duns;
+  const produtoTratado = _.omit(produto, ['eans', 'duns', 'ecommerce']);
   await produtoRepository.atualizar(produtoTratado);
-  if (eans && numberUtil.isMaiorZero(eans.length)) {
-    await eanService.atualizar(produto.eans);
+  if ((produto.eans && numberUtil.isMaiorZero(produto.eans.length)) || (produto.duns && numberUtil.isMaiorZero(produto.duns.length))) {
+    await eanService.atualizar(produtoModel.juntarEansDuns(eans, duns, produtoTratado.qtde_embalagem));
   }
 }
 

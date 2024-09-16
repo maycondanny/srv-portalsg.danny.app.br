@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import eanModel, { Ean, EMedidas, EPrincipal, ETamanho } from './ean.model';
-import { REGEX_APENAS_NUMEROS } from '@utils/regex.util';
+import { REGEX_NAO_NUMERICOS } from '@utils/regex.util';
 import stringUtil from '@utils/string.util';
 import Ecommerce from './ecommerce.model';
 import numberUtil from '@utils/number.util';
@@ -79,6 +79,7 @@ export interface Produto {
   status?: number;
   divergencias?: Divergencia[];
   eans: Ean[];
+  duns: Ean[];
   ecommerce: Ecommerce;
   produto_arius?: number;
   cadastro_arius?: Date;
@@ -94,32 +95,32 @@ function formatarTexto(produto: Produto): Produto {
 }
 
 function juntarEansDuns(eans: Ean[], duns: Ean[], quantidadeCaixa: number) {
-  eans = _.map(eans, (ean, index) => ({
+  eans = _.map(eans, ean => ({
     ...ean,
-    principal: index === 0 ? EPrincipal.SIM : EPrincipal.NAO,
-    codigo: eanModel.obterCodigoComZeroEsquerda(ean),
+    principal: EPrincipal.SIM,
+    codigo: eanModel.obterCodigoComZeroEsquerda(ean, ETamanho.EAN),
     quantidade: 1,
     tipo: EMedidas.UNIDADE,
   }));
   duns = _.map(duns, (dun) => ({
     ...dun,
-    codigo: eanModel.obterCodigoComZeroEsquerda(dun),
+    codigo: eanModel.obterCodigoComZeroEsquerda(dun, ETamanho.DUN),
     quantidade: quantidadeCaixa,
     tipo: EMedidas.CAIXA,
   }));
   return _.concat(eans, duns);
 }
 
-function possuiDivergencias(produto: Produto) {
-  return numberUtil.isMaiorZero(produto.divergencias.length);
+function obterEans(eans: Ean[]) {
+  return _.filter(eans, ean => ean.tipo === EMedidas.UNIDADE);
 }
 
-function obterDuns(eans: Ean[]): Ean[] {
+function obterDuns(eans: Ean[]) {
   return _.filter(eans, ean => ean.tipo === EMedidas.CAIXA);
 }
 
-function obterEans(eans: Ean[]): Ean[] {
-  return _.filter(eans, ean => ean.tipo === EMedidas.UNIDADE);
+function possuiDivergencias(produto: Produto) {
+  return numberUtil.isMaiorZero(produto.divergencias.length);
 }
 
 function ehTipoCaixa(produto: Produto): boolean {
@@ -135,7 +136,7 @@ function obterTipoEmbalagem(produto: Produto) {
 }
 
 function limparNCM(ncm: string): string {
-  return ncm?.trim()?.replace(REGEX_APENAS_NUMEROS, '');
+  return ncm?.trim()?.replace(REGEX_NAO_NUMERICOS, '');
 }
 
 function obterCodigosEans(eans: Ean[]): string[] {
@@ -143,13 +144,13 @@ function obterCodigosEans(eans: Ean[]): string[] {
 }
 
 export default {
-  obterDuns,
-  obterEans,
   juntarEansDuns,
   possuiDivergencias,
   formatarTexto,
   obterQuantidadeEmbalagem,
   obterTipoEmbalagem,
   limparNCM,
-  obterCodigosEans
+  obterCodigosEans,
+  obterEans,
+  obterDuns
 };

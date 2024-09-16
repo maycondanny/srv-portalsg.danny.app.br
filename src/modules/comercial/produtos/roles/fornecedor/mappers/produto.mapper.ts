@@ -4,6 +4,7 @@ import { ProdutoDTO } from '../dtos/produto.dto';
 
 function toProduto(dto: ProdutoDTO): Produto {
   const produto: Produto = {
+    id: dto.id,
     codigo_produto_fornecedor: dto.codigo_produto_fornecedor,
     descritivo_pdv: dto.descritivo_pdv,
     descritivo: dto.descritivo,
@@ -11,7 +12,8 @@ function toProduto(dto: ProdutoDTO): Produto {
     estado: dto.estado,
     preco: dto.preco,
     desconto_p: dto.desconto_p,
-    eans: produtoModel.juntarEansDuns(dto.eans, dto.duns, dto.qtde_embalagem),
+    eans: dto.eans,
+    duns: dto.duns,
     pesob: dto.pesob,
     pesol: dto.pesol,
     altura: dto.altura,
@@ -51,8 +53,8 @@ function toDTO(produto: Produto): ProdutoDTO {
     estado: produto.estado,
     preco: produto.preco,
     desconto_p: produto.desconto_p,
-    eans: produtoModel.obterEans(produto.eans),
-    duns: produtoModel.obterDuns(produto.eans),
+    eans: produto.eans,
+    duns: produto.duns,
     pesob: produto.pesob,
     pesol: produto.pesol,
     altura: produto.altura,

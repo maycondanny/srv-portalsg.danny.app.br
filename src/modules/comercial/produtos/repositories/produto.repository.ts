@@ -21,19 +21,7 @@ async function obterTodosPorFornecedor(fornecedorId: number) {
   const db = getDbInstance();
 
   try {
-    const query = db.select('*').from('produtos AS p').andWhere('p.fornecedor_id', '=', fornecedorId);
-
-    let produtos = await query;
-
-    produtos = await Promise.all(
-      produtos.map(async (produto: Produto) => {
-        return {
-          ...produto,
-          eans: await eanService.obterPorProdutoId(produto.id),
-        };
-      })
-    );
-    return produtos;
+    return await db.select('*').from('produtos AS p').andWhere('p.fornecedor_id', '=', fornecedorId);
   } catch (erro) {
     console.error(erro);
     throw new Error('Não foi possivel obter os produtos.');

@@ -1,5 +1,7 @@
 import path from 'path';
 import { types } from 'pg';
+import dotenv from 'dotenv';
+dotenv.config();
 
 types.setTypeParser(types.builtins.INT4, (val) => parseInt(val, 10));
 types.setTypeParser(types.builtins.INT8, (val) => parseInt(val, 10));

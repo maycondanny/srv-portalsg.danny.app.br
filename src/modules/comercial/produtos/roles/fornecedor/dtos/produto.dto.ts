@@ -1,8 +1,6 @@
 import { ESiglaEstado } from '@models/sigla-estado.model';
 import { Ean } from '@modules/comercial/produtos/models/ean.model';
 import { Imagem } from '@modules/comercial/produtos/models/ecommerce.model';
-import numberUtil from '@utils/number.util';
-import _ from 'lodash';
 
 export interface ProdutoDTO {
   id?: number;
@@ -36,19 +34,3 @@ export interface ProdutoDTO {
   imagens: Imagem[];
   fornecedor_id: number;
 }
-
-function validarPossuiEan(produtoDTO: ProdutoDTO) {
-  if (!_.isArray(produtoDTO.eans)) {
-    return false;
-  }
-
-  if (numberUtil.isMenorOuIgualZero(produtoDTO.eans.length)) {
-    return false;
-  }
-
-  return produtoDTO.eans.every((ean) => typeof ean.codigo === 'string' && ean.codigo.trim() !== '');
-}
-
-export default {
-  validarPossuiEan,
-};
