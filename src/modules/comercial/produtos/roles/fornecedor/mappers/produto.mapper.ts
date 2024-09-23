@@ -74,6 +74,7 @@ function toDTO(produto: Produto): ProdutoDTO {
     caracteristica: produto.ecommerce.caracteristica,
     modo_uso: produto.ecommerce.modo_uso,
     imagens: produto.ecommerce.imagens,
+    status: produto.status,
     fornecedor_id: produto.fornecedor_id
   };
 }

@@ -2,8 +2,9 @@ import { NextFunction, Request, Response } from 'express';
 import importacaoService from '../services/importacao.service';
 import _ from 'lodash';
 import httpStatusEnum from '@enums/http-status.enum';
+import ResponseDTO from 'dtos/response.dto';
 
-const importar = async (req: Request, res: Response, next: NextFunction) => {
+const importar = async (req: Request, res: Response<ResponseDTO>, next: NextFunction) => {
   try {
     await importacaoService.importar({
       planilha: req.file,

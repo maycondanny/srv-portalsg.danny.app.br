@@ -7,7 +7,7 @@ export interface ProdutoDTO {
   codigo_produto_fornecedor: string;
   descritivo_pdv: string;
   descritivo: string;
-  origem: number;
+  origem: string;
   estado: ESiglaEstado;
   preco: number;
   desconto_p: number;
@@ -32,5 +32,6 @@ export interface ProdutoDTO {
   caracteristica: string;
   modo_uso: string;
   imagens: Imagem[];
+  status: number;
   fornecedor_id: number;
 }

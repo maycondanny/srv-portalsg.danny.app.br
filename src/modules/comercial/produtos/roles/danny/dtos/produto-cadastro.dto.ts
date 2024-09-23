@@ -1,7 +1,7 @@
 import Divergencia from "@modules/comercial/produtos/models/divergencia.model";
 import { Ean } from "@modules/comercial/produtos/models/ean.model";
 
-export default interface ProdutoDTO {
+export default interface ProdutoCadastroDTO {
   id: number;
   codigo_produto_fornecedor: string;
   descritivo: string;
@@ -23,18 +23,12 @@ export default interface ProdutoDTO {
   comprimento: number;
   validade: number;
   qtde_embalagem: number;
+  eans: Ean[];
+  fornecedor_id: number;
+  divergencias: Divergencia[];
+  produto_arius: number;
   comprador: number;
   categoria_fiscal: string;
-  produto_arius: number;
-  fornecedor_id: number;
-  st_compra: string;
-  tipo_tributacao: string;
-  ipi: number;
-  icms_compra: number;
-  pis_cofins: string;
-  eans: Ean[];
-  duns: Ean[];
-  divergencias: Divergencia[];
   status: number;
   familia: number;
 }

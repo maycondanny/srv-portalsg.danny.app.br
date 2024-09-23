@@ -1,4 +1,4 @@
-import ariusHttpUtil from "@utils/arius-http.util";
+import ariusUtil from "@utils/arius.util";
 
 const URI = "/AriusERP/v2/TabelaFornecedor";
 
@@ -44,7 +44,7 @@ async function cadastrar(
   tabela: TabelaFornecedor
 ): Promise<TabelaFornecedor> {
   try {
-    return await ariusHttpUtil.post(URI, tabela);
+    return await ariusUtil.post(URI, tabela);
   } catch (erro) {
     console.error(erro);
     throw erro;
@@ -55,7 +55,7 @@ async function atualizar(
   tabela: TabelaFornecedor
 ): Promise<TabelaFornecedor> {
   try {
-    return await ariusHttpUtil.put(URI, tabela);
+    return await ariusUtil.put(URI, tabela);
   } catch (erro) {
     console.error(erro);
     throw erro;

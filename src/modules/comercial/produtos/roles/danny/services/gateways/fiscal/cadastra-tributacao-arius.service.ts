@@ -3,10 +3,11 @@ import aprovacaoService from "../../aprovacao.service";
 import tabelaFornecedor from "@services/arius/comercial/tabela-fornecedor";
 import tabelaFornecedorUf from "@services/arius/comercial/tabela-fornecedor-uf";
 import siglaEstadoModel from "@models/sigla-estado.model";
-import { EFiscalStatus, Produto } from "@modules/comercial/produtos/models/produto.model";
+import produtoModel, { EFiscalStatus } from "@modules/comercial/produtos/models/produto.model";
 import produtoService from "@modules/comercial/produtos/services/produto.service";
+import ProdutoFiscalDTO from "../../../dtos/produto-fiscal.dto";
 
-async function cadastrar(produto: Omit<Produto, "ecommerce">) {
+async function cadastrar(produto: ProdutoFiscalDTO) {
   if (!aprovacaoService.validarSituacaoTributaria({ st_compra: produto.st_compra, tipo_tributacao: produto.tipo_tributacao })) {
     throw new Error("Situação tributária está inconsistente para a tributação. Por favor, verifique.");
   }
@@ -15,9 +16,13 @@ async function cadastrar(produto: Omit<Produto, "ecommerce">) {
   await atualizarTabelaFornecedor(produto);
   await atualizarTabelaFornecedorUF(produto);
   await atualizarDados(produto);
+
+  return {
+    produtoId: produto.produto_arius
+  }
 }
 
-async function atualizarTributacaoArius(produto: Omit<Produto, "ecommerce">) {
+async function atualizarTributacaoArius(produto: ProdutoFiscalDTO) {
   try {
     await ariusProdutoService.atualizar({
       id: produto.produto_arius,
@@ -33,7 +38,7 @@ async function atualizarTributacaoArius(produto: Omit<Produto, "ecommerce">) {
   }
 };
 
-async function atualizarTabelaFornecedor(produto: Omit<Produto, "ecommerce">) {
+async function atualizarTabelaFornecedor(produto: ProdutoFiscalDTO) {
   try {
     await tabelaFornecedor.atualizar({
       pk: {
@@ -52,7 +57,6 @@ async function atualizarTabelaFornecedor(produto: Omit<Produto, "ecommerce">) {
           id: produto.fornecedor_id,
         },
       },
-      tipoIPI: "F",
       ipi: produto.ipi,
     });
   } catch (erro) {
@@ -63,7 +67,7 @@ async function atualizarTabelaFornecedor(produto: Omit<Produto, "ecommerce">) {
   }
 };
 
-async function atualizarTabelaFornecedorUF(produto: Omit<Produto, "ecommerce">) {
+async function atualizarTabelaFornecedorUF(produto: ProdutoFiscalDTO) {
   try {
     await tabelaFornecedorUf.atualizar({
       pk: {
@@ -83,7 +87,7 @@ async function atualizarTabelaFornecedorUF(produto: Omit<Produto, "ecommerce">) 
           estadoId: produto.estado,
         },
       },
-      tributacao: tabelaFornecedorUf.obterTipoTributacao(
+      tributacao: produtoModel.obterTipoTributacao(
         produto.st_compra
       ),
       situacaoTributaria: { id: produto.st_compra },
@@ -101,7 +105,7 @@ async function atualizarTabelaFornecedorUF(produto: Omit<Produto, "ecommerce">) 
   }
 };
 
-async function atualizarDados(produto: Omit<Produto, "ecommerce">) {
+async function atualizarDados(produto: ProdutoFiscalDTO) {
   try {
     await produtoService.atualizar({
       id: produto.id,

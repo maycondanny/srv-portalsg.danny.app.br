@@ -1,53 +1,63 @@
-import { ECadastroStatus, EFiscalStatus, ERole, Produto } from "@modules/comercial/produtos/models/produto.model";
-import AprovacaoRequestDTO from "../dtos/aprovacao-request.dto";
-import tabelaFornecedorUf from "@services/arius/comercial/tabela-fornecedor-uf";
-import cadastraProdutoAriusService from "./gateways/cadastro/cadastra-produto-arius.service";
-import cadastraTributacaoAriusService from "./gateways/fiscal/cadastra-tributacao-arius.service";
-import atualizaProdutoAriusService from "./gateways/cadastro/atualiza-produto-arius.service";
-import ProdutoDTO from "../dtos/produto.dto";
-import ProdutoAtualizacao from "../dtos/produto-atualizacao.dto";
-import produtoMapper from "../mappers/produto.mapper";
+import produtoModel, {
+  ECadastroStatus,
+  EFiscalStatus,
+  ERole,
+  Produto,
+} from '@modules/comercial/produtos/models/produto.model';
+import AprovacaoRequestDTO from '../dtos/aprovacao-request.dto';
+import tabelaFornecedorUf from '@services/arius/comercial/tabela-fornecedor-uf';
+import cadastraProdutoAriusService from './gateways/cadastro/cadastra-produto-arius.service';
+import cadastraTributacaoAriusService from './gateways/fiscal/cadastra-tributacao-arius.service';
+import atualizaProdutoAriusService from './gateways/cadastro/atualiza-produto-arius.service';
 import ariusProdutoFornecedor from '@services/arius/comercial/produto-fornecedor';
-import siglaEstadoModel from "@models/sigla-estado.model";
-import tabelaFornecedor from "@services/arius/comercial/tabela-fornecedor";
-import { EMedidas } from "@modules/comercial/produtos/models/ean.model";
-import objectUtil from "@utils/object.util";
-import ErroException from "@exceptions/erro.exception";
+import siglaEstadoModel from '@models/sigla-estado.model';
+import tabelaFornecedor from '@services/arius/comercial/tabela-fornecedor';
+import { EMedidas } from '@modules/comercial/produtos/models/ean.model';
+import objectUtil from '@utils/object.util';
+import ErroException from '@exceptions/erro.exception';
+import atualizaTributacaoAriusService from './gateways/fiscal/atualiza-tributacao.arius.service';
+import produtoMapper from '../mappers/produto.mapper';
+import ProdutoDTO from '../dtos/produto.dto';
+import ProdutoCadastroDTO from '../dtos/produto-cadastro.dto';
+import ProdutoFiscalDTO from '../dtos/produto-fiscal.dto';
+import AprovacaoResponseDTO from '../dtos/aprovacao-response.dto';
 
 export const LINHA_GERAL = 1;
 
-async function aprovar(dto: AprovacaoRequestDTO) {
-  if (objectUtil.isVazio(dto.produto)) throw new ErroException("Produto não informado para a aprovação!");
-  const produto = produtoMapper.toProduto(dto.produto);
-  switch (dto.role) {
-    case ERole.CADASTRO:
-      await aprovarCadastro(produto, dto.dadosAtualizacao);
-      return;
-    case ERole.FISCAL:
-      await aprovarFiscal(produto, dto.dadosAtualizacao);
-      return;
-  }
-};
+export const CST_SUBSTITUIDO = '260';
+export const TRIBUTACAO_SUBSTITUIDO = 'F';
 
-const aprovarCadastro = async (produto: Omit<Produto, "ecommerce">, produtoAtualizacaoDto: Partial<ProdutoAtualizacao>) => {
+async function aprovar({ role, produto, dadosAtualizacao }: AprovacaoRequestDTO): Promise<AprovacaoResponseDTO> {
+  if (objectUtil.isVazio(produto)) throw new ErroException('Produto não informado para a aprovação!');
+  switch (role) {
+    case ERole.CADASTRO:
+      const produtoCadastroDTO = produtoMapper.toProdutoCadastroDTO(produto);
+      return await aprovarCadastro(produtoCadastroDTO, dadosAtualizacao);;
+    case ERole.FISCAL:
+      const produtoFiscalDTO = produtoMapper.toProdutoFiscalDTO(produto);
+      return await aprovarFiscal(produtoFiscalDTO, dadosAtualizacao);
+  }
+}
+
+const aprovarCadastro = async (produtoCadastroDTO: ProdutoCadastroDTO, produtoAtualizacao: Partial<ProdutoDTO>) => {
   try {
-    if (produto.status === ECadastroStatus.CADASTRADO) {
-      await atualizaProdutoAriusService.atualizar(produto, produtoAtualizacaoDto);
-    } else {
-      await cadastraProdutoAriusService.cadastrar(produto);
+    if (produtoCadastroDTO.status === ECadastroStatus.CADASTRADO) {
+      return await atualizaProdutoAriusService.atualizar(produtoCadastroDTO, produtoAtualizacao);
     }
+
+    return await cadastraProdutoAriusService.cadastrar(produtoCadastroDTO);
   } catch (erro) {
     throw erro;
   }
 };
 
-const aprovarFiscal = async (produto: Omit<Produto, "ecommerce">, produtoAtualizacaoDto: Partial<ProdutoAtualizacao>) => {
+const aprovarFiscal = async (produtoFiscalDTO: ProdutoFiscalDTO, produtoAtualizacao: Partial<ProdutoDTO>) => {
   try {
-    if (produto.status === EFiscalStatus.CADASTRADO) {
-      await atualizaProdutoAriusService.atualizar(produto, produtoAtualizacaoDto);
-    } else {
-      await cadastraTributacaoAriusService.cadastrar(produto);
+    if (produtoFiscalDTO.status === EFiscalStatus.CADASTRADO) {
+      return await atualizaTributacaoAriusService.atualizar(produtoFiscalDTO, produtoAtualizacao);
     }
+
+    return await cadastraTributacaoAriusService.cadastrar(produtoFiscalDTO);
   } catch (erro) {
     throw erro;
   }
@@ -55,19 +65,15 @@ const aprovarFiscal = async (produto: Omit<Produto, "ecommerce">, produtoAtualiz
 
 const validarSituacaoTributaria = ({ st_compra, tipo_tributacao }): boolean => {
   if (st_compra || tipo_tributacao) {
-    if (!st_compra) throw new Error("Situação tributária do produto não informada.");
-    if (!tipo_tributacao) throw new Error("Tipo situação tributária do produto não informada.");
-    const tipoTributacao = tabelaFornecedorUf.obterTipoTributacao(st_compra);
+    if (!st_compra) throw new Error('Situação tributária do produto não informada.');
+    if (!tipo_tributacao) throw new Error('Tipo situação tributária do produto não informada.');
+    const tipoTributacao = produtoModel.obterTipoTributacao(st_compra);
     return tipoTributacao === tipo_tributacao;
   }
   return true;
 };
 
-async function inserirProdutoFornecedor({
-  produtoId,
-  fornecedorId,
-  referencia
-}) {
+async function inserirProdutoFornecedor({ produtoId, fornecedorId, referencia }) {
   try {
     await ariusProdutoFornecedor.cadastrar({
       pk: {
@@ -80,15 +86,11 @@ async function inserirProdutoFornecedor({
     });
   } catch (erro) {
     console.log(erro);
-    throw new Error('Ocorreu um erro ao cadastrar o produto fornecedor na ARIUS.');
+    throw new Error(erro.response.data.processedException?.causeMessage);
   }
 }
 
-async function inserirTabelaFornecedor({
-  produtoId,
-  fornecedorId,
-  ipi
-}) {
+async function inserirTabelaFornecedor({ produtoId, fornecedorId }) {
   try {
     await tabelaFornecedor.cadastrar({
       pk: {
@@ -108,7 +110,7 @@ async function inserirTabelaFornecedor({
         },
       },
       tipoIPI: 'F',
-      ipi: Number(ipi),
+      ipi: 0,
       quantidadeEmbalagem: 1,
       unidadeCompra: {
         id: EMedidas.UNIDADE,
@@ -116,19 +118,11 @@ async function inserirTabelaFornecedor({
     });
   } catch (erro) {
     console.log(erro);
-    throw new Error('Ocorreu um erro ao cadastrar os custos na tabela do fornecedor na Arius.');
+    throw new Error(erro.response.data.processedException?.causeMessage);
   }
 }
 
-async function inserirTabelaFornecedorUF({
-  estado,
-  produtoId,
-  fornecedorId,
-  preco,
-  st_compra,
-  icms_compra,
-  desconto_p
-}) {
+async function inserirTabelaFornecedorUF({ estado, produtoId, fornecedorId, preco, desconto_p }) {
   try {
     await tabelaFornecedorUf.cadastrar({
       pk: {
@@ -148,19 +142,19 @@ async function inserirTabelaFornecedorUF({
           estadoId: siglaEstadoModel.obterNome(estado),
         },
       },
-      custo: Number(preco),
-      tributacao: tabelaFornecedorUf.obterTipoTributacao(st_compra),
-      situacaoTributaria: { id: st_compra },
-      icms: Number(icms_compra),
+      custo: preco,
+      tributacao: TRIBUTACAO_SUBSTITUIDO,
+      situacaoTributaria: { id: CST_SUBSTITUIDO },
+      icms: 0,
       estado: {
         id: siglaEstadoModel.obterNome(estado),
-        icms: Number(icms_compra),
+        icms: 0,
       },
       descontoPercentual: desconto_p,
     });
   } catch (erro) {
     console.log(erro);
-    throw new Error('Ocorreu um erro ao cadastrar os custos na tabela do fornecedor no estado na Arius.');
+    throw new Error(erro.response.data.processedException?.causeMessage);
   }
 }
 
@@ -169,5 +163,5 @@ export default {
   validarSituacaoTributaria,
   inserirProdutoFornecedor,
   inserirTabelaFornecedor,
-  inserirTabelaFornecedorUF
-}
+  inserirTabelaFornecedorUF,
+};

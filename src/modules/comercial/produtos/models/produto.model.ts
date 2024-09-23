@@ -8,23 +8,20 @@ import Divergencia from './divergencia.model';
 
 export const CODIGO_REFERENCIA_FORNECEDOR_CACHE = 'CPF_CIPF';
 
-export const MARCA = 44;
-export const DEPTO_CLASSIFICAR = 80;
-export const GRUPO_CLASSIFICAR = 1;
-export const SUBGRUPO_CLASSIFICAR = 1;
-export const SECAO_CLASSIFICAR = 1;
-
 export const TAMANHO_DESCRICAO_ABREVIADA = 30;
 export const TAMANHO_DESCRICAO_CLASSIFICACAO = 128;
 
+const ORIGEM_IMPORTACAO_DIRETA = 'ESTRANGEIRA_IMPORTACAO_DIRETA';
+const ORIGEM_MERCADO_INTERNO = 'ESTRANGEIRA_MERCADO_INTERNO';
+
 export const CODIGOS_PIS_COFINS = {
   I: 'ISENTO',
-  N: 'NÃO INCIDE',
-  S: 'SUSPENSO',
-  M: 'MONOFÁSICO',
-  F: 'SUBSTITUIDO',
-  G: 'ALIQUOTA 0',
-  T: 'TRIBUTADO',
+  N: "NÃO INCIDE",
+  S: "SUSPENSO",
+  M: "MONOFÁSICO",
+  B: "SUBSTITUIDO",
+  O: "ALIQUOTA 0",
+  T: "TRIBUTADO"
 };
 
 export enum ERole {
@@ -56,7 +53,7 @@ export interface Produto {
   grupo?: number;
   subgrupo?: number;
   classificacao_fiscal: string;
-  origem: number;
+  origem: string;
   pesol: number;
   pesob: number;
   validade: number;
@@ -83,6 +80,9 @@ export interface Produto {
   ecommerce: Ecommerce;
   produto_arius?: number;
   cadastro_arius?: Date;
+  comprador?: number;
+  categoria_fiscal?: string;
+  familia?: number;
 }
 
 function formatarTexto(produto: Produto): Produto {
@@ -143,6 +143,41 @@ function obterCodigosEans(eans: Ean[]): string[] {
   return _.map(eans, ean => ean.codigo);
 }
 
+function obterOrigem(origem: string) {
+  return origem === "0" ? ORIGEM_IMPORTACAO_DIRETA : ORIGEM_MERCADO_INTERNO;
+}
+
+function obterTipoTributacao(cst: string): string {
+  if (!cst) return;
+  switch (cst?.substring(1, 3)) {
+    case '00':
+      return 'T';
+    case '10':
+    case '60':
+    case '30':
+    case '70':
+    case '02':
+    case '15':
+    case '53':
+    case '61':
+      return 'F';
+    case '20':
+      return 'R';
+    case '40':
+      return 'I';
+    case '41':
+      return 'N';
+    case '50':
+      return 'S';
+    case '51':
+      return 'D';
+    case '90':
+      return 'O';
+    default:
+      throw new Error('Tipo da situação tributária não encontrada');
+  }
+}
+
 export default {
   juntarEansDuns,
   possuiDivergencias,
@@ -152,5 +187,7 @@ export default {
   limparNCM,
   obterCodigosEans,
   obterEans,
-  obterDuns
+  obterDuns,
+  obterTipoTributacao,
+  obterOrigem
 };

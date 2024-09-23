@@ -6,7 +6,7 @@ import httpStatusEnum from '@enums/http-status.enum';
 import produtoService from '@modules/comercial/produtos/services/produto.service';
 import _ from 'lodash';
 import cacheUtil, { ETempoExpiracao } from '@utils/cache.util';
-import { CODIGO_REFERENCIA_FORNECEDOR_CACHE, Produto } from '@modules/comercial/produtos/models/produto.model';
+import { CODIGO_REFERENCIA_FORNECEDOR_CACHE } from '@modules/comercial/produtos/models/produto.model';
 import validacaoService from './validacao.service';
 
 async function cadastrar(produtoDTO: ProdutoDTO): Promise<void> {

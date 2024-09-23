@@ -13,6 +13,9 @@ import Fornecedor from '@models/fornecedor.model';
 import produtoRepository from '@modules/comercial/produtos/repositories/produto.repository';
 import divergenciasService from './divergencias.service';
 import ProdutoFornecedorResponse from '../dtos/produto-fornecedor-response.dto';
+import produtoService from '@modules/comercial/produtos/services/produto.service';
+import eanService from '@modules/comercial/produtos/services/ean.service';
+import produtoMapper from '../mappers/produto.mapper';
 
 async function obterTodosPorFornecedor(fornecedorId: number, role: ERole): Promise<ProdutoFornecedorResponse> {
   try {
@@ -22,7 +25,7 @@ async function obterTodosPorFornecedor(fornecedorId: number, role: ERole): Promi
 
     const fornecedor = await buscarFornecedor(fornecedorId);
 
-    const produtos = await produtoRepository.obterTodosPorFornecedor(fornecedorId);
+    const produtos = await obterProdutosFornecedor(fornecedorId);
 
     const resultado = _.map(produtos, async (produto) => {
       const divergencias = await divergenciasService.obterTodas(produto);
@@ -37,18 +40,26 @@ async function obterTodosPorFornecedor(fornecedorId: number, role: ERole): Promi
         mapearProdutoFiscal(produto);
       }
 
-      return produto;
+      return produtoMapper.toProdutoFornecedorDTO(produto);
     });
 
     return {
       fornecedor,
       produtos: await Promise.all(resultado),
     };
-
   } catch (erro) {
     console.error(erro);
     throw new Error('Não foi possivel obter os produtos.');
   }
+}
+
+async function obterProdutosFornecedor(fornecedorId: number): Promise<Produto[]> {
+  let produtos = await produtoRepository.obterTodosPorFornecedor(fornecedorId);
+  produtos = _.map(produtos, async (produto) => ({
+    ...produto,
+    eans: await eanService.obterPorProdutoId(produto.id),
+  }));
+  return await Promise.all(produtos);
 }
 
 function mapearProdutoCadastro(produto: Produto): Produto {
@@ -119,7 +130,12 @@ function agrupar(produtos: CapaProdutoResponseDTO[]): CapaProdutoResponseDTO[] {
   return _.values(resultado);
 }
 
+async function atualizar()  {
+
+}
+
 export default {
   obterTodosPorFornecedor,
   obterTodos,
+  atualizar
 };

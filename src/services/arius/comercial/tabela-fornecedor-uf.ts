@@ -1,4 +1,4 @@
-import ariusHttpUtil from '@utils/arius-http.util';
+import ariusUtil from '@utils/arius.util';
 
 const URI = '/AriusERP/v2/TabelaFornecedorUF';
 
@@ -58,7 +58,7 @@ interface TabelaFornecedorUF {
 
 async function cadastrar(tabela: TabelaFornecedorUF): Promise<TabelaFornecedorUF> {
   try {
-    return await ariusHttpUtil.post(URI, tabela);
+    return await ariusUtil.post(URI, tabela);
   } catch (erro) {
     console.error(erro);
     throw erro;
@@ -67,7 +67,7 @@ async function cadastrar(tabela: TabelaFornecedorUF): Promise<TabelaFornecedorUF
 
 async function atualizar(tabela: TabelaFornecedorUF): Promise<TabelaFornecedorUF> {
   try {
-    return await ariusHttpUtil.put(URI, tabela);
+    return await ariusUtil.put(URI, tabela);
   } catch (erro) {
     console.error(erro);
     throw erro;
@@ -77,46 +77,15 @@ async function atualizar(tabela: TabelaFornecedorUF): Promise<TabelaFornecedorUF
 async function obter({ estado, fornecedorId, produtoId }): Promise<TabelaFornecedorUF> {
   try {
     const url = `${URI}/{estadoId:${estado},produtoId:${produtoId},fornecedorId:${fornecedorId}}`;
-    return await ariusHttpUtil.get(url);
+    return await ariusUtil.get(url);
   } catch (erro) {
     console.error(erro);
     throw erro;
   }
 }
 
-function obterTipoTributacao(cst: string): string {
-  switch (cst?.substring(1, 3)) {
-    case '00':
-      return 'T';
-    case '10':
-    case '60':
-    case '30':
-    case '70':
-    case '02':
-    case '15':
-    case '53':
-    case '61':
-      return 'F';
-    case '20':
-      return 'R';
-    case '40':
-      return 'I';
-    case '41':
-      return 'N';
-    case '50':
-      return 'S';
-    case '51':
-      return 'D';
-    case '90':
-      return 'O';
-    default:
-      throw new Error('Tipo da situação tributária não encontrada');
-  }
-}
-
 export default {
   obter,
   atualizar,
-  cadastrar,
-  obterTipoTributacao,
+  cadastrar
 };

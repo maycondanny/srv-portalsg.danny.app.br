@@ -7,13 +7,14 @@ async function obterTodosAgrupados(): Promise<CapaProdutoResponseDTO[]> {
 
   try {
     const produtos = await db
-      .select("f.cnpj", "u.nome", "u.email", "p.created_at")
+      .select("f.id AS fornecedorId", "f.cnpj", "u.nome", "u.email", "p.created_at")
       .from("usuarios AS u")
       .join("usuarios_fornecedores AS uf", "u.id", "uf.usuario_id")
       .join("fornecedores AS f", "f.id", "uf.fornecedor_id")
       .join("produtos AS p", "p.fornecedor_id", "f.id");
 
     return _.map(produtos, produto => ({
+      fornecedorId: produto.fornecedorId,
       fornecedor: produto.nome,
       cnpj: produto.cnpj,
       email: produto.email,

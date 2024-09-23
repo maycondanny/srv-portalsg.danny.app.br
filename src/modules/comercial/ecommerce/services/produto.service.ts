@@ -22,8 +22,9 @@ async function cadastrar(produto: Produto) {
 async function obterPorProdutoId(produtoId: number) {
   try {
     const produto = await produtoRepository.obterPorProdutoId(produtoId);
-    const eans = await eanService.obterPorId(produto.id);
-    const imagens = await imagemService.obterPorId(produto.id);
+    if (!produto?.id) return produto;
+    const eans = await eanService.obterPorId(produto?.id);
+    const imagens = await imagemService.obterPorId(produto?.id);
     return { ...produto, eans, imagens };
   } catch (erro) {
     console.error(erro);

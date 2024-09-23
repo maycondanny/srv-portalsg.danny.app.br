@@ -1,7 +1,6 @@
 import getDbInstance from '@db/db';
 import { Produto } from '../models/produto.model';
 import _ from 'lodash';
-import eanService from '../services/ean.service';
 
 async function cadastrar(produto: Partial<Produto>) {
   const db = getDbInstance();

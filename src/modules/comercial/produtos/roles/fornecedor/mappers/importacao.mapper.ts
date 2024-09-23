@@ -91,10 +91,10 @@ function obterOrigem(origem: string) {
   const ORIGEM_IMPORTACAO_DIRETA = '0 - ESTRANGEIRA - IMPORTACAO DIRETA';
   const ORIGEM_MERCADO_INTERNO = '1 - ESTRANGEIRA - ADQUIRIDA NO MERCADO INTERNO';
   if (origem === ORIGEM_IMPORTACAO_DIRETA) {
-    return 0;
+    return "0";
   }
   if (origem === ORIGEM_MERCADO_INTERNO) {
-    return 1;
+    return "1";
   }
   return null;
 }

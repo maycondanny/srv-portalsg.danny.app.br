@@ -1,5 +1,5 @@
-import { EFiscalStatus, Produto } from '@modules/comercial/produtos/models/produto.model';
-import ProdutoAtualizacao from '../../../dtos/produto-atualizacao.dto';
+import { EFiscalStatus } from '@modules/comercial/produtos/models/produto.model';
+import ProdutoAtualizacao from '../../../dtos/produto.dto';
 import aprovacaoService from '../../aprovacao.service';
 import Divergencia from '@modules/comercial/produtos/models/divergencia.model';
 import produtoService from '@modules/comercial/produtos/services/produto.service';
@@ -7,25 +7,30 @@ import objectUtil from '@utils/object.util';
 import siglaEstadoModel from '@models/sigla-estado.model';
 import tabelaFornecedorUf from '@services/arius/comercial/tabela-fornecedor-uf';
 import tabelaFornecedor from '@services/arius/comercial/tabela-fornecedor';
-import ariusProdutoArius from "@services/arius/comercial/produto.service";
+import ariusProdutoArius from '@services/arius/comercial/produto.service';
 import _ from 'lodash';
+import ProdutoFiscalDTO from '../../../dtos/produto-fiscal.dto';
 
-const atualizar = async (produto: Omit<Produto, 'ecommerce'>, produtoAtualizacao: Partial<ProdutoAtualizacao>) => {
-  const divergencia = produto.divergencias[0];
-
-  if (!aprovacaoService.validarSituacaoTributaria({
+const atualizar = async (produto: ProdutoFiscalDTO, produtoAtualizacao: Partial<ProdutoAtualizacao>) => {
+  if (
+    !aprovacaoService.validarSituacaoTributaria({
       st_compra: produtoAtualizacao.st_compra,
       tipo_tributacao: produtoAtualizacao.tipo_tributacao,
-    })) {
+    })
+  ) {
     throw new Error('Situação tributária está inconsistente para a tributação. Por favor, verifique.');
   }
   await atualizarProdutoArius(produto, produtoAtualizacao);
   await atualizarTabelaFornecedor(produto, produtoAtualizacao);
   await atualizarTabelaFornecedorUF(produto, produtoAtualizacao);
-  await atualizarDados(produto, produtoAtualizacao, divergencia);
+  await atualizarDados(produto, produtoAtualizacao);
+
+  return {
+    produtoId: produto.produto_arius,
+  };
 };
 
-const atualizarProdutoArius = async (produto: Omit<Produto, 'ecommerce'>, produtoAtualizacao: Partial<ProdutoAtualizacao>) => {
+const atualizarProdutoArius = async (produto: ProdutoFiscalDTO, produtoAtualizacao: Partial<ProdutoAtualizacao>) => {
   try {
     const campos = {
       ...(produtoAtualizacao.classificacao_fiscal && {
@@ -37,7 +42,7 @@ const atualizarProdutoArius = async (produto: Omit<Produto, 'ecommerce'>, produt
       }),
     };
 
-    if (!objectUtil.isVazio(campos)) return;
+    if (objectUtil.isVazio(campos)) return;
 
     await ariusProdutoArius.atualizar({
       id: produto.produto_arius,
@@ -45,17 +50,20 @@ const atualizarProdutoArius = async (produto: Omit<Produto, 'ecommerce'>, produt
     });
   } catch (erro) {
     console.log(erro);
-    throw new Error('Ocorreu um erro ao atualizar o produto na Arius.');
+    throw new Error(erro.response.data.processedException?.causeMessage);
   }
 };
 
-const atualizarTabelaFornecedor = async (produto: Omit<Produto, 'ecommerce'>, produtoAtualizacao: Partial<ProdutoAtualizacao>) => {
+const atualizarTabelaFornecedor = async (
+  produto: ProdutoFiscalDTO,
+  produtoAtualizacao: Partial<ProdutoAtualizacao>
+) => {
   try {
     const campos = {
       ...(produtoAtualizacao.ipi && { ipi: produtoAtualizacao.ipi }),
     };
 
-    if (!objectUtil.isVazio(campos)) return;
+    if (objectUtil.isVazio(campos)) return;
 
     await tabelaFornecedor.atualizar({
       pk: {
@@ -78,23 +86,26 @@ const atualizarTabelaFornecedor = async (produto: Omit<Produto, 'ecommerce'>, pr
     });
   } catch (erro) {
     console.log(erro);
-    throw new Error('Ocorreu um erro ao atualizar as tributações do fornecedor na Arius.');
+    throw new Error(erro.response.data.processedException?.causeMessage);
   }
 };
 
-const atualizarTabelaFornecedorUF = async (produto: Omit<Produto, 'ecommerce'>, produtoAtualizacao: Partial<ProdutoAtualizacao>) => {
+const atualizarTabelaFornecedorUF = async (
+  produto: ProdutoFiscalDTO,
+  produtoAtualizacao: Partial<ProdutoAtualizacao>
+) => {
   try {
     const campos = {
       ...(produtoAtualizacao.st_compra && {
         situacaoTributaria: { id: produtoAtualizacao.st_compra },
-        tributacao: tabelaFornecedorUf.obterTipoTributacao(produto.st_compra),
+        tributacao: produtoAtualizacao.tipo_tributacao,
       }),
       ...(produtoAtualizacao.icms_compra && {
         icms: produtoAtualizacao.icms_compra,
       }),
     };
 
-    if (!objectUtil.isVazio(campos)) return;
+    if (objectUtil.isVazio(campos)) return;
 
     await tabelaFornecedorUf.atualizar({
       pk: {
@@ -122,18 +133,28 @@ const atualizarTabelaFornecedorUF = async (produto: Omit<Produto, 'ecommerce'>, 
     });
   } catch (erro) {
     console.log(erro);
-    throw new Error('Ocorreu um erro ao atualizar as tributações por estado na Arius.');
+    throw new Error(erro.response.data.processedException?.causeMessage);
   }
 };
 
-const atualizarDados = async (produto: Omit<Produto, 'ecommerce'>, produtoAtualizacao: Partial<ProdutoAtualizacao>, divergencia: Divergencia) => {
+const atualizarDados = async (produto: ProdutoFiscalDTO, produtoAtualizacao: Partial<ProdutoAtualizacao>) => {
   try {
-    const campos = _.defaults({}, produtoAtualizacao, divergencia);
+    const divergencia: Divergencia = produto.divergencias[0];
+    const campos = {
+      st_compra: produtoAtualizacao.st_compra ?? divergencia.st_compra,
+      ipi: produtoAtualizacao.ipi ?? divergencia.ipi,
+      icms_compra: produtoAtualizacao.icms_compra ?? divergencia.icms_compra,
+      pis_cofins: produtoAtualizacao.pis_cofins ?? divergencia.pis_cofins,
+      tipo_tributacao: produtoAtualizacao.tipo_tributacao ?? divergencia.tributacao_compra,
+      classificacao_fiscal: produtoAtualizacao.classificacao_fiscal ?? divergencia.classificacao_fiscal,
+    };
+
+    if (objectUtil.isVazio(campos)) return;
 
     await produtoService.atualizar({
       id: produto.id,
-      ...campos,
       status: EFiscalStatus.APROVADO,
+      ...campos,
     });
   } catch (erro) {
     console.log(erro);

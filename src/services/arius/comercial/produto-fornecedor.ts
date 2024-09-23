@@ -1,4 +1,4 @@
-import ariusHttpUtil from '@utils/arius-http.util';
+import ariusUtil from '@utils/arius.util';
 
 const URI = '/AriusERP/v2/ProdutoFornecedor';
 
@@ -14,7 +14,7 @@ interface ProdutoFornecedor {
 
 async function cadastrar(produto: ProdutoFornecedor): Promise<ProdutoFornecedor> {
   try {
-    return await ariusHttpUtil.post(URI, produto);
+    return await ariusUtil.post(URI, produto);
   } catch (erro) {
     console.error(erro);
     throw erro;
@@ -23,17 +23,17 @@ async function cadastrar(produto: ProdutoFornecedor): Promise<ProdutoFornecedor>
 
 async function atualizar(produto: ProdutoFornecedor): Promise<ProdutoFornecedor> {
   try {
-    return await ariusHttpUtil.put(URI, produto);
+    return await ariusUtil.put(URI, produto);
   } catch (erro) {
     console.error(erro);
     throw erro;
   }
 }
 
-async function obter({ estado, fornecedorId, produtoId }): Promise<ProdutoFornecedor> {
+async function obter({ fornecedorId, produtoId }): Promise<ProdutoFornecedor> {
   try {
-    const url = `${URI}/{estadoId:${estado},produtoId:${produtoId},fornecedorId:${fornecedorId}}`;
-    return await ariusHttpUtil.get(url);
+    const url = `${URI}/{produtoId:${produtoId},fornecedorId:${fornecedorId}}`;
+    return await ariusUtil.get(url);
   } catch (erro) {
     console.error(erro);
     throw erro;

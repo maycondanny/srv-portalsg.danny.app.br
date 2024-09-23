@@ -1,35 +1,53 @@
-import produtoModel, { ECadastroStatus, Produto } from '@modules/comercial/produtos/models/produto.model';
+import produtoModel, { ECadastroStatus } from '@modules/comercial/produtos/models/produto.model';
 import _ from 'lodash';
 import produtoEanService from '@services/hub/produtos/produto-ean.service';
 import ariusProdutoEanService from '@services/arius/comercial/produto-ean.service';
 import numberUtil from '@utils/number.util';
 import eanModel, { EMedidas } from '@modules/comercial/produtos/models/ean.model';
 import ariusProdutoService from '@services/arius/comercial/produto.service';
-import tabelaFornecedorUf from '@services/arius/comercial/tabela-fornecedor-uf';
 import produtoService from '@modules/comercial/produtos/services/produto.service';
 import aprovacaoService from '../../aprovacao.service';
+import ProdutoCadastroDTO from '../../../dtos/produto-cadastro.dto';
+import produtoCompradorService from '@services/arius/comercial/produto-comprador.service';
 
-async function cadastrar(produto: Omit<Produto, 'ecommerce'>) {
+async function cadastrar(produto: ProdutoCadastroDTO) {
   const codigos = produtoModel.obterCodigosEans(produto.eans);
   const eansExistem = await produtoEanService.obterPorCodigos(codigos);
 
-  if (numberUtil.isMaiorZero(eansExistem.length)) throw new Error('Já possui EANs vinculados ao produto fornecido');
+  if (numberUtil.isMaiorZero(eansExistem.length)) throw new Error('Já possui EANs vinculados para este produto, verifique');
 
   const { id, dataCadastro } = await cadastrarArius(produto);
+
   const produtoArius = id;
+
   if (!produtoArius) throw new Error('Não foi possivel aprovar o produto');
+
   await cadastrarEans(produtoArius, produto);
+  await inserirComprador(produtoArius, produto);
   await aprovacaoService.inserirProdutoFornecedor({
     produtoId: produtoArius,
-    fornecedorId: Number(produto.fornecedor_id),
+    fornecedorId: produto.fornecedor_id,
     referencia: produto.codigo_produto_fornecedor,
   });
-  await inserirTabelaFornecedor(produtoArius, produto);
-  await inserirTabelaFornecedorUF(produtoArius, produto);
+  await aprovacaoService.inserirTabelaFornecedor({
+    fornecedorId: produto.fornecedor_id,
+    produtoId: produtoArius,
+  });
+  await aprovacaoService.inserirTabelaFornecedorUF({
+    preco: produto?.preco,
+    desconto_p: produto.desconto_p,
+    estado: produto.estado,
+    fornecedorId: produto.fornecedor_id,
+    produtoId: produtoArius,
+  });
   await atualizarDados(produtoArius, dataCadastro, produto);
+
+  return {
+    produtoId: produtoArius
+  }
 }
 
-async function cadastrarArius(produto: Omit<Produto, 'ecommerce'>) {
+async function cadastrarArius(produto: ProdutoCadastroDTO) {
   try {
     const { id, dataCadastro } = await ariusProdutoService.cadastrar({
       descricao: produto.descritivo,
@@ -51,13 +69,15 @@ async function cadastrarArius(produto: Omit<Produto, 'ecommerce'>) {
       tipoIpv: '1',
       pesoLiquido: produto.pesol,
       pesoBruto: produto.pesob,
-      pisCofins: true,
-      tributacaoPisCofins: produto.pis_cofins,
       aceitaMultiplicacaoPDV: 'F',
       aceitaEnterPDV: false,
-      incluiListaInventario: false,
+      incluiListaInventario: true,
       incluiListaPesquisa: false,
-      origem: ariusProdutoService.obterOrigem(produto.origem),
+      familiaId: produto.familia,
+      familia: {
+        id: produto.familia,
+      },
+      origem: produtoModel.obterOrigem(produto.origem),
       baseFidelidade: 'F',
       departamento: {
         departamentoPK: {
@@ -75,7 +95,7 @@ async function cadastrarArius(produto: Omit<Produto, 'ecommerce'>) {
       quantidadeKgl: 0,
       aceitaTroca: true,
       controlaEstoque: true,
-      tipoCategoriaFiscal: 0,
+      tipoCategoriaFiscal: produto.categoria_fiscal,
       mixBase: false,
       armazenagemElevador: false,
       removidoSortimento: false,
@@ -86,91 +106,87 @@ async function cadastrarArius(produto: Omit<Produto, 'ecommerce'>) {
     return { id, dataCadastro };
   } catch (erro) {
     console.log(erro);
-    throw new Error('Ocorreu um erro ao cadastrar o produto na ARIUS.');
+    throw new Error(erro.response.data.processedException?.causeMessage);
   }
 }
 
-async function cadastrarEans(produtoAriusId: number, produto: Omit<Produto, 'ecommerce'>) {
-  const resultado = _.map(produto.eans, async (ean) => {
-    let dados: any = {
-      produto: {
-        id: produtoAriusId,
+async function inserirComprador(produtoId: number, produto: ProdutoCadastroDTO) {
+  try {
+    await produtoCompradorService.cadastrar({
+      pk: {
+        produtoId,
+        compradorId: produto.comprador,
       },
-      eanPrincipal: false,
-      enviaPdv: false,
-      registradoGtin: false,
-      ean: ean.codigo,
-      quantidade: ean.quantidade,
-      embalagem: {
-        id: ean.tipo,
-      },
-    };
-
-    if (eanModel.isEan(ean)) {
-      dados = _.assign({}, dados, {
-        eanPrincipal: true,
-        enviaPdv: true,
-      });
-    }
-
-    await ariusProdutoEanService.cadastrar(dados);
-  });
-
-  await Promise.all(resultado);
+    });
+  } catch (erro) {
+    console.log(erro);
+    throw new Error(erro.response.data.processedException?.causeMessage);
+  }
 }
 
-async function inserirTabelaFornecedor(produtoId: number, produto: Omit<Produto, 'ecommerce'>) {
-  await aprovacaoService.inserirTabelaFornecedor({
-    fornecedorId: produto.fornecedor_id,
-    produtoId,
-    ipi: produto.ipi,
-  });
+async function cadastrarEans(produtoAriusId: number, produto: ProdutoCadastroDTO) {
+  try {
+    const resultado = _.map(produto.eans, async (ean) => {
+      let dados: any = {
+        produto: {
+          id: produtoAriusId,
+        },
+        eanPrincipal: false,
+        enviaPdv: false,
+        registradoGtin: false,
+        ean: ean.codigo,
+        quantidade: ean.quantidade,
+        embalagem: {
+          id: ean.tipo,
+        },
+      };
+
+      if (eanModel.isEan(ean)) {
+        dados = _.assign({}, dados, {
+          eanPrincipal: true,
+          enviaPdv: true,
+        });
+      }
+
+      await ariusProdutoEanService.cadastrar(dados);
+    });
+    await Promise.all(resultado);
+  } catch (erro) {
+    console.log(erro);
+    throw new Error(erro.response.data.processedException?.causeMessage);
+  }
 }
 
-async function inserirTabelaFornecedorUF(produtoId: number, produto: Omit<Produto, 'ecommerce'>) {
-  await aprovacaoService.inserirTabelaFornecedorUF({
-    preco: produto?.preco,
-    st_compra: tabelaFornecedorUf.obterTipoTributacao(produto?.st_compra),
-    icms_compra: Number(produto?.icms_compra),
-    desconto_p: produto.desconto_p,
-    estado: produto.estado,
-    fornecedorId: produto.fornecedor_id,
-    produtoId,
-  });
-}
-
-async function atualizarDados(produtoAriusId: number, dataCadastroArius: Date, produto: Omit<Produto, 'ecommerce'>) {
+async function atualizarDados(produtoAriusId: number, dataCadastroArius: Date, produto: ProdutoCadastroDTO) {
   try {
     await produtoService.atualizar({
-      id: produto?.id,
-      codigo_produto_fornecedor: produto?.codigo_produto_fornecedor,
+      id: produto.id,
+      codigo_produto_fornecedor: produto.codigo_produto_fornecedor,
       descritivo: produto.descritivo,
-      descritivo_pdv: produto?.descritivo_pdv,
-      marca: produto?.marca,
-      depto: produto?.depto,
-      secao: produto?.secao,
-      grupo: produto?.grupo,
-      subgrupo: produto?.subgrupo,
-      classificacao_fiscal: produto?.classificacao_fiscal,
-      origem: produto?.origem,
-      pesol: produto?.pesol,
-      pesob: produto?.pesob,
-      validade: produto?.validade,
-      comprimento: produto?.comprimento,
-      largura: produto?.largura,
-      altura: produto?.altura,
-      qtde_embalagem: produto?.qtde_embalagem,
-      comprimento_d: produto?.comprimento_d,
-      altura_d: produto?.altura_d,
-      largura_d: produto?.largura_d,
-      ipi: produto?.ipi,
-      pis_cofins: produto?.pis_cofins,
-      estado: produto?.estado,
-      preco: produto?.preco,
-      desconto_p: produto?.desconto_p,
+      descritivo_pdv: produto.descritivo_pdv,
+      marca: produto.marca,
+      depto: produto.depto,
+      secao: produto.secao,
+      grupo: produto.grupo,
+      subgrupo: produto.subgrupo,
+      classificacao_fiscal: produto.classificacao_fiscal,
+      origem: produto.origem,
+      pesol: produto.pesol,
+      pesob: produto.pesob,
+      validade: produto.validade,
+      comprimento: produto.comprimento,
+      largura: produto.largura,
+      altura: produto.altura,
+      qtde_embalagem: produto.qtde_embalagem,
+      estado: produto.estado,
+      preco: produto.preco,
+      desconto_p: produto.desconto_p,
       cadastro_arius: dataCadastroArius,
+      comprador: produto.comprador,
+      categoria_fiscal: produto.categoria_fiscal,
       produto_arius: produtoAriusId,
       eans: produto.eans,
+      familia: produto.familia,
       status: ECadastroStatus.APROVADO,
     });
   } catch (erro) {

@@ -6,58 +6,61 @@ import ProdutoFornecedorResponse from '../dtos/produto-fornecedor-response.dto';
 import CapaProdutoResponseDTO from '../dtos/capa-produto-response.dto';
 import aprovacaoService from '../services/aprovacao.service';
 import AprovacaoRequestDTO from '../dtos/aprovacao-request.dto';
+import AprovacaoResponseDTO from '../dtos/aprovacao-response.dto';
+import ResponseDTO from 'dtos/response.dto';
 
-// async function cadastrar(req: Request, res: Response, next: NextFunction) {
-//   try {
-//     await produtoService.cadastrar(req.body);
-//     return res.status(httpStatusEnum.Status.CRIADO).json({ mensagem: 'Produto cadastrado com sucesso.' });
-//   } catch (error) {
-//     next(error);
-//   }
-// }
-
-async function obterTodos(req: Request, res: Response<CapaProdutoResponseDTO[]>, next: NextFunction) {
+async function obterTodos(req: Request, res: Response<ResponseDTO<CapaProdutoResponseDTO[]>>, next: NextFunction) {
   try {
     const produtos = await produtoService.obterTodos();
-    return res.status(httpStatusEnum.Status.SUCESSO).json(produtos);
-  } catch (error) {
-    next(error);
-  }
-}
-
-async function obterTodosPorFornecedor(req: Request<{}, {}, {}, ProdutoFornecedorRequest>, res: Response<ProdutoFornecedorResponse>, next: NextFunction) {
-  try {
-    const { fornecedorId, role } = req.query;
-    const produtos = await produtoService.obterTodosPorFornecedor(fornecedorId, role);
-    return res.status(httpStatusEnum.Status.SUCESSO).json(produtos);
-  } catch (error) {
-    next(error);
-  }
-}
-
-async function aprovar(req: Request<{}, {}, AprovacaoRequestDTO>, res: Response, next: NextFunction) {
-  try {
-    await aprovacaoService.aprovar(req.body);
     return res.status(httpStatusEnum.Status.SUCESSO).json({
-      mensagem: "Produto aprovado com sucesso"
+      dados: produtos
     });
   } catch (error) {
     next(error);
   }
 }
 
-// async function obterPorId(req: Request, res: Response, next: NextFunction) {
-//   try {
-//     const { id } = req.params;
-//     const produto = await produtoService.obterPorId(Number(id));
-//     return res.status(httpStatusEnum.Status.SUCESSO).json(produto);
-//   } catch (error) {
-//     next(error);
-//   }
-// }
+async function obterTodosPorFornecedor(req: Request<{}, {}, {}, ProdutoFornecedorRequest>, res: Response<ResponseDTO<ProdutoFornecedorResponse>>, next: NextFunction) {
+  try {
+    const { fornecedorId, role } = req.query;
+    const produtos = await produtoService.obterTodosPorFornecedor(fornecedorId, role);
+    return res.status(httpStatusEnum.Status.SUCESSO).json({
+      dados: produtos
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function aprovar(req: Request<{}, {}, AprovacaoRequestDTO>, res: Response<ResponseDTO<AprovacaoResponseDTO>>, next: NextFunction) {
+  try {
+    const { produtoId } = await aprovacaoService.aprovar(req.body);
+    return res.status(httpStatusEnum.Status.SUCESSO).json({
+      mensagem: "Produto aprovado com sucesso",
+      dados: {
+        produtoId
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function atualizar(req: Request, res: Response<ResponseDTO>, next: NextFunction) {
+  try {
+    // TODO: Fazer a atualização do produto com base na role 'cadastro' ou 'fiscal'
+    //await produtoService.atualizar(req.body);
+    return res.status(httpStatusEnum.Status.SUCESSO).json({
+      mensagem: "Produto atualizado com sucesso"
+    });
+  } catch (error) {
+    next(error);
+  }
+}
 
 export default {
   obterTodos,
   obterTodosPorFornecedor,
-  aprovar
+  aprovar,
+  atualizar
 };

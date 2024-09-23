@@ -1,7 +1,7 @@
 import Fornecedor from "@models/fornecedor.model";
-import { Produto } from "@modules/comercial/produtos/models/produto.model";
+import ProdutoFornecedorDTO from "./produto-fornecedor.dto";
 
 export default interface ProdutoFornecedorResponse {
-  produtos: Produto[];
+  produtos: ProdutoFornecedorDTO[];
   fornecedor: Fornecedor;
 }
