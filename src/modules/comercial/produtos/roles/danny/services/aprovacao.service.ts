@@ -17,9 +17,6 @@ import objectUtil from '@utils/object.util';
 import ErroException from '@exceptions/erro.exception';
 import atualizaTributacaoAriusService from './gateways/fiscal/atualiza-tributacao.arius.service';
 import produtoMapper from '../mappers/produto.mapper';
-import ProdutoDTO from '../dtos/produto.dto';
-import ProdutoCadastroDTO from '../dtos/produto-cadastro.dto';
-import ProdutoFiscalDTO from '../dtos/produto-fiscal.dto';
 import AprovacaoResponseDTO from '../dtos/aprovacao-response.dto';
 
 export const LINHA_GERAL = 1;
@@ -31,33 +28,29 @@ async function aprovar({ role, produto, dadosAtualizacao }: AprovacaoRequestDTO)
   if (objectUtil.isVazio(produto)) throw new ErroException('Produto não informado para a aprovação!');
   switch (role) {
     case ERole.CADASTRO:
-      const produtoCadastroDTO = produtoMapper.toProdutoCadastroDTO(produto);
-      return await aprovarCadastro(produtoCadastroDTO, dadosAtualizacao);;
+      return await aprovarCadastro(produtoMapper.toProduto(produto), produtoMapper.toProduto(dadosAtualizacao));
     case ERole.FISCAL:
-      const produtoFiscalDTO = produtoMapper.toProdutoFiscalDTO(produto);
-      return await aprovarFiscal(produtoFiscalDTO, dadosAtualizacao);
+      return await aprovarFiscal(produtoMapper.toProduto(produto), produtoMapper.toProduto(dadosAtualizacao));
   }
 }
 
-const aprovarCadastro = async (produtoCadastroDTO: ProdutoCadastroDTO, produtoAtualizacao: Partial<ProdutoDTO>) => {
+const aprovarCadastro = async (produto: Produto, produtoAtualizacao: Partial<Produto>) => {
   try {
-    if (produtoCadastroDTO.status === ECadastroStatus.CADASTRADO) {
-      return await atualizaProdutoAriusService.atualizar(produtoCadastroDTO, produtoAtualizacao);
+    if (produto.status === ECadastroStatus.CADASTRADO) {
+      return await atualizaProdutoAriusService.atualizar(produto, produtoAtualizacao);
     }
-
-    return await cadastraProdutoAriusService.cadastrar(produtoCadastroDTO);
+    return await cadastraProdutoAriusService.cadastrar(produto);
   } catch (erro) {
     throw erro;
   }
 };
 
-const aprovarFiscal = async (produtoFiscalDTO: ProdutoFiscalDTO, produtoAtualizacao: Partial<ProdutoDTO>) => {
+const aprovarFiscal = async (produto: Produto, produtoAtualizacao: Partial<Produto>) => {
   try {
-    if (produtoFiscalDTO.status === EFiscalStatus.CADASTRADO) {
-      return await atualizaTributacaoAriusService.atualizar(produtoFiscalDTO, produtoAtualizacao);
+    if (produto.status === EFiscalStatus.CADASTRADO) {
+      return await atualizaTributacaoAriusService.atualizar(produto, produtoAtualizacao);
     }
-
-    return await cadastraTributacaoAriusService.cadastrar(produtoFiscalDTO);
+    return await cadastraTributacaoAriusService.cadastrar(produto);
   } catch (erro) {
     throw erro;
   }

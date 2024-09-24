@@ -10,7 +10,14 @@ async function obterPorId(ecommerceId: number): Promise<Imagem[]> {
   return await imagemRepository.obterPorId(ecommerceId);
 }
 
+async function atualizar(ecommerceId: number, imagens: Imagem[]) {
+  await imagemRepository.remover(ecommerceId);
+  imagens = _.map(imagens, (imagem) => ({ ...imagem, ecommerce_id: ecommerceId }));
+  await imagemRepository.cadastrar(imagens);
+}
+
 export default {
   cadastrar,
-  obterPorId
+  obterPorId,
+  atualizar,
 };

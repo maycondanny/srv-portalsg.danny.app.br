@@ -10,7 +10,12 @@ async function obterPorId(ecommerceId: number): Promise<Ean> {
   return await eanRepository.obterPorId(ecommerceId);
 }
 
+async function atualizar(ecommerceId: number, eans: Ean[]): Promise<void> {
+  return await eanRepository.atualizar(ecommerceId, eans);
+}
+
 export default {
   cadastrar,
-  obterPorId
+  obterPorId,
+  atualizar
 };

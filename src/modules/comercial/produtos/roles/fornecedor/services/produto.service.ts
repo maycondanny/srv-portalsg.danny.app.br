@@ -54,10 +54,18 @@ async function atualizar(produtoDTO: ProdutoDTO) {
   const validacao = await validacaoService.validar(produto);
 
   if (!validacao.valido) {
-    throw new ErroException('Erro ao cadastrar novo produto', validacao, httpStatusEnum.Status.ERRO_REQUISICAO);
+    throw new ErroException('Erro ao atualizar o produto', validacao, httpStatusEnum.Status.ERRO_REQUISICAO);
   }
 
   await produtoService.atualizar(produto);
+
+  await produtoEcommerceService.atualizarPorProdutoId(produto.id, {
+    descricao: produto.ecommerce.descricao,
+    imagens: produto.ecommerce.imagens,
+    modo_uso: produto.ecommerce.modo_uso,
+    caracteristica: produto.ecommerce.caracteristica,
+    eans: produto.eans,
+  });
 }
 
 export default {

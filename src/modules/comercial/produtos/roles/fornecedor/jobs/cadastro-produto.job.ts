@@ -1,7 +1,6 @@
 import produtoEcommerceService from '@modules/comercial/ecommerce/services/produto.service';
 import { Queue, Worker } from 'bullmq';
 import connection from '@configs/queue.config';
-import produtoMapper from '../mappers/produto.mapper';
 import produtoService from '@modules/comercial/produtos/services/produto.service';
 import cacheUtil, { ETempoExpiracao } from '@utils/cache.util';
 import { CODIGO_REFERENCIA_FORNECEDOR_CACHE } from '@modules/comercial/produtos/models/produto.model';

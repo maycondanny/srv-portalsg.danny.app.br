@@ -13,9 +13,12 @@ import Fornecedor from '@models/fornecedor.model';
 import produtoRepository from '@modules/comercial/produtos/repositories/produto.repository';
 import divergenciasService from './divergencias.service';
 import ProdutoFornecedorResponse from '../dtos/produto-fornecedor-response.dto';
-import produtoService from '@modules/comercial/produtos/services/produto.service';
 import eanService from '@modules/comercial/produtos/services/ean.service';
+import produtoService from '@modules/comercial/produtos/services/produto.service';
 import produtoMapper from '../mappers/produto.mapper';
+import ErroException from '@exceptions/erro.exception';
+import httpStatusEnum from '@enums/http-status.enum';
+import validacaoService from './validacao.service';
 
 async function obterTodosPorFornecedor(fornecedorId: number, role: ERole): Promise<ProdutoFornecedorResponse> {
   try {
@@ -130,12 +133,83 @@ function agrupar(produtos: CapaProdutoResponseDTO[]): CapaProdutoResponseDTO[] {
   return _.values(resultado);
 }
 
-async function atualizar()  {
+async function atualizar(role: ERole, produto: Produto) {
+  if (!role) throw new Error('Role não informada');
+  if (!produto) throw new Error('Produto não informada');
 
+  if (role === ERole.FISCAL) {
+    const validacao = await validacaoService.validarFiscal(produto);
+
+    if (!validacao.valido) {
+      throw new ErroException(
+        'Erro ao atualizar a tributação do produto',
+        validacao,
+        httpStatusEnum.Status.ERRO_REQUISICAO
+      );
+    }
+
+    await produtoService.atualizar({
+      id: produto.id,
+      classificacao_fiscal: produto?.classificacao_fiscal,
+      st_compra: produto?.st_compra,
+      ipi: produto?.ipi,
+      icms_compra: produto?.icms_compra,
+      pis_cofins: produto?.pis_cofins,
+    });
+    return;
+  }
+
+  if (role === ERole.CADASTRO) {
+    const validacao = await validacaoService.validarCadastro(produto);
+
+    if (!validacao.valido) {
+      throw new ErroException(
+        'Erro ao atualizar o cadastro do produto',
+        validacao,
+        httpStatusEnum.Status.ERRO_REQUISICAO
+      );
+    }
+
+    produto = produtoModel.formatarTexto(produto);
+    await produtoService.atualizar({
+      id: produto.id,
+      codigo_produto_fornecedor: produto?.codigo_produto_fornecedor,
+      descritivo: produto.descritivo,
+      descritivo_pdv: produto?.descritivo_pdv,
+      marca: produto?.marca,
+      depto: produto?.depto,
+      secao: produto?.secao,
+      grupo: produto?.grupo,
+      subgrupo: produto?.subgrupo,
+      classificacao_fiscal: produto?.classificacao_fiscal,
+      origem: produto?.origem,
+      pesol: produto?.pesol,
+      pesob: produto?.pesob,
+      validade: produto?.validade,
+      familia: produto?.familia,
+      comprimento: produto?.comprimento,
+      largura: produto?.largura,
+      altura: produto?.altura,
+      qtde_embalagem: produto?.qtde_embalagem,
+      comprimento_d: produto?.comprimento_d,
+      altura_d: produto?.altura_d,
+      largura_d: produto?.largura_d,
+      ipi: produto?.ipi,
+      pis_cofins: produto?.pis_cofins,
+      preco: produto?.preco,
+      desconto_p: produto?.desconto_p,
+      estado: produto?.estado,
+      comprador: produto?.comprador,
+      categoria_fiscal: produto?.categoria_fiscal,
+    });
+    const eans = produtoModel.juntarEansDuns(produto.eans, produto.duns, produto.qtde_embalagem);
+    await eanService.atualizar(eans);
+    return;
+  }
 }
 
 export default {
   obterTodosPorFornecedor,
   obterTodos,
-  atualizar
+  atualizar,
 };

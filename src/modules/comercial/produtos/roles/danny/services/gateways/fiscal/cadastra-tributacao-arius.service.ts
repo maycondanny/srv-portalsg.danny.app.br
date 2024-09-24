@@ -3,13 +3,20 @@ import aprovacaoService from "../../aprovacao.service";
 import tabelaFornecedor from "@services/arius/comercial/tabela-fornecedor";
 import tabelaFornecedorUf from "@services/arius/comercial/tabela-fornecedor-uf";
 import siglaEstadoModel from "@models/sigla-estado.model";
-import produtoModel, { EFiscalStatus } from "@modules/comercial/produtos/models/produto.model";
+import produtoModel, { EFiscalStatus, Produto } from "@modules/comercial/produtos/models/produto.model";
 import produtoService from "@modules/comercial/produtos/services/produto.service";
-import ProdutoFiscalDTO from "../../../dtos/produto-fiscal.dto";
+import validacaoService from "../../validacao.service";
+import ErroException from "@exceptions/erro.exception";
 
-async function cadastrar(produto: ProdutoFiscalDTO) {
+async function cadastrar(produto: Produto) {
+  const validacao = await validacaoService.validarFiscal(produto);
+
+  if (!validacao.valido) {
+    throw new ErroException('Campos obrigatórios não preenchidos, verifique', validacao);
+  }
+
   if (!aprovacaoService.validarSituacaoTributaria({ st_compra: produto.st_compra, tipo_tributacao: produto.tipo_tributacao })) {
-    throw new Error("Situação tributária está inconsistente para a tributação. Por favor, verifique.");
+    throw new ErroException("Situação tributária está inconsistente para a tributação. Por favor, verifique");
   }
 
   await atualizarTributacaoArius(produto);
@@ -22,7 +29,7 @@ async function cadastrar(produto: ProdutoFiscalDTO) {
   }
 }
 
-async function atualizarTributacaoArius(produto: ProdutoFiscalDTO) {
+async function atualizarTributacaoArius(produto: Produto) {
   try {
     await ariusProdutoService.atualizar({
       id: produto.produto_arius,
@@ -34,11 +41,11 @@ async function atualizarTributacaoArius(produto: ProdutoFiscalDTO) {
     });
   } catch (erro) {
     console.log(erro);
-    throw new Error("Ocorreu um erro ao atualizar o produto na ARIUS.");
+    throw new ErroException("Ocorreu um erro ao atualizar o produto na ARIUS");
   }
 };
 
-async function atualizarTabelaFornecedor(produto: ProdutoFiscalDTO) {
+async function atualizarTabelaFornecedor(produto: Produto) {
   try {
     await tabelaFornecedor.atualizar({
       pk: {
@@ -61,13 +68,13 @@ async function atualizarTabelaFornecedor(produto: ProdutoFiscalDTO) {
     });
   } catch (erro) {
     console.log(erro);
-    throw new Error(
+    throw new ErroException(
       "Ocorreu um erro ao atualizar os custos na tabela do fornecedor na Arius."
     );
   }
 };
 
-async function atualizarTabelaFornecedorUF(produto: ProdutoFiscalDTO) {
+async function atualizarTabelaFornecedorUF(produto: Produto) {
   try {
     await tabelaFornecedorUf.atualizar({
       pk: {
@@ -99,13 +106,13 @@ async function atualizarTabelaFornecedorUF(produto: ProdutoFiscalDTO) {
     });
   } catch (erro) {
     console.log(erro);
-    throw new Error(
+    throw new ErroException(
       "Ocorreu um erro ao cadastrar os custos na tabela do fornecedor no estado na Arius."
     );
   }
 };
 
-async function atualizarDados(produto: ProdutoFiscalDTO) {
+async function atualizarDados(produto: Produto) {
   try {
     await produtoService.atualizar({
       id: produto.id,
@@ -118,7 +125,7 @@ async function atualizarDados(produto: ProdutoFiscalDTO) {
     });
   } catch (erro) {
     console.log(erro);
-    throw new Error(
+    throw new ErroException(
       "Ocorreu um erro ao atualizar na base as tributações do produto."
     );
   }

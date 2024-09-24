@@ -17,7 +17,7 @@ async function cadastrar(produto: Produto) {
 
 async function obterTodosPorFornecedor(fornecedorId: number): Promise<Produto[]> {
   try {
-    if (!fornecedorId) throw new Error('Fornecedor não encontrado.');
+    if (!fornecedorId) throw new ErroException('Fornecedor não encontrado.');
     const produtos = await produtoRepository.obterTodosPorFornecedor(fornecedorId);
     const resultado = _.map(produtos, async (produto) => {
       const ecommerce = await produtoEcommerceService.obterPorProdutoId(produto.id);
@@ -38,8 +38,9 @@ async function obterTodosPorFornecedor(fornecedorId: number): Promise<Produto[]>
 
 async function obterPorId(id: number): Promise<Produto> {
   try {
-    if (!id) throw new Error('Id produto não encontrado.');
+    if (!id) throw new ErroException('Id produto não encontrado.');
     const produto = await produtoRepository.obterPorId(id);
+    if (!produto) throw new ErroException("Produto não encontrado");
     const eans = await eanService.obterPorProdutoId(produto.id);
     const ecommerce = await produtoEcommerceService.obterPorProdutoId(produto.id);
     return { ...produto, ecommerce, eans: produtoModel.obterEans(eans), duns: produtoModel.obterDuns(eans) };

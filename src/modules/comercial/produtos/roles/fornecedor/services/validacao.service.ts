@@ -1,14 +1,35 @@
-import { Produto } from "@modules/comercial/produtos/models/produto.model";
-import validacaoService from "@modules/comercial/produtos/services/validacao.service";
-import numberUtil from "@utils/number.util";
-import _ from "lodash";
+import { CODIGO_REFERENCIA_FORNECEDOR_CACHE, Produto } from '@modules/comercial/produtos/models/produto.model';
+import validacaoService from '@modules/comercial/produtos/services/validacao.service';
+import cacheUtil from '@utils/cache.util';
+import numberUtil from '@utils/number.util';
+import _ from 'lodash';
 
 async function validar(produto: Produto) {
   let erros: string[] = [];
-  const validacao = await validacaoService.validar(produto);
-  erros = _.concat(erros, validacao.erros);
+  erros = _.concat(erros, validacaoService.validarCodigoFornecedor(produto));
+  erros = _.concat(erros, await validarCodigoFornecedorCache(produto));
+  erros = _.concat(erros, validacaoService.validarEan(produto));
+  erros = _.concat(erros, validacaoService.validarCaixaDun(produto));
+  erros = _.concat(erros, validacaoService.validarCamposObrigatorios(produto));
+  erros = _.concat(erros, validacaoService.validarCamposObrigatoriosFiscal(produto));
   erros = _.concat(erros, validarEcommerce(produto));
   return validacaoService.montarRespostaRetorno(produto, erros);
+}
+
+async function validarCodigoFornecedorCache(produto: Produto): Promise<string[]> {
+  const mensagens = [];
+
+  const referencia = produto.codigo_produto_fornecedor;
+
+  const produtoFornecedorCache = await cacheUtil.obter(
+    `${CODIGO_REFERENCIA_FORNECEDOR_CACHE}_${referencia}`
+  );
+
+  if (produtoFornecedorCache) {
+    mensagens.push('CODIGO INTERNO DO PRODUTO FORNECEDOR já cadastrado');
+  }
+
+  return mensagens;
 }
 
 function validarEcommerce(produto: Produto): string[] {
@@ -31,5 +52,5 @@ function validarEcommerce(produto: Produto): string[] {
 }
 
 export default {
-  validar
-}
+  validar,
+};

@@ -1,46 +1,27 @@
 import _ from 'lodash';
 import numberUtil from '@utils/number.util';
-import cacheUtil from '@utils/cache.util';
 import { ETamanho } from '@modules/comercial/produtos/models/ean.model';
 import stringUtil from '@utils/string.util';
-import produtoModel, { CODIGO_REFERENCIA_FORNECEDOR_CACHE, Produto } from '@modules/comercial/produtos/models/produto.model';
+import produtoModel, { Produto } from '@modules/comercial/produtos/models/produto.model';
 import { REGEX_APENAS_NUMEROS } from '@utils/regex.util';
 import ErroValidacaoResponseDTO from '../dtos/erro-validacao-response.dto';
 
-const CST_REDUCAO = "020";
-const TIPO_TRIBUTACAO_TRIBUTADO = "T";
+const CST_REDUCAO = '020';
+const TIPO_TRIBUTACAO_TRIBUTADO = 'T';
 
-async function validar(produto: Produto): Promise<ErroValidacaoResponseDTO> {
-  let erros: string[] = [];
-  erros = _.concat(erros, await validarCodigoFornecedor(produto));
-  erros = _.concat(erros, validarEan(produto));
-  erros = _.concat(erros, validarCaixaDun(produto));
-  erros = _.concat(erros, validarCamposObrigatorios(produto));
-  erros = _.concat(erros, validarTributacao(produto));
-  return montarRespostaRetorno(produto, erros);
-}
-
-async function validarCodigoFornecedor(produto: Produto): Promise<string[]> {
+function validarCodigoFornecedor(produto: Produto): string[] {
   const mensagens = [];
 
-  if (_.isEmpty(produto.codigo_produto_fornecedor)) {
+  const referencia = produto.codigo_produto_fornecedor;
+
+  if (_.isEmpty(referencia)) {
     mensagens.push('CODIGO INTERNO DO PRODUTO FORNECEDOR não informado');
     return mensagens;
   }
 
-  const referencia = produto.codigo_produto_fornecedor;
-
   if (referencia.startsWith('0')) {
     mensagens.push('CODIGO INTERNO DO PRODUTO FORNECEDOR não pode começar com 0');
     return mensagens;
-  }
-
-  const produtoFornecedorCache = await cacheUtil.obter(
-    `${CODIGO_REFERENCIA_FORNECEDOR_CACHE}_${referencia}_${produto.fornecedor_id}`
-  );
-
-  if (produtoFornecedorCache) {
-    mensagens.push('CODIGO INTERNO DO PRODUTO FORNECEDOR já cadastrado');
   }
 
   return mensagens;
@@ -70,17 +51,22 @@ function validarEan(produto: Produto): string[] {
       mensagens.push(`O código do EAN ${ean.codigo} é maior que ${ETamanho.EAN} digitos`);
     }
   });
-  _.forEach(produto.duns, (dun) => {
-    if (stringUtil.isMaior(dun.codigo, ETamanho.DUN)) {
-      mensagens.push(`O código do DUN ${dun.codigo} é maior que ${ETamanho.DUN} digitos`);
-    }
-  });
+
+  if (produto.duns) {
+    _.forEach(produto?.duns, (dun) => {
+      if (stringUtil.isMaior(dun.codigo, ETamanho.DUN)) {
+        mensagens.push(`O código do DUN ${dun.codigo} é maior que ${ETamanho.DUN} digitos`);
+      }
+    });
+  }
 
   return mensagens;
 }
 
 function validarCaixaDun(produto: Produto): string[] {
   const mensagens = [];
+
+  if (!produto.duns) return mensagens;
 
   if (
     numberUtil.isMaiorZero(produto.duns?.length) &&
@@ -103,30 +89,39 @@ function validarCamposObrigatorios(produto: Produto): string[] {
   if (_.isEmpty(produto.descritivo)) {
     mensagens.push('DESCRIÇÃO COMPLETA não informada');
   }
-  if (validaCampo(produto, 'estado')) {
+  if (validaCampoNumerico(produto, 'estado')) {
     mensagens.push('UF FATURAMENTO não informado');
   }
-  if (validaCampo(produto, 'preco')) {
+  if (validaCampoNumerico(produto, 'preco')) {
     mensagens.push('PREÇO CUSTO não informado');
   }
-  if (validaCampo(produto, 'pesob')) {
+  if (validaCampoNumerico(produto, 'pesob')) {
     mensagens.push('PESO BRUTO(KG) não informado');
   }
-  if (validaCampo(produto, 'pesol')) {
+  if (validaCampoNumerico(produto, 'pesol')) {
     mensagens.push('PESO LIQUIDO não informado');
   }
-  if (validaCampo(produto, 'altura')) {
+  if (validaCampoNumerico(produto, 'altura')) {
     mensagens.push('ALTURA não informada');
   }
-  if (validaCampo(produto, 'largura')) {
+  if (validaCampoNumerico(produto, 'largura')) {
     mensagens.push('LARGURA não informada');
   }
-  if (validaCampo(produto, 'comprimento')) {
+  if (validaCampoNumerico(produto, 'comprimento')) {
     mensagens.push('COMPRIMENTO não informado');
   }
   if (!_.isNumber(produto.validade) && _.isUndefined(produto.validade)) {
     mensagens.push('VALIDADE DO PRODUTO (MESES) não informado');
   }
+  if (_.isEmpty(produto.classificacao_fiscal)) {
+    mensagens.push('NCM não informado');
+  }
+
+  return mensagens;
+}
+
+function validarCamposObrigatoriosFiscal(produto: Produto): string[] {
+  const mensagens = [];
   if (_.isEmpty(produto.classificacao_fiscal)) {
     mensagens.push('NCM não informado');
   }
@@ -143,11 +138,10 @@ function validarCamposObrigatorios(produto: Produto): string[] {
   ) {
     mensagens.push('ICMS não informado');
   }
-
   return mensagens;
 }
 
-function validarTributacao(produto: Produto): string[] {
+function validarCstTributacao(produto: Produto): string[] {
   const mensagens = [];
 
   if (produto?.st_compra === CST_REDUCAO && numberUtil.isMenorOuIgualZero(produto.icms_compra)) {
@@ -158,15 +152,13 @@ function validarTributacao(produto: Produto): string[] {
     produtoModel.obterTipoTributacao(produto?.st_compra) === TIPO_TRIBUTACAO_TRIBUTADO &&
     numberUtil.isMenorOuIgualZero(produto.icms_compra)
   ) {
-    mensagens.push(
-      `O valor do ICMS não pode ser igual a zero para o CST ${produto.st_compra}`
-    );
+    mensagens.push(`O valor do ICMS não pode ser igual a zero para o CST ${produto.st_compra}`);
   }
 
   return mensagens;
 }
 
-function validaCampo(produto: Produto, campo: string): boolean {
+function validaCampoNumerico(produto: Produto, campo: string): boolean {
   return !_.isNumber(produto[campo]) || _.isUndefined(produto[campo]) || numberUtil.isMenorOuIgualZero(produto[campo]);
 }
 
@@ -179,6 +171,12 @@ function montarRespostaRetorno(produto: Produto, erros: string[]): ErroValidacao
 }
 
 export default {
-  validar,
+  validarCodigoFornecedor,
+  validarCstTributacao,
+  validarEan,
+  validarCaixaDun,
+  validarCamposObrigatorios,
+  validarCamposObrigatoriosFiscal,
+  validaCampoNumerico,
   montarRespostaRetorno,
 };

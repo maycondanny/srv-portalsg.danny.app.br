@@ -1,5 +1,7 @@
 import getDbInstance from '@db/db';
 import Imagem from '../models/imagem.model';
+import ErroException from '@exceptions/erro.exception';
+import _ from 'lodash';
 
 async function cadastrar(imagens: Imagem[]) {
   const db = getDbInstance();
@@ -10,7 +12,8 @@ async function cadastrar(imagens: Imagem[]) {
       return id;
     });
   } catch (error) {
-    throw error;
+    console.log(error);
+    throw new ErroException('Não foi possivel cadastrar as imagens.');
   } finally {
     await db.destroy();
   }
@@ -23,7 +26,22 @@ async function obterPorId(ecommerceId: number): Promise<Imagem[]> {
     return await db.select('*').from('produtos_ecommerce_imagens AS p').where('p.ecommerce_id', '=', ecommerceId);
   } catch (erro) {
     console.error(erro);
-    throw new Error('Não foi possivel obter as imagens.');
+    throw new ErroException('Não foi possivel obter as imagens.');
+  } finally {
+    db.destroy();
+  }
+}
+
+async function remover(ecommerceId: number): Promise<void> {
+  const db = getDbInstance();
+
+  try {
+    await db.transaction(async (trx) => {
+      await trx.into('produtos_ecommerce_imagens AS p').where('p.ecommerce_id', '=', ecommerceId).del();
+    });
+  } catch (erro) {
+    console.error(erro);
+    throw new ErroException('Não foi possivel atualizar o produto no ecommerce');
   } finally {
     db.destroy();
   }
@@ -31,5 +49,6 @@ async function obterPorId(ecommerceId: number): Promise<Imagem[]> {
 
 export default {
   cadastrar,
-  obterPorId
+  obterPorId,
+  remover,
 };

@@ -1,5 +1,6 @@
 import getDbInstance from '@db/db';
 import Produto from '../models/produto.model';
+import ErroException from '@exceptions/erro.exception';
 
 async function cadastrar(produto: Produto) {
   const db = getDbInstance();
@@ -10,7 +11,7 @@ async function cadastrar(produto: Produto) {
       return id;
     });
   } catch (error) {
-    throw error;
+    throw new ErroException('Não foi possivel obter os produtos no ecommerce');
   } finally {
     await db.destroy();
   }
@@ -23,7 +24,27 @@ async function obterPorProdutoId(produtoId: number): Promise<Produto> {
     return await db.select('*').from('produtos_ecommerce AS p').where('p.produto_id', '=', produtoId).first();
   } catch (erro) {
     console.error(erro);
-    throw new Error('Não foi possivel obter os produtos.');
+    throw new ErroException('Não foi possivel obter os produtos no ecommerce');
+  } finally {
+    db.destroy();
+  }
+}
+
+async function atualizarPorProdutoId(produtoId: number, produto: Partial<Produto>): Promise<number> {
+  const db = getDbInstance();
+
+  try {
+    return await db.transaction(async (trx) => {
+      const [{ id }] = await trx
+        .update(produto)
+        .from('produtos_ecommerce AS p')
+        .where('p.produto_id', '=', produtoId)
+        .returning('id');
+      return id;
+    });
+  } catch (erro) {
+    console.error(erro);
+    throw new ErroException('Não foi possivel atualizar o produto no ecommerce');
   } finally {
     db.destroy();
   }
@@ -31,5 +52,6 @@ async function obterPorProdutoId(produtoId: number): Promise<Produto> {
 
 export default {
   cadastrar,
-  obterPorProdutoId
+  obterPorProdutoId,
+  atualizarPorProdutoId,
 };

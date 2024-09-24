@@ -70,10 +70,10 @@ function toDTO(produto: Produto): ProdutoDTO {
     icms_compra: produto.icms_compra,
     ipi: produto.ipi,
     pis_cofins: produto.pis_cofins,
-    descricao: produto.ecommerce.descricao,
-    caracteristica: produto.ecommerce.caracteristica,
-    modo_uso: produto.ecommerce.modo_uso,
-    imagens: produto.ecommerce.imagens,
+    descricao: produto.ecommerce?.descricao,
+    caracteristica: produto.ecommerce?.caracteristica,
+    modo_uso: produto.ecommerce?.modo_uso,
+    imagens: produto.ecommerce?.imagens,
     status: produto.status,
     fornecedor_id: produto.fornecedor_id
   };

@@ -6,10 +6,10 @@ import Ecommerce from './ecommerce.model';
 import numberUtil from '@utils/number.util';
 import Divergencia from './divergencia.model';
 
-export const CODIGO_REFERENCIA_FORNECEDOR_CACHE = 'CPF_CIPF';
-
 export const TAMANHO_DESCRICAO_ABREVIADA = 30;
 export const TAMANHO_DESCRICAO_CLASSIFICACAO = 128;
+
+export const CODIGO_REFERENCIA_FORNECEDOR_CACHE = 'CPF_CIPF';
 
 const ORIGEM_IMPORTACAO_DIRETA = 'ESTRANGEIRA_IMPORTACAO_DIRETA';
 const ORIGEM_MERCADO_INTERNO = 'ESTRANGEIRA_MERCADO_INTERNO';
@@ -77,7 +77,7 @@ export interface Produto {
   divergencias?: Divergencia[];
   eans: Ean[];
   duns: Ean[];
-  ecommerce: Ecommerce;
+  ecommerce?: Ecommerce;
   produto_arius?: number;
   cadastro_arius?: Date;
   comprador?: number;

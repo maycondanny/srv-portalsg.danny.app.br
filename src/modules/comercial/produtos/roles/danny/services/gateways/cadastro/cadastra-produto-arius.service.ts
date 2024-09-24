@@ -1,4 +1,4 @@
-import produtoModel, { ECadastroStatus } from '@modules/comercial/produtos/models/produto.model';
+import produtoModel, { ECadastroStatus, Produto } from '@modules/comercial/produtos/models/produto.model';
 import _ from 'lodash';
 import produtoEanService from '@services/hub/produtos/produto-ean.service';
 import ariusProdutoEanService from '@services/arius/comercial/produto-ean.service';
@@ -7,20 +7,28 @@ import eanModel, { EMedidas } from '@modules/comercial/produtos/models/ean.model
 import ariusProdutoService from '@services/arius/comercial/produto.service';
 import produtoService from '@modules/comercial/produtos/services/produto.service';
 import aprovacaoService from '../../aprovacao.service';
-import ProdutoCadastroDTO from '../../../dtos/produto-cadastro.dto';
 import produtoCompradorService from '@services/arius/comercial/produto-comprador.service';
+import validacaoService from '../../validacao.service';
+import ErroException from '@exceptions/erro.exception';
 
-async function cadastrar(produto: ProdutoCadastroDTO) {
+async function cadastrar(produto: Produto) {
+  const validacao = await validacaoService.validarCadastro(produto);
+
+  if (!validacao.valido) {
+    throw new ErroException('Campos obrigatórios não preenchidos, verifique', validacao);
+  }
+
   const codigos = produtoModel.obterCodigosEans(produto.eans);
   const eansExistem = await produtoEanService.obterPorCodigos(codigos);
 
-  if (numberUtil.isMaiorZero(eansExistem.length)) throw new Error('Já possui EANs vinculados para este produto, verifique');
+  if (numberUtil.isMaiorZero(eansExistem.length))
+    throw new ErroException('Já possui EANs vinculados para este produto, verifique');
 
   const { id, dataCadastro } = await cadastrarArius(produto);
 
   const produtoArius = id;
 
-  if (!produtoArius) throw new Error('Não foi possivel aprovar o produto');
+  if (!produtoArius) throw new ErroException('Não foi possivel aprovar o produto');
 
   await cadastrarEans(produtoArius, produto);
   await inserirComprador(produtoArius, produto);
@@ -43,11 +51,11 @@ async function cadastrar(produto: ProdutoCadastroDTO) {
   await atualizarDados(produtoArius, dataCadastro, produto);
 
   return {
-    produtoId: produtoArius
-  }
+    produtoId: produtoArius,
+  };
 }
 
-async function cadastrarArius(produto: ProdutoCadastroDTO) {
+async function cadastrarArius(produto: Produto) {
   try {
     const { id, dataCadastro } = await ariusProdutoService.cadastrar({
       descricao: produto.descritivo,
@@ -106,11 +114,11 @@ async function cadastrarArius(produto: ProdutoCadastroDTO) {
     return { id, dataCadastro };
   } catch (erro) {
     console.log(erro);
-    throw new Error(erro.response.data.processedException?.causeMessage);
+    throw new ErroException(erro.response.data.processedException?.causeMessage);
   }
 }
 
-async function inserirComprador(produtoId: number, produto: ProdutoCadastroDTO) {
+async function inserirComprador(produtoId: number, produto: Produto) {
   try {
     await produtoCompradorService.cadastrar({
       pk: {
@@ -120,11 +128,11 @@ async function inserirComprador(produtoId: number, produto: ProdutoCadastroDTO) 
     });
   } catch (erro) {
     console.log(erro);
-    throw new Error(erro.response.data.processedException?.causeMessage);
+    throw new ErroException(erro.response.data.processedException?.causeMessage);
   }
 }
 
-async function cadastrarEans(produtoAriusId: number, produto: ProdutoCadastroDTO) {
+async function cadastrarEans(produtoAriusId: number, produto: Produto) {
   try {
     const resultado = _.map(produto.eans, async (ean) => {
       let dados: any = {
@@ -153,11 +161,11 @@ async function cadastrarEans(produtoAriusId: number, produto: ProdutoCadastroDTO
     await Promise.all(resultado);
   } catch (erro) {
     console.log(erro);
-    throw new Error(erro.response.data.processedException?.causeMessage);
+    throw new ErroException(erro.response.data.processedException?.causeMessage);
   }
 }
 
-async function atualizarDados(produtoAriusId: number, dataCadastroArius: Date, produto: ProdutoCadastroDTO) {
+async function atualizarDados(produtoAriusId: number, dataCadastroArius: Date, produto: Produto) {
   try {
     await produtoService.atualizar({
       id: produto.id,
@@ -191,7 +199,7 @@ async function atualizarDados(produtoAriusId: number, dataCadastroArius: Date, p
     });
   } catch (erro) {
     console.log(erro);
-    throw new Error('Ocorreu um erro ao cadastrar o produto na base.');
+    throw new ErroException('Ocorreu um erro ao cadastrar o produto na base.');
   }
 }
 

@@ -3,6 +3,7 @@ import Produto from '../models/produto.model';
 import produtoRepository from '../repositories/produto.repository';
 import eanService from './ean.service';
 import imagemService from './imagem.service';
+import numberUtil from '@utils/number.util';
 
 async function cadastrar(produto: Produto) {
   try {
@@ -14,7 +15,7 @@ async function cadastrar(produto: Produto) {
     await imagemService.cadastrar(ecommerceId, imagens);
   } catch (erro) {
     console.error(erro);
-    console.log('Nao foi possivel cadastrar no ecommerce');
+    console.log('Não foi possivel cadastrar no ecommerce');
     throw erro;
   }
 }
@@ -28,7 +29,26 @@ async function obterPorProdutoId(produtoId: number) {
     return { ...produto, eans, imagens };
   } catch (erro) {
     console.error(erro);
-    console.log('Nao foi possivel obter o produto');
+    console.log('Não foi possivel obter o produto');
+    throw erro;
+  }
+}
+
+async function atualizarPorProdutoId(produtoId: number, produto: Partial<Produto>) {
+  try {
+    const eans = produto.eans;
+    const imagens = produto.imagens;
+    const produtoTratado = _.omit(produto, ['eans', 'imagens']) as Produto;
+    const ecommerceId = await produtoRepository.atualizarPorProdutoId(produtoId, produtoTratado);
+    if (numberUtil.isMaiorZero(imagens.length)) {
+      await imagemService.atualizar(ecommerceId, imagens);
+    }
+    if (numberUtil.isMaiorZero(eans.length)) {
+      await eanService.atualizar(ecommerceId, eans);
+    }
+  } catch (erro) {
+    console.error(erro);
+    console.log('Não foi possivel atualizar no ecommerce');
     throw erro;
   }
 }
@@ -36,4 +56,5 @@ async function obterPorProdutoId(produtoId: number) {
 export default {
   cadastrar,
   obterPorProdutoId,
+  atualizarPorProdutoId,
 };

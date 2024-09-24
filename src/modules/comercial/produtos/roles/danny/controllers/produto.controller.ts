@@ -13,33 +13,41 @@ async function obterTodos(req: Request, res: Response<ResponseDTO<CapaProdutoRes
   try {
     const produtos = await produtoService.obterTodos();
     return res.status(httpStatusEnum.Status.SUCESSO).json({
-      dados: produtos
+      dados: produtos,
     });
   } catch (error) {
     next(error);
   }
 }
 
-async function obterTodosPorFornecedor(req: Request<{}, {}, {}, ProdutoFornecedorRequest>, res: Response<ResponseDTO<ProdutoFornecedorResponse>>, next: NextFunction) {
+async function obterTodosPorFornecedor(
+  req: Request<{}, {}, {}, ProdutoFornecedorRequest>,
+  res: Response<ResponseDTO<ProdutoFornecedorResponse>>,
+  next: NextFunction
+) {
   try {
     const { fornecedorId, role } = req.query;
     const produtos = await produtoService.obterTodosPorFornecedor(fornecedorId, role);
     return res.status(httpStatusEnum.Status.SUCESSO).json({
-      dados: produtos
+      dados: produtos,
     });
   } catch (error) {
     next(error);
   }
 }
 
-async function aprovar(req: Request<{}, {}, AprovacaoRequestDTO>, res: Response<ResponseDTO<AprovacaoResponseDTO>>, next: NextFunction) {
+async function aprovar(
+  req: Request<{}, {}, AprovacaoRequestDTO>,
+  res: Response<ResponseDTO<AprovacaoResponseDTO>>,
+  next: NextFunction
+) {
   try {
     const { produtoId } = await aprovacaoService.aprovar(req.body);
     return res.status(httpStatusEnum.Status.SUCESSO).json({
-      mensagem: "Produto aprovado com sucesso",
+      mensagem: 'Produto aprovado com sucesso',
       dados: {
-        produtoId
-      }
+        produtoId,
+      },
     });
   } catch (error) {
     next(error);
@@ -48,10 +56,10 @@ async function aprovar(req: Request<{}, {}, AprovacaoRequestDTO>, res: Response<
 
 async function atualizar(req: Request, res: Response<ResponseDTO>, next: NextFunction) {
   try {
-    // TODO: Fazer a atualização do produto com base na role 'cadastro' ou 'fiscal'
-    //await produtoService.atualizar(req.body);
+    const { role, produto } = req.body;
+    await produtoService.atualizar(role, produto);
     return res.status(httpStatusEnum.Status.SUCESSO).json({
-      mensagem: "Produto atualizado com sucesso"
+      mensagem: 'Produto atualizado com sucesso',
     });
   } catch (error) {
     next(error);
@@ -62,5 +70,5 @@ export default {
   obterTodos,
   obterTodosPorFornecedor,
   aprovar,
-  atualizar
+  atualizar,
 };

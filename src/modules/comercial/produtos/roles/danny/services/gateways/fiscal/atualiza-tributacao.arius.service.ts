@@ -1,4 +1,4 @@
-import { EFiscalStatus } from '@modules/comercial/produtos/models/produto.model';
+import { EFiscalStatus, Produto } from '@modules/comercial/produtos/models/produto.model';
 import ProdutoAtualizacao from '../../../dtos/produto.dto';
 import aprovacaoService from '../../aprovacao.service';
 import Divergencia from '@modules/comercial/produtos/models/divergencia.model';
@@ -9,16 +9,24 @@ import tabelaFornecedorUf from '@services/arius/comercial/tabela-fornecedor-uf';
 import tabelaFornecedor from '@services/arius/comercial/tabela-fornecedor';
 import ariusProdutoArius from '@services/arius/comercial/produto.service';
 import _ from 'lodash';
-import ProdutoFiscalDTO from '../../../dtos/produto-fiscal.dto';
+import ErroException from '@exceptions/erro.exception';
+import validacaoService from '../../validacao.service';
+import numberUtil from '@utils/number.util';
 
-const atualizar = async (produto: ProdutoFiscalDTO, produtoAtualizacao: Partial<ProdutoAtualizacao>) => {
+const atualizar = async (produto: Produto, produtoAtualizacao: Partial<Produto>) => {
+  const validacao = await validacaoService.validarFiscal(_.merge({}, produto, produtoAtualizacao));
+
+  if (!validacao.valido) {
+    throw new ErroException('Campos obrigatórios não preenchidos, verifique', validacao);
+  }
+
   if (
     !aprovacaoService.validarSituacaoTributaria({
       st_compra: produtoAtualizacao.st_compra,
       tipo_tributacao: produtoAtualizacao.tipo_tributacao,
     })
   ) {
-    throw new Error('Situação tributária está inconsistente para a tributação. Por favor, verifique.');
+    throw new ErroException('Situação tributária está inconsistente para a tributação. Por favor, verifique.');
   }
   await atualizarProdutoArius(produto, produtoAtualizacao);
   await atualizarTabelaFornecedor(produto, produtoAtualizacao);
@@ -30,7 +38,7 @@ const atualizar = async (produto: ProdutoFiscalDTO, produtoAtualizacao: Partial<
   };
 };
 
-const atualizarProdutoArius = async (produto: ProdutoFiscalDTO, produtoAtualizacao: Partial<ProdutoAtualizacao>) => {
+const atualizarProdutoArius = async (produto: Produto, produtoAtualizacao: Partial<Produto>) => {
   try {
     const campos = {
       ...(produtoAtualizacao.classificacao_fiscal && {
@@ -50,17 +58,14 @@ const atualizarProdutoArius = async (produto: ProdutoFiscalDTO, produtoAtualizac
     });
   } catch (erro) {
     console.log(erro);
-    throw new Error(erro.response.data.processedException?.causeMessage);
+    throw new ErroException(erro.response.data.processedException?.causeMessage);
   }
 };
 
-const atualizarTabelaFornecedor = async (
-  produto: ProdutoFiscalDTO,
-  produtoAtualizacao: Partial<ProdutoAtualizacao>
-) => {
+const atualizarTabelaFornecedor = async (produto: Produto, produtoAtualizacao: Partial<ProdutoAtualizacao>) => {
   try {
     const campos = {
-      ...(produtoAtualizacao.ipi && { ipi: produtoAtualizacao.ipi }),
+      ...(numberUtil.isMaiorOuIgualZero(produtoAtualizacao.ipi) && { ipi: produtoAtualizacao.ipi }),
     };
 
     if (objectUtil.isVazio(campos)) return;
@@ -86,21 +91,18 @@ const atualizarTabelaFornecedor = async (
     });
   } catch (erro) {
     console.log(erro);
-    throw new Error(erro.response.data.processedException?.causeMessage);
+    throw new ErroException(erro.response.data.processedException?.causeMessage);
   }
 };
 
-const atualizarTabelaFornecedorUF = async (
-  produto: ProdutoFiscalDTO,
-  produtoAtualizacao: Partial<ProdutoAtualizacao>
-) => {
+const atualizarTabelaFornecedorUF = async (produto: Produto, produtoAtualizacao: Partial<ProdutoAtualizacao>) => {
   try {
     const campos = {
       ...(produtoAtualizacao.st_compra && {
         situacaoTributaria: { id: produtoAtualizacao.st_compra },
         tributacao: produtoAtualizacao.tipo_tributacao,
       }),
-      ...(produtoAtualizacao.icms_compra && {
+      ...(numberUtil.isMaiorOuIgualZero(produtoAtualizacao.icms_compra) && {
         icms: produtoAtualizacao.icms_compra,
       }),
     };
@@ -127,17 +129,19 @@ const atualizarTabelaFornecedorUF = async (
       },
       estado: {
         id: siglaEstadoModel.obterNome(produto.estado),
-        icms: produto.icms_compra,
+        icms: numberUtil.isMaiorOuIgualZero(produtoAtualizacao.icms_compra)
+          ? produtoAtualizacao.icms_compra
+          : produto.icms_compra,
       },
       ...campos,
     });
   } catch (erro) {
     console.log(erro);
-    throw new Error(erro.response.data.processedException?.causeMessage);
+    throw new ErroException(erro.response.data.processedException?.causeMessage);
   }
 };
 
-const atualizarDados = async (produto: ProdutoFiscalDTO, produtoAtualizacao: Partial<ProdutoAtualizacao>) => {
+const atualizarDados = async (produto: Produto, produtoAtualizacao: Partial<Produto>) => {
   try {
     const divergencia: Divergencia = produto.divergencias[0];
     const campos = {
@@ -158,7 +162,7 @@ const atualizarDados = async (produto: ProdutoFiscalDTO, produtoAtualizacao: Par
     });
   } catch (erro) {
     console.log(erro);
-    throw new Error('Ocorreu um erro ao atualizar na base as tributações do produto.');
+    throw new ErroException('Ocorreu um erro ao atualizar na base as tributações do produto.');
   }
 };
 

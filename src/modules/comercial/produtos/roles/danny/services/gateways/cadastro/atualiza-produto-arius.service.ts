@@ -8,15 +8,22 @@ import ariusProdutoFornecedor from '@services/arius/comercial/produto-fornecedor
 import aprovacaoService, { CST_SUBSTITUIDO, TRIBUTACAO_SUBSTITUIDO } from '../../aprovacao.service';
 import _ from 'lodash';
 import objectUtil from '@utils/object.util';
-import ProdutoCadastroDTO from '../../../dtos/produto-cadastro.dto';
 import produtoCompradorService from '@services/arius/comercial/produto-comprador.service';
+import ErroException from '@exceptions/erro.exception';
+import validacaoService from '../../validacao.service';
 
-async function atualizar(produto: ProdutoCadastroDTO, produtoAtualizacao: Partial<ProdutoCadastroDTO>) {
-  if (!produto.produto_arius) throw new Error('Produto não encontrado!');
-  if (!produto.fornecedor_id) throw new Error('Fornecedor não encontrado!');
+async function atualizar(produto: Produto, produtoAtualizacao: Partial<Produto>) {
+  const validacao = await validacaoService.validarCadastro(_.merge({}, produto, produtoAtualizacao));
+
+  if (!validacao.valido) {
+    throw new ErroException('Campos obrigatórios não preenchidos, verifique', validacao);
+  }
+
+  if (!produto.produto_arius) throw new ErroException('Produto não encontrado!');
+  if (!produto.fornecedor_id) throw new ErroException('Fornecedor não encontrado!');
 
   if (produtoAtualizacao.depto <= 0 || !validarDepartamento(produtoAtualizacao)) {
-    throw new Error('Deve ser informado o departamento, seção, grupo e subgrupo do produto.');
+    throw new ErroException('Deve ser informado o departamento, seção, grupo e subgrupo do produto.');
   }
 
   const produtoId = produto.produto_arius;
@@ -28,7 +35,9 @@ async function atualizar(produto: ProdutoCadastroDTO, produtoAtualizacao: Partia
   });
 
   if (objectUtil.isVazio(comprador)) {
-    throw new Error(`O comprador ${compradorCadastrado} não existe para o produto ${produtoId} no ERP, verifique.`);
+    throw new ErroException(
+      `O comprador ${compradorCadastrado} não existe para o produto ${produtoId} no ERP, verifique.`
+    );
   }
 
   const produtoFornecedor = await ariusProdutoFornecedor.obter({
@@ -78,7 +87,7 @@ async function atualizar(produto: ProdutoCadastroDTO, produtoAtualizacao: Partia
   };
 }
 
-function validarDepartamento(produtoAtualizacao: Partial<ProdutoCadastroDTO>): boolean {
+function validarDepartamento(produtoAtualizacao: Partial<Produto>): boolean {
   return (
     typeof produtoAtualizacao.secao !== undefined &&
     typeof produtoAtualizacao.grupo !== undefined &&
@@ -86,7 +95,7 @@ function validarDepartamento(produtoAtualizacao: Partial<ProdutoCadastroDTO>): b
   );
 }
 
-async function atualizarComprador(produto: ProdutoCadastroDTO, produtoAtualizacao: Partial<ProdutoCadastroDTO>) {
+async function atualizarComprador(produto: Produto, produtoAtualizacao: Partial<Produto>) {
   try {
     const produtoId = produto.produto_arius;
     const compradorCadastrado = produto.divergencias[0].comprador;
@@ -102,13 +111,13 @@ async function atualizarComprador(produto: ProdutoCadastroDTO, produtoAtualizaca
         produtoId,
       },
     });
-  } catch (error) {
-    console.log(error);
-    throw new Error(error.response.data.processedException?.causeMessage);
+  } catch (ErroException) {
+    console.log(ErroException);
+    throw new ErroException(ErroException.response.data.processedException?.causeMessage);
   }
 }
 
-async function atualizarArius(produto: ProdutoCadastroDTO, produtoAtualizacao: Partial<ProdutoCadastroDTO>) {
+async function atualizarArius(produto: Produto, produtoAtualizacao: Partial<Produto>) {
   const campos = {
     ...(produtoAtualizacao.descritivo && {
       descricao: produtoAtualizacao.descritivo,
@@ -164,14 +173,11 @@ async function atualizarArius(produto: ProdutoCadastroDTO, produtoAtualizacao: P
     });
   } catch (erro) {
     console.log(erro);
-    throw new Error(erro.response.data.processedException?.causeMessage);
+    throw new ErroException(erro.response.data.processedException?.causeMessage);
   }
 }
 
-async function atualizarTabelaFornecedorUF(
-  produto: ProdutoCadastroDTO,
-  produtoAtualizacao: Partial<ProdutoCadastroDTO>
-) {
+async function atualizarTabelaFornecedorUF(produto: Produto, produtoAtualizacao: Partial<Produto>) {
   const campos = {
     ...(produtoAtualizacao.preco && { custo: produtoAtualizacao.preco }),
     ...(produtoAtualizacao.desconto_p && {
@@ -211,11 +217,11 @@ async function atualizarTabelaFornecedorUF(
     });
   } catch (erro) {
     console.log(erro);
-    throw new Error(erro.response.data.processedException?.causeMessage);
+    throw new ErroException(erro.response.data.processedException?.causeMessage);
   }
 }
 
-async function atualizarDados(produto: ProdutoCadastroDTO, produtoAtualizacao: Partial<ProdutoCadastroDTO>) {
+async function atualizarDados(produto: Produto, produtoAtualizacao: Partial<Produto>) {
   try {
     const divergencia = produto.divergencias[0];
     const campos = {
@@ -251,7 +257,7 @@ async function atualizarDados(produto: ProdutoCadastroDTO, produtoAtualizacao: P
     });
   } catch (erro) {
     console.log(erro);
-    throw new Error('Ocorreu um erro ao atualizar o produto na base.');
+    throw new ErroException('Ocorreu um erro ao atualizar o produto na base.');
   }
 }
 

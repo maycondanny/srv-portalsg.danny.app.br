@@ -2,7 +2,7 @@ import httpStatusEnum from '@enums/http-status.enum';
 
 export default class ErroException<T> extends Error {
   public readonly codigo: number;
-  public readonly dados: any;
+  public readonly dados: T;
 
   constructor(mensagem: string, dados?: T, codigo: number = httpStatusEnum.Status.ERRO_INTERNO_SERVIDOR) {
     super(mensagem);
