@@ -42,7 +42,7 @@ function validarEan(produto: Produto): string[] {
   const apenasNumeros = produto.eans.concat(produto.duns).every((ean) => REGEX_APENAS_NUMEROS.test(ean.codigo));
 
   if (!apenasNumeros) {
-    mensagens.push('É permitido apenas números no códigos EANs e DUNs');
+    mensagens.push('É permitido apenas números nos códigos EANs e DUNs');
     return mensagens;
   }
 
@@ -86,6 +86,9 @@ function validarCaixaDun(produto: Produto): string[] {
 
 function validarCamposObrigatorios(produto: Produto): string[] {
   const mensagens = [];
+  if (_.isEmpty(produto.descritivo_pdv)) {
+    mensagens.push('DESCRIÇÃO REDUZIDA não informada');
+  }
   if (_.isEmpty(produto.descritivo)) {
     mensagens.push('DESCRIÇÃO COMPLETA não informada');
   }

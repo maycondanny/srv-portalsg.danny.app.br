@@ -83,6 +83,7 @@ export interface Produto {
   comprador?: number;
   categoria_fiscal?: string;
   familia?: number;
+  created_at?: Date;
 }
 
 function formatarTexto(produto: Produto): Produto {
@@ -120,7 +121,7 @@ function obterDuns(eans: Ean[]) {
 }
 
 function possuiDivergencias(produto: Produto) {
-  return numberUtil.isMaiorZero(produto.divergencias.length);
+  return numberUtil.isMaiorZero(produto.divergencias?.length);
 }
 
 function ehTipoCaixa(produto: Produto): boolean {

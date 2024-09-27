@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import httpStatusEnum from '@enums/http-status.enum';
 import produtoService from '../services/produto.service';
-import ProdutoFornecedorRequest from '../dtos/produto-fornecedor-request.dto';
-import ProdutoFornecedorResponse from '../dtos/produto-fornecedor-response.dto';
+import ProdutoFornecedorRequestDTO from '../dtos/produto-fornecedor-request.dto';
+import ProdutoFornecedorResponseDTO from '../dtos/produto-fornecedor-response.dto';
 import CapaProdutoResponseDTO from '../dtos/capa-produto-response.dto';
 import aprovacaoService from '../services/aprovacao.service';
 import AprovacaoRequestDTO from '../dtos/aprovacao-request.dto';
@@ -21,13 +21,13 @@ async function obterTodos(req: Request, res: Response<ResponseDTO<CapaProdutoRes
 }
 
 async function obterTodosPorFornecedor(
-  req: Request<{}, {}, {}, ProdutoFornecedorRequest>,
-  res: Response<ResponseDTO<ProdutoFornecedorResponse>>,
+  req: Request<{}, {}, {}, ProdutoFornecedorRequestDTO>,
+  res: Response<ResponseDTO<ProdutoFornecedorResponseDTO>>,
   next: NextFunction
 ) {
   try {
-    const { fornecedorId, role } = req.query;
-    const produtos = await produtoService.obterTodosPorFornecedor(fornecedorId, role);
+    const { id, role } = req.query;
+    const produtos = await produtoService.obterTodosPorFornecedor(id, role);
     return res.status(httpStatusEnum.Status.SUCESSO).json({
       dados: produtos,
     });
@@ -42,7 +42,8 @@ async function aprovar(
   next: NextFunction
 ) {
   try {
-    const { produtoId } = await aprovacaoService.aprovar(req.body);
+    const { role, produto, dadosAtualizacao }: AprovacaoRequestDTO = req.body;
+    const { produtoId } = await aprovacaoService.aprovar({ role, produto, dadosAtualizacao });
     return res.status(httpStatusEnum.Status.SUCESSO).json({
       mensagem: 'Produto aprovado com sucesso',
       dados: {

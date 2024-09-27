@@ -10,6 +10,7 @@ async function obterPorProdutoId(produtoId: number): Promise<Ean[]> {
       .into('produtos_eans as p')
       .where('p.produto_id', '=', produtoId);
   } catch (error) {
+    console.error(error);
     throw error;
   } finally {
     await db.destroy();
@@ -26,6 +27,7 @@ async function obterPorCodigos(codigos: string[]) {
       .join('produtos as p', 'p.id', 'e.produto_id')
       .whereIn('e.codigo_ean', codigos);
   } catch (error) {
+    console.error(error);
     throw error;
   } finally {
     await db.destroy();
@@ -39,6 +41,7 @@ async function cadastrarEmlote(eans: Partial<Ean>[]) {
       await trx.insert(eans).into('produtos_eans');
     });
   } catch (error) {
+    console.error(error);
     throw error;
   } finally {
     await db.destroy();
@@ -54,8 +57,9 @@ async function atualizar(eans: Ean[]) {
         await trx.update({ codigo_ean: ean.codigo }).from('produtos_eans').where('id', '=', ean.id);
       }
     });
-  } catch (erro) {
-    throw erro;
+  } catch (error) {
+    console.error(error);
+    throw error;
   } finally {
     await db.destroy();
   }

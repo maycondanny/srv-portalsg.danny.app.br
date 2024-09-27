@@ -1,12 +1,12 @@
-import ariusProdutoService from "@services/arius/comercial/produto.service";
+import ariusProdutoService from "@modules/integradores/arius/comercial/services/produto.service";
 import aprovacaoService from "../../aprovacao.service";
-import tabelaFornecedor from "@services/arius/comercial/tabela-fornecedor";
-import tabelaFornecedorUf from "@services/arius/comercial/tabela-fornecedor-uf";
-import siglaEstadoModel from "@models/sigla-estado.model";
+import tabelaFornecedor from "@modules/integradores/arius/comercial/services/tabela-fornecedor";
+import tabelaFornecedorUf from "@modules/integradores/arius/comercial/services/tabela-fornecedor-uf";
 import produtoModel, { EFiscalStatus, Produto } from "@modules/comercial/produtos/models/produto.model";
 import produtoService from "@modules/comercial/produtos/services/produto.service";
 import validacaoService from "../../validacao.service";
 import ErroException from "@exceptions/erro.exception";
+import estadoModel from "@modules/core/models/estado.model";
 
 async function cadastrar(produto: Produto) {
   const validacao = await validacaoService.validarFiscal(produto);
@@ -78,7 +78,7 @@ async function atualizarTabelaFornecedorUF(produto: Produto) {
   try {
     await tabelaFornecedorUf.atualizar({
       pk: {
-        estadoId: siglaEstadoModel.obterNome(produto.estado),
+        estadoId: estadoModel.obterNome(produto.estado),
         produtoId: produto.produto_arius,
         fornecedorId: produto.fornecedor_id,
       },
@@ -100,7 +100,7 @@ async function atualizarTabelaFornecedorUF(produto: Produto) {
       situacaoTributaria: { id: produto.st_compra },
       icms: produto.icms_compra,
       estado: {
-        id: siglaEstadoModel.obterNome(produto.estado),
+        id: estadoModel.obterNome(produto.estado),
         icms: produto.icms_compra,
       },
     });

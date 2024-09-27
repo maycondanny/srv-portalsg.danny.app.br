@@ -1,15 +1,15 @@
+import ariusProdutoEanService from '@modules/integradores/arius/comercial/services/produto-ean.service';
+import ariusProdutoService from '@modules/integradores/arius/comercial/services/produto.service';
 import produtoModel, { ECadastroStatus, Produto } from '@modules/comercial/produtos/models/produto.model';
 import _ from 'lodash';
-import produtoEanService from '@services/hub/produtos/produto-ean.service';
-import ariusProdutoEanService from '@services/arius/comercial/produto-ean.service';
 import numberUtil from '@utils/number.util';
 import eanModel, { EMedidas } from '@modules/comercial/produtos/models/ean.model';
-import ariusProdutoService from '@services/arius/comercial/produto.service';
 import produtoService from '@modules/comercial/produtos/services/produto.service';
 import aprovacaoService from '../../aprovacao.service';
-import produtoCompradorService from '@services/arius/comercial/produto-comprador.service';
 import validacaoService from '../../validacao.service';
 import ErroException from '@exceptions/erro.exception';
+import produtoCompradorService from '@modules/integradores/arius/comercial/services/produto-comprador.service';
+import produtoEanService from '@modules/integradores/hub/produtos/services/produto-ean.service';
 
 async function cadastrar(produto: Produto) {
   const validacao = await validacaoService.validarCadastro(produto);

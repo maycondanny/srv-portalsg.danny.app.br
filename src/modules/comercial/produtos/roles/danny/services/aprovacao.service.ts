@@ -1,3 +1,4 @@
+import ariusProdutoFornecedor from '@modules/integradores/arius/comercial/services/produto-fornecedor';
 import produtoModel, {
   ECadastroStatus,
   EFiscalStatus,
@@ -5,19 +6,18 @@ import produtoModel, {
   Produto,
 } from '@modules/comercial/produtos/models/produto.model';
 import AprovacaoRequestDTO from '../dtos/aprovacao-request.dto';
-import tabelaFornecedorUf from '@services/arius/comercial/tabela-fornecedor-uf';
 import cadastraProdutoAriusService from './gateways/cadastro/cadastra-produto-arius.service';
 import cadastraTributacaoAriusService from './gateways/fiscal/cadastra-tributacao-arius.service';
 import atualizaProdutoAriusService from './gateways/cadastro/atualiza-produto-arius.service';
-import ariusProdutoFornecedor from '@services/arius/comercial/produto-fornecedor';
-import siglaEstadoModel from '@models/sigla-estado.model';
-import tabelaFornecedor from '@services/arius/comercial/tabela-fornecedor';
 import { EMedidas } from '@modules/comercial/produtos/models/ean.model';
 import objectUtil from '@utils/object.util';
 import ErroException from '@exceptions/erro.exception';
 import atualizaTributacaoAriusService from './gateways/fiscal/atualiza-tributacao.arius.service';
 import produtoMapper from '../mappers/produto.mapper';
 import AprovacaoResponseDTO from '../dtos/aprovacao-response.dto';
+import tabelaFornecedor from '@modules/integradores/arius/comercial/services/tabela-fornecedor';
+import tabelaFornecedorUf from '@modules/integradores/arius/comercial/services/tabela-fornecedor-uf';
+import estadoModel from '@modules/core/models/estado.model';
 
 export const LINHA_GERAL = 1;
 
@@ -57,13 +57,10 @@ const aprovarFiscal = async (produto: Produto, produtoAtualizacao: Partial<Produ
 };
 
 const validarSituacaoTributaria = ({ st_compra, tipo_tributacao }): boolean => {
-  if (st_compra || tipo_tributacao) {
-    if (!st_compra) throw new Error('Situação tributária do produto não informada.');
-    if (!tipo_tributacao) throw new Error('Tipo situação tributária do produto não informada.');
-    const tipoTributacao = produtoModel.obterTipoTributacao(st_compra);
-    return tipoTributacao === tipo_tributacao;
-  }
-  return true;
+  if (!st_compra) throw new Error('Situação tributária do produto não informada.');
+  if (!tipo_tributacao) throw new Error('Tipo situação tributária do produto não informada.');
+  const tipoTributacao = produtoModel.obterTipoTributacao(st_compra);
+  return tipoTributacao === tipo_tributacao;
 };
 
 async function inserirProdutoFornecedor({ produtoId, fornecedorId, referencia }) {
@@ -119,7 +116,7 @@ async function inserirTabelaFornecedorUF({ estado, produtoId, fornecedorId, prec
   try {
     await tabelaFornecedorUf.cadastrar({
       pk: {
-        estadoId: siglaEstadoModel.obterNome(estado),
+        estadoId: estadoModel.obterNome(estado),
         produtoId: produtoId,
         fornecedorId,
       },
@@ -132,7 +129,7 @@ async function inserirTabelaFornecedorUF({ estado, produtoId, fornecedorId, prec
       produtoEstado: {
         pk: {
           produtoId: produtoId,
-          estadoId: siglaEstadoModel.obterNome(estado),
+          estadoId: estadoModel.obterNome(estado),
         },
       },
       custo: preco,
@@ -140,7 +137,7 @@ async function inserirTabelaFornecedorUF({ estado, produtoId, fornecedorId, prec
       situacaoTributaria: { id: CST_SUBSTITUIDO },
       icms: 0,
       estado: {
-        id: siglaEstadoModel.obterNome(estado),
+        id: estadoModel.obterNome(estado),
         icms: 0,
       },
       descontoPercentual: desconto_p,

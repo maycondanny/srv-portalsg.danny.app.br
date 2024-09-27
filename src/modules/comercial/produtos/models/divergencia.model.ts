@@ -1,5 +1,5 @@
 export default interface Divergencia {
-  produto_id: string;
+  produto_id: number;
   marca: number;
   descritivo: string;
   descritivo_pdv: string;

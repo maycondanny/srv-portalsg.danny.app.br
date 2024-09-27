@@ -1,9 +1,9 @@
 import stringUtil from '@utils/string.util';
 import produtoModel, { CODIGOS_PIS_COFINS, Produto } from '@modules/comercial/produtos/models/produto.model';
 import { REGEX_CONTEM_LETRA_OU_NUMERO, REGEX_NAO_NUMERICOS, REGEX_TEXTO_VAZIO } from '@utils/regex.util';
-import { ESiglaEstado } from '@models/sigla-estado.model';
 import _ from 'lodash';
 import ProdutoImportacaoDTO from '../dtos/produto-importacao.dto';
+import { ESiglaEstado } from '@modules/core/models/estado.model';
 
 const TAMANHO_SITUACAO_TRIBUTARIA = 3;
 

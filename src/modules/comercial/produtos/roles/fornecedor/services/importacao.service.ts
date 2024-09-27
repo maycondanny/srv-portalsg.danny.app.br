@@ -36,7 +36,11 @@ async function importar({ planilha, fornecedorId }: ImportacaoRequestDTO): Promi
   }
 
   if (numberUtil.isMaiorZero(produtosInvalidos.length)) {
-    throw new ErroException('Erro ao cadastrar novo produto', produtosInvalidos, httpStatusEnum.Status.ERRO_REQUISICAO);
+    throw new ErroException(
+      'Ocorreu um erro ao cadastrar os produtos',
+      produtosInvalidos,
+      httpStatusEnum.Status.ERRO_REQUISICAO
+    );
   }
 
   for (const produto of produtos) {

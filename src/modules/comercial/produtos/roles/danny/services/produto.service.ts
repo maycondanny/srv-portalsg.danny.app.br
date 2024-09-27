@@ -7,9 +7,7 @@ import produtoModel, {
 import CapaProdutoResponseDTO from '../dtos/capa-produto-response.dto';
 import produtoDannyRepository from '../repositories/produto.repository';
 import _ from 'lodash';
-import fornecedorService from '@services/fornecedor.service';
 import cacheUtil, { ETempoExpiracao } from '@utils/cache.util';
-import Fornecedor from '@models/fornecedor.model';
 import produtoRepository from '@modules/comercial/produtos/repositories/produto.repository';
 import divergenciasService from './divergencias.service';
 import ProdutoFornecedorResponse from '../dtos/produto-fornecedor-response.dto';
@@ -19,11 +17,13 @@ import produtoMapper from '../mappers/produto.mapper';
 import ErroException from '@exceptions/erro.exception';
 import httpStatusEnum from '@enums/http-status.enum';
 import validacaoService from './validacao.service';
+import { Fornecedor } from '@modules/core/models/fornecedor.model';
+import fornecedorService from '@modules/core/services/fornecedor.service';
 
 async function obterTodosPorFornecedor(fornecedorId: number, role: ERole): Promise<ProdutoFornecedorResponse> {
   try {
     if (!fornecedorId) {
-      throw new Error('Fornecedor não encontrado.');
+      throw new Error('Fornecedor não encontrado');
     }
 
     const fornecedor = await buscarFornecedor(fornecedorId);
@@ -201,9 +201,9 @@ async function atualizar(role: ERole, produto: Produto) {
       estado: produto?.estado,
       comprador: produto?.comprador,
       categoria_fiscal: produto?.categoria_fiscal,
+      eans: produto.eans,
+      duns: produto.duns
     });
-    const eans = produtoModel.juntarEansDuns(produto.eans, produto.duns, produto.qtde_embalagem);
-    await eanService.atualizar(eans);
     return;
   }
 }

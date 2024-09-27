@@ -1,5 +1,5 @@
-import Divergencia from "@modules/comercial/produtos/models/divergencia.model";
 import { Ean } from "@modules/comercial/produtos/models/ean.model";
+import Divergencia from "../../../models/divergencia.model";
 
 export default interface ProdutoDTO {
   id: number;
@@ -20,6 +20,9 @@ export default interface ProdutoDTO {
   pesol: number;
   altura: number;
   largura: number;
+  comprimento_d?: number;
+  largura_d?: number;
+  altura_d?: number;
   comprimento: number;
   validade: number;
   qtde_embalagem: number;
@@ -37,4 +40,6 @@ export default interface ProdutoDTO {
   divergencias: Divergencia[];
   status: number;
   familia: number;
+  cadastro_arius?: Date;
+  created_at?: Date;
 }

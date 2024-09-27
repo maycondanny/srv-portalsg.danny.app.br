@@ -1,24 +1,17 @@
 import produtoModel, { ECadastroStatus, Produto } from '@modules/comercial/produtos/models/produto.model';
-import ariusProdutoService from '@services/arius/comercial/produto.service';
+import ariusProdutoService from '@modules/integradores/arius/comercial/services/produto.service';
 import { EMedidas } from '@modules/comercial/produtos/models/ean.model';
-import tabelaFornecedorUf from '@services/arius/comercial/tabela-fornecedor-uf';
-import siglaEstadoModel from '@models/sigla-estado.model';
+import tabelaFornecedorUf from '@modules/integradores/arius/comercial/services/tabela-fornecedor-uf';
 import produtoService from '@modules/comercial/produtos/services/produto.service';
-import ariusProdutoFornecedor from '@services/arius/comercial/produto-fornecedor';
+import ariusProdutoFornecedor from '@modules/integradores/arius/comercial/services/produto-fornecedor';
 import aprovacaoService, { CST_SUBSTITUIDO, TRIBUTACAO_SUBSTITUIDO } from '../../aprovacao.service';
 import _ from 'lodash';
 import objectUtil from '@utils/object.util';
-import produtoCompradorService from '@services/arius/comercial/produto-comprador.service';
+import produtoCompradorService from '@modules/integradores/arius/comercial/services/produto-comprador.service';
 import ErroException from '@exceptions/erro.exception';
-import validacaoService from '../../validacao.service';
+import estadoModel from '@modules/core/models/estado.model';
 
 async function atualizar(produto: Produto, produtoAtualizacao: Partial<Produto>) {
-  const validacao = await validacaoService.validarCadastro(_.merge({}, produto, produtoAtualizacao));
-
-  if (!validacao.valido) {
-    throw new ErroException('Campos obrigatórios não preenchidos, verifique', validacao);
-  }
-
   if (!produto.produto_arius) throw new ErroException('Produto não encontrado!');
   if (!produto.fornecedor_id) throw new ErroException('Fornecedor não encontrado!');
 
@@ -54,7 +47,7 @@ async function atualizar(produto: Produto, produtoAtualizacao: Partial<Produto>)
   }
 
   const existeTributacaoEstado = await tabelaFornecedorUf.obter({
-    estado: siglaEstadoModel.obterNome(produtoAtualizacao.estado || produto.estado),
+    estado: estadoModel.obterNome(produtoAtualizacao.estado || produto.estado),
     fornecedorId: produto.fornecedor_id,
     produtoId: produto.produto_arius,
   });
@@ -190,7 +183,7 @@ async function atualizarTabelaFornecedorUF(produto: Produto, produtoAtualizacao:
   try {
     await tabelaFornecedorUf.atualizar({
       pk: {
-        estadoId: siglaEstadoModel.obterNome(produtoAtualizacao.estado || produto.estado),
+        estadoId: estadoModel.obterNome(produtoAtualizacao.estado || produto.estado),
         produtoId: produto.produto_arius,
         fornecedorId: produto?.fornecedor_id,
       },
@@ -203,14 +196,14 @@ async function atualizarTabelaFornecedorUF(produto: Produto, produtoAtualizacao:
       produtoEstado: {
         pk: {
           produtoId: produto.produto_arius,
-          estadoId: siglaEstadoModel.obterNome(produtoAtualizacao.estado || produto.estado),
+          estadoId: estadoModel.obterNome(produtoAtualizacao.estado || produto.estado),
         },
       },
       tributacao: TRIBUTACAO_SUBSTITUIDO,
       situacaoTributaria: { id: CST_SUBSTITUIDO },
       icms: 0,
       estado: {
-        id: siglaEstadoModel.obterNome(produto.estado),
+        id: estadoModel.obterNome(produto.estado),
         icms: 0,
       },
       ...campos,

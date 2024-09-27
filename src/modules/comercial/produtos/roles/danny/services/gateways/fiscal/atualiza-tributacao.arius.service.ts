@@ -1,17 +1,17 @@
 import { EFiscalStatus, Produto } from '@modules/comercial/produtos/models/produto.model';
 import ProdutoAtualizacao from '../../../dtos/produto.dto';
 import aprovacaoService from '../../aprovacao.service';
-import Divergencia from '@modules/comercial/produtos/models/divergencia.model';
 import produtoService from '@modules/comercial/produtos/services/produto.service';
 import objectUtil from '@utils/object.util';
-import siglaEstadoModel from '@models/sigla-estado.model';
-import tabelaFornecedorUf from '@services/arius/comercial/tabela-fornecedor-uf';
-import tabelaFornecedor from '@services/arius/comercial/tabela-fornecedor';
-import ariusProdutoArius from '@services/arius/comercial/produto.service';
+import tabelaFornecedorUf from '@modules/integradores/arius/comercial/services/tabela-fornecedor-uf';
+import tabelaFornecedor from '@modules/integradores/arius/comercial/services/tabela-fornecedor';
+import ariusProdutoArius from '@modules/integradores/arius/comercial/services/produto.service';
 import _ from 'lodash';
 import ErroException from '@exceptions/erro.exception';
-import validacaoService from '../../validacao.service';
 import numberUtil from '@utils/number.util';
+import Divergencia from '../../../../../models/divergencia.model';
+import validacaoService from '../../validacao.service';
+import estadoModel from '@modules/core/models/estado.model';
 
 const atualizar = async (produto: Produto, produtoAtualizacao: Partial<Produto>) => {
   const validacao = await validacaoService.validarFiscal(_.merge({}, produto, produtoAtualizacao));
@@ -23,7 +23,7 @@ const atualizar = async (produto: Produto, produtoAtualizacao: Partial<Produto>)
   if (
     !aprovacaoService.validarSituacaoTributaria({
       st_compra: produtoAtualizacao.st_compra,
-      tipo_tributacao: produtoAtualizacao.tipo_tributacao,
+      tipo_tributacao: produtoAtualizacao.tipo_tributacao || produto.tipo_tributacao,
     })
   ) {
     throw new ErroException('Situação tributária está inconsistente para a tributação. Por favor, verifique.');
@@ -111,7 +111,7 @@ const atualizarTabelaFornecedorUF = async (produto: Produto, produtoAtualizacao:
 
     await tabelaFornecedorUf.atualizar({
       pk: {
-        estadoId: siglaEstadoModel.obterNome(produto.estado),
+        estadoId: estadoModel.obterNome(produto.estado),
         produtoId: produto.produto_arius,
         fornecedorId: produto.fornecedor_id,
       },
@@ -128,7 +128,7 @@ const atualizarTabelaFornecedorUF = async (produto: Produto, produtoAtualizacao:
         },
       },
       estado: {
-        id: siglaEstadoModel.obterNome(produto.estado),
+        id: estadoModel.obterNome(produto.estado),
         icms: numberUtil.isMaiorOuIgualZero(produtoAtualizacao.icms_compra)
           ? produtoAtualizacao.icms_compra
           : produto.icms_compra,

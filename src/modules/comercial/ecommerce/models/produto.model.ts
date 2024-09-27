@@ -1,7 +1,16 @@
-import Ean from './ean.model';
+import numberUtil from '@utils/number.util';
+import { Ean } from './ean.model';
 import Imagem from './imagem.model';
+import { Divergencia } from './divergencia.model';
 
-export default interface Produto {
+export enum EStatus {
+  NAO_CADASTRADO = 1,
+  APROVADO = 2,
+  CADASTRADO = 3,
+  NOVO = 4,
+}
+
+export interface Produto {
   id?: number;
   produto_id?: number;
   produto_arius?: number;
@@ -19,4 +28,25 @@ export default interface Produto {
   fornecedor_id: number;
   eans: Ean[];
   imagens: Imagem[];
+  created_at?: Date;
+  divergencias?: Divergencia[];
 }
+
+function possuiDivergencias(produto: Produto) {
+  return numberUtil.isMaiorZero(produto.divergencias.length);
+}
+
+function obterUrlPlataforma(valor: string) {
+  if (!valor) return;
+  return valor
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]/g, '')
+    .replace(/-+/g, '-');
+}
+
+export default {
+  possuiDivergencias,
+  obterUrlPlataforma
+};

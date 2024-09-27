@@ -1,5 +1,5 @@
 import getDbInstance from '@db/db';
-import Ean from '../models/ean.model';
+import { Ean } from '../models/ean.model';
 import ErroException from '@exceptions/erro.exception';
 import _ from 'lodash';
 
@@ -18,11 +18,11 @@ async function cadastrar(eans: Ean[]) {
   }
 }
 
-async function obterPorId(ecommerceId: number): Promise<Ean> {
+async function obterPorId(ecommerceId: number): Promise<Ean[]> {
   const db = getDbInstance();
 
   try {
-    return await db.select('*').from('produtos_ecommerce_eans AS p').where('p.ecommerce_id', '=', ecommerceId).first();
+    return await db.select('*').from('produtos_ecommerce_eans AS p').where('p.ecommerce_id', '=', ecommerceId);
   } catch (erro) {
     console.error(erro);
     throw new Error('Não foi possivel obter os eans.');
