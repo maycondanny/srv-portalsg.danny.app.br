@@ -18,4 +18,5 @@ export default interface ProdutoDTO {
   ativo?: boolean;
   lancamento?: boolean;
   destaque?: boolean;
+  produto_arius?: number;
 }

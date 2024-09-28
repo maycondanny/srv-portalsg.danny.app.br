@@ -21,7 +21,7 @@ function tratarDivergencia(dados: any): Divergencia {
     descricao: dados.descricao,
     caracteristica: dados.caracteristica,
     ativo: dados.ativo,
-    imagens: dados.imagens,
+    imagens: _.map(dados.imagens, imagem => ({ url: imagem })),
     datahora_cadastro: dados.datahora_cadastro,
     datahora_alteracao: dados.datahora_alteracao,
   };

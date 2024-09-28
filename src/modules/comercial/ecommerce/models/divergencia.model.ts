@@ -1,3 +1,5 @@
+import Imagem from "./imagem.model";
+
 export interface Divergencia {
   produto_id: number;
   nome: string;
@@ -10,7 +12,7 @@ export interface Divergencia {
   depto: number;
   marca: number;
   secao: number;
-  imagens: string[];
+  imagens: Imagem[];
   datahora_cadastro: Date,
   datahora_alteracao: Date,
 }

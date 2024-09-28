@@ -16,6 +16,8 @@ import produtoService from "../services/produto.service";
 import httpStatusEnum from "@enums/http-status.enum";
 import ProdutoFornecedorRequestDTO from "../dtos/produto-fornecedor-request.dto";
 import ProdutoFornecedorResponseDTO from "../dtos/produto-fornecedor-response.dto";
+import AprovacaoRequestDTO from "../dtos/aprovacao-request.dto";
+import aprovacaoService from "../services/aprovacao.service";
 
 async function obterTodos(req: Request, res: Response<ResponseDTO<CapaProdutoResponseDTO[]>>, next: NextFunction) {
   try {
@@ -47,24 +49,21 @@ async function obterTodosPorFornecedor(
   }
 }
 
-// async function aprovar(
-//   req: Request<{}, {}, AprovacaoRequestDTO>,
-//   res: Response<ResponseDTO<AprovacaoResponseDTO>>,
-//   next: NextFunction
-// ) {
-//   try {
-//     const { role, produto, dadosAtualizacao }: AprovacaoRequestDTO = req.body;
-//     const { produtoId } = await aprovacaoService.aprovar({ role, produto, dadosAtualizacao });
-//     return res.status(httpStatusEnum.Status.SUCESSO).json({
-//       mensagem: 'Produto aprovado com sucesso',
-//       dados: {
-//         produtoId,
-//       },
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// }
+async function aprovar(
+  req: Request<{}, {}, AprovacaoRequestDTO>,
+  res: Response<ResponseDTO<void>>,
+  next: NextFunction
+) {
+  try {
+    const { produto, dadosAtualizacao }: AprovacaoRequestDTO = req.body;
+    await aprovacaoService.aprovar({ produto, dadosAtualizacao });
+    return res.status(httpStatusEnum.Status.SUCESSO).json({
+      mensagem: 'Produto aprovado com sucesso'
+    });
+  } catch (error) {
+    next(error);
+  }
+}
 
 async function atualizar(req: Request, res: Response<ResponseDTO>, next: NextFunction) {
   try {
@@ -79,6 +78,7 @@ async function atualizar(req: Request, res: Response<ResponseDTO>, next: NextFun
 }
 
 export default {
+  aprovar,
   obterTodos,
   obterTodosPorFornecedor,
   atualizar

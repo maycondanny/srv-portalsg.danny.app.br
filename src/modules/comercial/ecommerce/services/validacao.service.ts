@@ -9,6 +9,10 @@ import { ETamanho } from '../models/ean.model';
 function validarCamposObrigatorios(produto: Produto): string[] {
   const mensagens = [];
 
+  if (_.isEmpty(produto.nome)) {
+    mensagens.push('NOME não informado');
+  }
+
   if (_.isEmpty(produto.caracteristica)) {
     mensagens.push('DESCRIÇÃO DETALHADA DO SKU não informada');
   }

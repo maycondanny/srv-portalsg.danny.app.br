@@ -1,24 +1,27 @@
 import { EStatus, Produto } from '@modules/comercial/ecommerce/models/produto.model';
 import AprovacaoRequestDTO from '../dtos/aprovacao-request.dto';
-import AprovacaoResponseDTO from '../dtos/aprovacao-response.dto';
-import hubUtil from '@utils/hub.util';
 import numberUtil from '@utils/number.util';
 import _ from 'lodash';
 import atualizaEcommerceAriusService from './gateways/atualiza-ecommerce-arius.service';
 import cadastraEcommerceAriusService from './gateways/cadastra-ecommerce-arius.service';
+import produtoMapper from '../mappers/produto.mapper';
 
-const aprovar = async ({ produto, dadosAtualizacao }: AprovacaoRequestDTO): Promise<AprovacaoResponseDTO> => {
+const aprovar = async ({ produto, dadosAtualizacao }: AprovacaoRequestDTO): Promise<void> => {
   if (produto.status === EStatus.CADASTRADO) {
-    return await atualizaEcommerceAriusService.atualizar(produto, dadosAtualizacao);
-  } else {
-    return await cadastraEcommerceAriusService.cadastrar(produto);
+    await atualizaEcommerceAriusService.atualizar(
+      produtoMapper.toProduto(produto),
+      produtoMapper.toProduto(dadosAtualizacao)
+    );
+    return;
   }
+
+  await cadastraEcommerceAriusService.cadastrar(produtoMapper.toProduto(produto));
 };
 
 async function salvarImagens(produto: Produto) {
-  const URL = '/images/create';
-  const imagens = tratarImagens(produto);
-  await hubUtil.post(URL, imagens);
+  // const URL = '/images/create';
+  // const imagens = tratarImagens(produto);
+  // await hubUtil.post(URL, imagens);
 }
 
 function tratarImagens(produto: Produto) {

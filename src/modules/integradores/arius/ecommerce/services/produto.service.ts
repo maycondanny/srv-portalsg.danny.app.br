@@ -1,4 +1,4 @@
-import arius from "@core/utils/arius";
+import ariusUtil from "@utils/arius.util";
 
 const URI = "/AriusERP/v2/ProdutoEcommerce";
 
@@ -51,7 +51,7 @@ interface Produto {
 
 const cadastrar = async (produto: Produto | any): Promise<Produto> => {
   try {
-    return await arius.post(URI, produto);
+    return await ariusUtil.post(URI, produto);
   } catch (erro) {
     console.error(erro);
     throw erro;
@@ -60,7 +60,7 @@ const cadastrar = async (produto: Produto | any): Promise<Produto> => {
 
 const atualizar = async (produto: Produto | any): Promise<Produto> => {
   try {
-    return await arius.put(URI, produto);
+    return await ariusUtil.put(URI, produto);
   } catch (erro) {
     console.error(erro);
     throw erro;
@@ -69,7 +69,7 @@ const atualizar = async (produto: Produto | any): Promise<Produto> => {
 
 const obter = async (produtoId: number): Promise<Produto> => {
   try {
-    return await arius.get(`${URI}/${produtoId}`);
+    return await ariusUtil.get(`${URI}/${produtoId}`);
   } catch (erro) {
     console.error(erro);
     throw erro;

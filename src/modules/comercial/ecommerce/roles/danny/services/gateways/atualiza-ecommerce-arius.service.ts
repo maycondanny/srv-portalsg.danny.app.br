@@ -2,54 +2,69 @@ import produtoModel, { EStatus, Produto } from '@modules/comercial/ecommerce/mod
 import produtoEcommerceServiceArius from '@modules/integradores/arius/ecommerce/services/produto.service';
 import aprovacaoService from '../aprovacao.service';
 import { Divergencia } from '@modules/comercial/ecommerce/models/divergencia.model';
-import produtoService from '../produto.service';
+import objectUtil from '@utils/object.util';
+import numberUtil from '@utils/number.util';
+import produtoService from '@modules/comercial/ecommerce/services/produto.service';
+import ErroException from '@exceptions/erro.exception';
+import validacaoService from '../validacao.service';
+import _ from 'lodash';
+import httpStatusEnum from '@enums/http-status.enum';
 
-async function atualizar(produto: Produto, dadosAtualizacao: Produto) {
-  const divergencia = produto.divergencias[0];
+async function atualizar(produto: Produto, produtoAtualizacao: Produto) {
+  const divergencia: Divergencia = produto.divergencias[0];
 
-  await atualizarArius(produto, dadosAtualizacao);
+  const validacao = validacaoService.validar(_.merge({}, produto, produtoAtualizacao));
 
-  if (existeImagens(dadosAtualizacao)) {
-    await aprovacaoService.salvarImagens({ ...dadosAtualizacao, produto_id: produto.produto_id });
+  if (!validacao.valido) {
+    throw new ErroException('Erro ao aprovar o produto', validacao, httpStatusEnum.Status.ERRO_REQUISICAO);
   }
 
-  await atualizarBaseDados(produto, dadosAtualizacao, divergencia);
+  await atualizarArius(produto, produtoAtualizacao);
+
+  if (numberUtil.isMaiorZero(produtoAtualizacao?.imagens?.length)) {
+    await aprovacaoService.salvarImagens({ ...produtoAtualizacao, produto_id: produto.produto_id });
+  }
+
+  await atualizarBaseDados(produto, produtoAtualizacao, divergencia);
 }
 
-const existeImagens = (produto: Produto) => {
-  return produto?.imagens?.length > 0;
-};
-
 const atualizarArius = async (produto: Produto, dadosAtualizacao: Produto) => {
-  const campos = {
-    ...(dadosAtualizacao.nome && {
-      nome: dadosAtualizacao.nome,
-      urlPlataforma: produtoModel.obterUrlPlataforma(dadosAtualizacao.nome),
-    }),
-    ...(dadosAtualizacao.marca && { marcasEcommerce: { id: dadosAtualizacao.marca } }),
-    ...(dadosAtualizacao.depto && { departamento: { idCategoria: dadosAtualizacao.depto } }),
-    ...(dadosAtualizacao.secao && { secao: { idCategoria: dadosAtualizacao.secao } }),
-    ...(dadosAtualizacao.descricao && {
-      descricao: dadosAtualizacao.descricao,
-      descricaoHtml: dadosAtualizacao.descricao,
-    }),
-    ...(dadosAtualizacao.caracteristica && {
-      caracteristica: dadosAtualizacao.caracteristica,
-      caracteristicaHtml: dadosAtualizacao.caracteristica,
-    }),
-    ...(dadosAtualizacao.modo_uso && { modoUso: dadosAtualizacao.modo_uso }),
-    ...(typeof dadosAtualizacao.ativo !== undefined && {
-      tipoSituacaoProdutoEcommerce: dadosAtualizacao.ativo ? 'ATIVO' : 'INATIVO',
-    }),
-    ...(typeof dadosAtualizacao.lancamento !== undefined && { lancamento: dadosAtualizacao.lancamento }),
-    ...(typeof dadosAtualizacao.destaque !== undefined && { destaque: dadosAtualizacao.destaque }),
-  };
+  try {
+    const campos = {
+      ...(dadosAtualizacao.nome && {
+        nome: dadosAtualizacao.nome,
+        urlPlataforma: produtoModel.obterUrlPlataforma(dadosAtualizacao.nome),
+      }),
+      ...(dadosAtualizacao.marca && { marcasEcommerce: { id: dadosAtualizacao.marca } }),
+      ...(dadosAtualizacao.depto && { departamento: { idCategoria: dadosAtualizacao.depto } }),
+      ...(dadosAtualizacao.secao && { secao: { idCategoria: dadosAtualizacao.secao } }),
+      ...(dadosAtualizacao.descricao && {
+        descricao: dadosAtualizacao.descricao,
+        descricaoHtml: dadosAtualizacao.descricao,
+      }),
+      ...(dadosAtualizacao.caracteristica && {
+        caracteristica: dadosAtualizacao.caracteristica,
+        caracteristicaHtml: dadosAtualizacao.caracteristica,
+      }),
+      ...(dadosAtualizacao.modo_uso && { modoUso: dadosAtualizacao.modo_uso }),
+      ...(typeof dadosAtualizacao.ativo !== undefined && {
+        tipoSituacaoProdutoEcommerce: dadosAtualizacao.ativo ? 'ATIVO' : 'INATIVO',
+      }),
+      ...(typeof dadosAtualizacao.lancamento !== undefined && { lancamento: dadosAtualizacao.lancamento }),
+      ...(typeof dadosAtualizacao.destaque !== undefined && { destaque: dadosAtualizacao.destaque }),
+    };
 
-  if (Object.keys(campos).length > 0) {
+    if (objectUtil.isVazio(campos)) {
+      return;
+    }
+
     await produtoEcommerceServiceArius.atualizar({
       produtoId: produto.produto_id,
       ...campos,
     });
+  } catch (erro) {
+    console.log(erro);
+    throw new ErroException(erro.response.data.processedException?.causeMessage);
   }
 };
 
@@ -69,12 +84,20 @@ const atualizarBaseDados = async (produto: Produto, dadosAtualizacao: Produto, d
 
   produto.imagens = dadosAtualizacao?.imagens ?? divergencia.imagens;
 
-  if (Object.keys(campos).length > 0) {
-    await produtoService.atualizar(produto, {
+  if (objectUtil.isVazio(campos)) {
+    return;
+  }
+
+  try {
+    await produtoService.atualizar({
+      ...produto,
       status: EStatus.APROVADO,
-      produto_id: produto.produto_id,
+      produto_arius: produto.produto_id,
       ...campos,
     });
+  } catch (erro) {
+    console.log(erro);
+    throw new ErroException('Não foi possivel realizar a atualização do produto na base de dados');
   }
 };
 

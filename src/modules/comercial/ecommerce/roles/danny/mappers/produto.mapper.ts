@@ -16,7 +16,7 @@ function toDTO(produto: Produto): ProdutoDTO {
   };
 }
 
-function toProduto(produtoDTO: ProdutoDTO): Produto {
+function toProduto(produtoDTO: Partial<ProdutoDTO>): Produto {
   return {
     id: produtoDTO.id,
     caracteristica: produtoDTO.caracteristica,
@@ -34,6 +34,7 @@ function toProduto(produtoDTO: ProdutoDTO): Produto {
     ativo: produtoDTO.ativo,
     lancamento: produtoDTO.lancamento,
     destaque: produtoDTO.destaque,
+    produto_arius: produtoDTO.produto_arius
   };
 }
 
