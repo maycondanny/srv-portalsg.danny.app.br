@@ -82,14 +82,14 @@ async function atualizarPorProdutoId(produtoId: number, produto: Partial<Produto
 
 async function atualizar(produto: Partial<Produto>) {
   try {
-    const eans = produto.eans;
-    const imagens = produto.imagens;
-    const produtoTratado = _.omit(produto, ['eans', 'imagens']) as Produto;
+    const eans = produto?.eans;
+    const imagens = produto?.imagens;
+    const produtoTratado = _.omit(produto, ['eans', 'imagens', 'divergencias']) as Produto;
     const ecommerceId = await produtoRepository.atualizar(produtoTratado);
-    if (numberUtil.isMaiorZero(imagens.length)) {
+    if (numberUtil.isMaiorZero(imagens?.length)) {
       await imagemService.atualizar(ecommerceId, imagens);
     }
-    if (numberUtil.isMaiorZero(eans.length)) {
+    if (numberUtil.isMaiorZero(eans?.length)) {
       await eanService.atualizar(ecommerceId, eans);
     }
   } catch (erro) {

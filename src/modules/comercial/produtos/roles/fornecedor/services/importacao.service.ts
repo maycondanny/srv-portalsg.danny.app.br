@@ -26,7 +26,7 @@ async function importar({ planilha, fornecedorId }: ImportacaoRequestDTO): Promi
       produto: linhaProduto,
     });
 
-    const validacao = await validacaoService.validar(produto);
+    const validacao = await validacaoService.validarCadastro(produto);
 
     if (!validacao.valido) {
       produtosInvalidos.push({ ean: validacao.ean, erros: validacao.erros });

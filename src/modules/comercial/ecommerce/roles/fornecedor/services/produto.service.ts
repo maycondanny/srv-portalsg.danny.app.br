@@ -8,7 +8,7 @@ import _ from 'lodash';
 
 async function cadastrar(produtoDTO: ProdutoDTO) {
   const produto = produtoMapper.toProduto(produtoDTO);
-  const validacao = validacaoService.validar(produto);
+  const validacao = await validacaoService.validar(produto);
 
   if (!validacao.valido) {
     throw new ErroException('Erro ao cadastrar novo produto', validacao, httpStatusEnum.Status.ERRO_REQUISICAO);
@@ -32,7 +32,7 @@ async function obterPorId(id: number): Promise<ProdutoDTO> {
 async function atualizar(produtoDTO: ProdutoDTO): Promise<void> {
   if (!produtoDTO) throw new Error('Produto não informado para atualização');
   const produto = produtoMapper.toProduto(produtoDTO);
-  const validacao = validacaoService.validar(produto);
+  const validacao = await validacaoService.validar(produto);
 
   if (!validacao.valido) {
     throw new ErroException('Erro ao atualizar o produto', validacao, httpStatusEnum.Status.ERRO_REQUISICAO);

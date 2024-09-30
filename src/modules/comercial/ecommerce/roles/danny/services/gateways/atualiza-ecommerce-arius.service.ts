@@ -11,6 +11,9 @@ import _ from 'lodash';
 import httpStatusEnum from '@enums/http-status.enum';
 
 async function atualizar(produto: Produto, produtoAtualizacao: Produto) {
+  if (!produtoModel.possuiDivergencias(produto)) {
+    throw new ErroException("Dados do produto cadastrado não informados");
+  }
   const divergencia: Divergencia = produto.divergencias[0];
 
   const validacao = validacaoService.validar(_.merge({}, produto, produtoAtualizacao));
@@ -19,39 +22,39 @@ async function atualizar(produto: Produto, produtoAtualizacao: Produto) {
     throw new ErroException('Erro ao aprovar o produto', validacao, httpStatusEnum.Status.ERRO_REQUISICAO);
   }
 
-  await atualizarArius(produto, produtoAtualizacao);
+  await atualizarArius(produtoAtualizacao, divergencia);
 
-  if (numberUtil.isMaiorZero(produtoAtualizacao?.imagens?.length)) {
-    await aprovacaoService.salvarImagens({ ...produtoAtualizacao, produto_id: produto.produto_id });
+  if (produtoModel.possuiImagens(produtoAtualizacao)) {
+    await aprovacaoService.salvarImagens({ ...produtoAtualizacao, produto_id: produto.produto_arius });
   }
 
   await atualizarBaseDados(produto, produtoAtualizacao, divergencia);
 }
 
-const atualizarArius = async (produto: Produto, dadosAtualizacao: Produto) => {
+const atualizarArius = async (produtoAtualizacao: Produto, divergencia: Divergencia) => {
   try {
     const campos = {
-      ...(dadosAtualizacao.nome && {
-        nome: dadosAtualizacao.nome,
-        urlPlataforma: produtoModel.obterUrlPlataforma(dadosAtualizacao.nome),
+      ...(produtoAtualizacao.nome && {
+        nome: produtoAtualizacao.nome,
+        urlPlataforma: produtoModel.obterUrlPlataforma(produtoAtualizacao.nome),
       }),
-      ...(dadosAtualizacao.marca && { marcasEcommerce: { id: dadosAtualizacao.marca } }),
-      ...(dadosAtualizacao.depto && { departamento: { idCategoria: dadosAtualizacao.depto } }),
-      ...(dadosAtualizacao.secao && { secao: { idCategoria: dadosAtualizacao.secao } }),
-      ...(dadosAtualizacao.descricao && {
-        descricao: dadosAtualizacao.descricao,
-        descricaoHtml: dadosAtualizacao.descricao,
+      ...(produtoAtualizacao.marca && { marcasEcommerce: { id: produtoAtualizacao.marca } }),
+      ...(produtoAtualizacao.depto && { departamento: { idCategoria: produtoAtualizacao.depto } }),
+      ...(produtoAtualizacao.secao && { secao: { idCategoria: produtoAtualizacao.secao } }),
+      ...(produtoAtualizacao.descricao && {
+        descricao: produtoAtualizacao.descricao,
+        descricaoHtml: produtoAtualizacao.descricao,
       }),
-      ...(dadosAtualizacao.caracteristica && {
-        caracteristica: dadosAtualizacao.caracteristica,
-        caracteristicaHtml: dadosAtualizacao.caracteristica,
+      ...(produtoAtualizacao.caracteristica && {
+        caracteristica: produtoAtualizacao.caracteristica,
+        caracteristicaHtml: produtoAtualizacao.caracteristica,
       }),
-      ...(dadosAtualizacao.modo_uso && { modoUso: dadosAtualizacao.modo_uso }),
-      ...(typeof dadosAtualizacao.ativo !== undefined && {
-        tipoSituacaoProdutoEcommerce: dadosAtualizacao.ativo ? 'ATIVO' : 'INATIVO',
+      ...(produtoAtualizacao.modo_uso && { modoUso: produtoAtualizacao.modo_uso }),
+      ...(produtoAtualizacao.ativo && {
+        tipoSituacaoProdutoEcommerce: produtoAtualizacao.ativo ? 'ATIVO' : 'INATIVO',
       }),
-      ...(typeof dadosAtualizacao.lancamento !== undefined && { lancamento: dadosAtualizacao.lancamento }),
-      ...(typeof dadosAtualizacao.destaque !== undefined && { destaque: dadosAtualizacao.destaque }),
+      ...(produtoAtualizacao.lancamento && { lancamento: produtoAtualizacao.lancamento }),
+      ...(produtoAtualizacao.destaque && { destaque: produtoAtualizacao.destaque }),
     };
 
     if (objectUtil.isVazio(campos)) {
@@ -59,7 +62,7 @@ const atualizarArius = async (produto: Produto, dadosAtualizacao: Produto) => {
     }
 
     await produtoEcommerceServiceArius.atualizar({
-      produtoId: produto.produto_id,
+      produtoId: divergencia.produto_id,
       ...campos,
     });
   } catch (erro) {
@@ -68,21 +71,19 @@ const atualizarArius = async (produto: Produto, dadosAtualizacao: Produto) => {
   }
 };
 
-const atualizarBaseDados = async (produto: Produto, dadosAtualizacao: Produto, divergencia: Divergencia) => {
+const atualizarBaseDados = async (produto: Produto, produtoAtualizacao: Produto, divergencia: Divergencia) => {
   const campos = {
-    nome: dadosAtualizacao?.nome ?? divergencia.nome,
-    marca: dadosAtualizacao?.marca ?? divergencia.marca,
-    depto: dadosAtualizacao?.depto ?? divergencia.depto,
-    secao: dadosAtualizacao?.secao ?? divergencia.secao,
-    descricao: dadosAtualizacao?.descricao ?? divergencia.descricao,
-    caracteristica: dadosAtualizacao?.caracteristica ?? divergencia.caracteristica,
-    modo_uso: dadosAtualizacao?.modo_uso ?? divergencia.modo_uso,
-    ativo: dadosAtualizacao?.ativo ?? divergencia.ativo,
-    lancamento: dadosAtualizacao?.lancamento ?? divergencia.lancamento,
-    destaque: dadosAtualizacao?.destaque ?? divergencia.destaque,
+    nome: produtoAtualizacao?.nome ?? divergencia.nome,
+    marca: produtoAtualizacao?.marca ?? divergencia.marca,
+    depto: produtoAtualizacao?.depto ?? divergencia.depto,
+    secao: produtoAtualizacao?.secao ?? divergencia.secao,
+    descricao: produtoAtualizacao?.descricao ?? divergencia.descricao,
+    caracteristica: produtoAtualizacao?.caracteristica ?? divergencia.caracteristica,
+    modo_uso: produtoAtualizacao?.modo_uso ?? divergencia.modo_uso,
+    ativo: produtoAtualizacao?.ativo ?? divergencia.ativo,
+    lancamento: produtoAtualizacao?.lancamento ?? divergencia.lancamento,
+    destaque: produtoAtualizacao?.destaque ?? divergencia.destaque,
   };
-
-  produto.imagens = dadosAtualizacao?.imagens ?? divergencia.imagens;
 
   if (objectUtil.isVazio(campos)) {
     return;
@@ -90,9 +91,10 @@ const atualizarBaseDados = async (produto: Produto, dadosAtualizacao: Produto, d
 
   try {
     await produtoService.atualizar({
-      ...produto,
+      id: produto.id,
       status: EStatus.APROVADO,
-      produto_arius: produto.produto_id,
+      produto_arius: divergencia.produto_id,
+      imagens: produtoAtualizacao?.imagens ?? divergencia.imagens,
       ...campos,
     });
   } catch (erro) {

@@ -4,10 +4,20 @@ import cacheUtil from '@utils/cache.util';
 import numberUtil from '@utils/number.util';
 import _ from 'lodash';
 
-async function validar(produto: Produto) {
+async function validarCadastro(produto: Produto) {
   let erros: string[] = [];
   erros = _.concat(erros, validacaoService.validarCodigoFornecedor(produto));
   erros = _.concat(erros, await validarCodigoFornecedorCache(produto));
+  erros = _.concat(erros, validacaoService.validarEan(produto));
+  erros = _.concat(erros, validacaoService.validarCaixaDun(produto));
+  erros = _.concat(erros, validacaoService.validarCamposObrigatorios(produto));
+  erros = _.concat(erros, validacaoService.validarCamposObrigatoriosFiscal(produto));
+  erros = _.concat(erros, validarEcommerce(produto));
+  return validacaoService.montarRespostaRetorno(produto, erros);
+}
+
+async function validarAtualizacao(produto: Produto) {
+  let erros: string[] = [];
   erros = _.concat(erros, validacaoService.validarEan(produto));
   erros = _.concat(erros, validacaoService.validarCaixaDun(produto));
   erros = _.concat(erros, validacaoService.validarCamposObrigatorios(produto));
@@ -52,5 +62,6 @@ function validarEcommerce(produto: Produto): string[] {
 }
 
 export default {
-  validar,
+  validarAtualizacao,
+  validarCadastro,
 };

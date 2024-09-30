@@ -72,7 +72,7 @@ async function obterTodosPorFornecedor(fornecedorId: number) {
 
       return produtoMapper.toDTO({
         ...produto,
-        produto_id: produto.produto_id ?? produtoId,
+        produto_arius: produtoId,
         status: EStatus.NOVO,
       });
     }

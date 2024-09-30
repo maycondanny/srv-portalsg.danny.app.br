@@ -1,6 +1,6 @@
-import { ESiglaEstado } from '@models/sigla-estado.model';
 import { Ean } from '@modules/comercial/produtos/models/ean.model';
 import { Imagem } from '@modules/comercial/produtos/models/ecommerce.model';
+import { ESiglaEstado } from '@modules/core/models/estado.model';
 
 export interface ProdutoDTO {
   id?: number;

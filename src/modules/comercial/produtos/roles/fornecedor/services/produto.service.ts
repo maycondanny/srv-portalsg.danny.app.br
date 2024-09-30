@@ -11,7 +11,7 @@ import validacaoService from './validacao.service';
 
 async function cadastrar(produtoDTO: ProdutoDTO): Promise<void> {
   const produto = produtoMapper.toProduto(produtoDTO);
-  const validacao = await validacaoService.validar(produto);
+  const validacao = await validacaoService.validarCadastro(produto);
 
   if (!validacao.valido) {
     throw new ErroException('Erro ao cadastrar novo produto', validacao, httpStatusEnum.Status.ERRO_REQUISICAO);
@@ -51,7 +51,7 @@ async function obterPorId(id: number): Promise<ProdutoDTO> {
 
 async function atualizar(produtoDTO: ProdutoDTO) {
   const produto = produtoMapper.toProduto(produtoDTO);
-  const validacao = await validacaoService.validar(produto);
+  const validacao = await validacaoService.validarAtualizacao(produto);
 
   if (!validacao.valido) {
     throw new ErroException('Erro ao atualizar o produto', validacao, httpStatusEnum.Status.ERRO_REQUISICAO);

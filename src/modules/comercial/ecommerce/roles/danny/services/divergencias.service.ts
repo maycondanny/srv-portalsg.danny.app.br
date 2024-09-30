@@ -1,11 +1,12 @@
 import { Divergencia } from '@modules/comercial/ecommerce/models/divergencia.model';
 import produtosServiceHub from '@modules/integradores/hub/ecommerce/services/produtos.service';
+import numberUtil from '@utils/number.util';
 import objectUtil from '@utils/object.util';
 import _ from 'lodash';
 
 async function obterTodas(produtoId: number): Promise<Divergencia[]> {
-  const divergencia = await produtosServiceHub.obterTodos(produtoId);
-  return divergencia ? [tratarDivergencia(divergencia)] : [];
+  const divergencias = await produtosServiceHub.obterTodos(produtoId);
+  return numberUtil.isMaiorZero(divergencias.length) ? [tratarDivergencia(divergencias[0])] : [];
 }
 
 function tratarDivergencia(dados: any): Divergencia {
@@ -21,7 +22,7 @@ function tratarDivergencia(dados: any): Divergencia {
     descricao: dados.descricao,
     caracteristica: dados.caracteristica,
     ativo: dados.ativo,
-    imagens: _.map(dados.imagens, imagem => ({ url: imagem })),
+    imagens: _.map(dados.imagens, (imagem) => ({ url: imagem })),
     datahora_cadastro: dados.datahora_cadastro,
     datahora_alteracao: dados.datahora_alteracao,
   };

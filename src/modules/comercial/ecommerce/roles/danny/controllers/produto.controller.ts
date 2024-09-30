@@ -1,14 +1,3 @@
-// import { NextFunction, Request, Response } from 'express';
-// import httpStatusEnum from '@enums/http-status.enum';
-// import produtoService from '../services/produto.service';
-// import ProdutoFornecedorRequestDTO from '../dtos/produto-fornecedor-request.dto';
-// import ProdutoFornecedorResponseDTO from '../dtos/produto-fornecedor-response.dto';
-// import CapaProdutoResponseDTO from '../dtos/capa-produto-response.dto';
-// import aprovacaoService from '../services/aprovacao.service';
-// import AprovacaoRequestDTO from '../dtos/aprovacao-request.dto';
-// import AprovacaoResponseDTO from '../dtos/aprovacao-response.dto';
-// import ResponseDTO from 'dtos/response.dto';
-
 import { NextFunction, Request, Response } from "express";
 import CapaProdutoResponseDTO from "../dtos/capa-produto-response.dto";
 import ResponseDTO from "dtos/response.dto";
@@ -18,6 +7,7 @@ import ProdutoFornecedorRequestDTO from "../dtos/produto-fornecedor-request.dto"
 import ProdutoFornecedorResponseDTO from "../dtos/produto-fornecedor-response.dto";
 import AprovacaoRequestDTO from "../dtos/aprovacao-request.dto";
 import aprovacaoService from "../services/aprovacao.service";
+import AprovacaoEmLoteRequestDTO from "../dtos/aprovacao-em-lote-request.dto";
 
 async function obterTodos(req: Request, res: Response<ResponseDTO<CapaProdutoResponseDTO[]>>, next: NextFunction) {
   try {
@@ -65,6 +55,22 @@ async function aprovar(
   }
 }
 
+async function aprovarEmLote(
+  req: Request<{}, {}, AprovacaoEmLoteRequestDTO>,
+  res: Response<ResponseDTO<void>>,
+  next: NextFunction
+) {
+  try {
+    const { produtos }: AprovacaoEmLoteRequestDTO = req.body;
+    await aprovacaoService.aprovarEmLote({ produtos });
+    return res.status(httpStatusEnum.Status.SUCESSO).json({
+      mensagem: 'Produtos aprovados com sucesso'
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 async function atualizar(req: Request, res: Response<ResponseDTO>, next: NextFunction) {
   try {
     const produto = req.body;
@@ -79,6 +85,7 @@ async function atualizar(req: Request, res: Response<ResponseDTO>, next: NextFun
 
 export default {
   aprovar,
+  aprovarEmLote,
   obterTodos,
   obterTodosPorFornecedor,
   atualizar

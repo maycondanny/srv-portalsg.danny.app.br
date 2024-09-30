@@ -137,6 +137,7 @@ async function atualizarArius(produto: Produto, produtoAtualizacao: Partial<Prod
     ...(produtoAtualizacao.comprimento && {
       comprimento: produtoAtualizacao.comprimento,
     }),
+    ...(produtoAtualizacao.categoria_fiscal && { tipoCategoriaFiscal: produtoAtualizacao.categoria_fiscal }),
     ...(produtoAtualizacao.largura && { largura: produtoAtualizacao.largura }),
     ...(produtoAtualizacao.altura && { altura: produtoAtualizacao.altura }),
     ...(produtoAtualizacao.marca && {

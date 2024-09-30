@@ -1,3 +1,4 @@
+import { Divergencia } from "@modules/comercial/ecommerce/models/divergencia.model";
 import { Ean } from "@modules/comercial/ecommerce/models/ean.model";
 import Imagem from "@modules/comercial/ecommerce/models/imagem.model";
 
@@ -19,4 +20,5 @@ export default interface ProdutoDTO {
   lancamento?: boolean;
   destaque?: boolean;
   produto_arius?: number;
+  divergencias?: Divergencia[];
 }

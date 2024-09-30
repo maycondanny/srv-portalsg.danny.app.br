@@ -13,6 +13,14 @@ function toDTO(produto: Produto): ProdutoDTO {
     dataCadastro: produto.created_at,
     status: produto.status,
     fornecedor_id: produto.fornecedor_id,
+    produto_arius: produto.produto_arius,
+    divergencias: produto.divergencias,
+    marca: produto.marca,
+    depto: produto.depto,
+    secao: produto.secao,
+    ativo: produto.ativo,
+    lancamento: produto.lancamento,
+    destaque: produto.destaque,
   };
 }
 
@@ -34,7 +42,8 @@ function toProduto(produtoDTO: Partial<ProdutoDTO>): Produto {
     ativo: produtoDTO.ativo,
     lancamento: produtoDTO.lancamento,
     destaque: produtoDTO.destaque,
-    produto_arius: produtoDTO.produto_arius
+    produto_arius: produtoDTO.produto_arius,
+    divergencias: produtoDTO.divergencias,
   };
 }
 

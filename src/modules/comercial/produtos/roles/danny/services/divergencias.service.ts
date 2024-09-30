@@ -25,7 +25,7 @@ function tratarDivergencia(dados: any): Divergencia {
     grupo: objectUtil.isCamposExiste(dados, ["grupo"]) ? Number(dados.grupo) : dados.grupo,
     subgrupo: objectUtil.isCamposExiste(dados, ["subgrupo"]) ? Number(dados.subgrupo) : dados.subgrupo,
     classificacao_fiscal: dados.classificacao_fiscal,
-    origem: objectUtil.isCamposExiste(dados, ["origem"]) ? dados.origem.toString() : dados.origem,
+    origem: objectUtil.isCamposExiste(dados, ["origem"]) ? dados.origem?.toString() : dados.origem,
     pesol: objectUtil.isCamposExiste(dados, ["pesol"]) ? Number(dados.pesol) : dados.pesol,
     pesob: objectUtil.isCamposExiste(dados, ["pesob"]) ? Number(dados.pesob) : dados.pesob,
     validade: objectUtil.isCamposExiste(dados, ["validade"]) ? Number(dados.validade) : dados.validade,

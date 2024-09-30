@@ -23,7 +23,7 @@ async function importar({ planilha, fornecedorId }: ImportacaoRequestDTO): Promi
   for (const dado of dados) {
     const produto = obterProduto(fornecedorId, dado);
 
-    const validacao = validacaoService.validar(produto);
+    const validacao = await validacaoService.validar(produto);
 
     if (!validacao.valido) {
       produtosInvalidos.push({ ean: validacao.ean, erros: validacao.erros });

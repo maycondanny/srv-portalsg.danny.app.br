@@ -22,7 +22,7 @@ async function cadastrar(produto: Produto) {
 const cadastrarArius = async (produto: Produto) => {
   try {
     await produtoEcommerceServiceArius.cadastrar({
-      produtoId: produto.produto_id,
+      produtoId: produto.produto_arius,
       marcasEcommerce: {
         id: produto.marca,
       },
@@ -73,6 +73,8 @@ const atualizarBaseDados = async (produto: Produto) => {
       ...produto,
       status: EStatus.APROVADO,
       produto_id: produto.produto_id,
+      imagens: produto.imagens,
+      eans: produto.eans,
       ...campos,
     });
   } catch (erro) {
@@ -83,4 +85,6 @@ const atualizarBaseDados = async (produto: Produto) => {
 
 export default {
   cadastrar,
+  cadastrarArius,
+  atualizarBaseDados
 };

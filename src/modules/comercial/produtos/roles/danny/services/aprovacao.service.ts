@@ -37,6 +37,9 @@ async function aprovar({ role, produto, dadosAtualizacao }: AprovacaoRequestDTO)
 const aprovarCadastro = async (produto: Produto, produtoAtualizacao: Partial<Produto>) => {
   try {
     if (produto.status === ECadastroStatus.CADASTRADO) {
+      if (objectUtil.isVazio(produtoAtualizacao)) {
+        throw new ErroException('Dados para atualização não informados');
+      }
       return await atualizaProdutoAriusService.atualizar(produto, produtoAtualizacao);
     }
     return await cadastraProdutoAriusService.cadastrar(produto);
@@ -48,6 +51,9 @@ const aprovarCadastro = async (produto: Produto, produtoAtualizacao: Partial<Pro
 const aprovarFiscal = async (produto: Produto, produtoAtualizacao: Partial<Produto>) => {
   try {
     if (produto.status === EFiscalStatus.CADASTRADO) {
+      if (objectUtil.isVazio(produtoAtualizacao)) {
+        throw new ErroException('Dados para atualização não informados');
+      }
       return await atualizaTributacaoAriusService.atualizar(produto, produtoAtualizacao);
     }
     return await cadastraTributacaoAriusService.cadastrar(produto);

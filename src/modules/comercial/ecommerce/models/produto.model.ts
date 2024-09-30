@@ -32,8 +32,12 @@ export interface Produto {
   divergencias?: Divergencia[];
 }
 
-function possuiDivergencias(produto: Produto) {
-  return numberUtil.isMaiorZero(produto.divergencias.length);
+function possuiDivergencias(produto: Produto): boolean {
+  return produto.divergencias && numberUtil.isMaiorZero(produto.divergencias.length);
+}
+
+function possuiImagens(produto: Produto): boolean {
+  return produto.imagens && numberUtil.isMaiorZero(produto.imagens.length);
 }
 
 function obterUrlPlataforma(valor: string) {
@@ -48,5 +52,6 @@ function obterUrlPlataforma(valor: string) {
 
 export default {
   possuiDivergencias,
+  possuiImagens,
   obterUrlPlataforma
 };
