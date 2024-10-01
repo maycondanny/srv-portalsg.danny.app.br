@@ -11,6 +11,7 @@ import validacaoService from './validacao.service';
 import httpStatusEnum from '@enums/http-status.enum';
 import cadastraEcommerceAriusEmLoteJob from '../jobs/cadastra-ecommerce-arius-em-lote.job';
 import numberUtil from '@utils/number.util';
+import hubUtil from '@utils/hub.util';
 
 async function aprovar({ produto, dadosAtualizacao }: AprovacaoRequestDTO): Promise<void> {
   if (produto.status === EStatus.CADASTRADO) {
@@ -61,9 +62,9 @@ async function aprovarEmLote({ produtos }: AprovacaoEmLoteRequestDTO): Promise<v
 }
 
 async function salvarImagens(produto: Produto) {
-  // const URL = '/images/create';
-  // const imagens = tratarImagens(produto);
-  // await hubUtil.post(URL, imagens);
+  const URL = '/images/create';
+  const imagens = tratarImagens(produto);
+  await hubUtil.post(URL, imagens);
 }
 
 function tratarImagens(produto: Produto) {
