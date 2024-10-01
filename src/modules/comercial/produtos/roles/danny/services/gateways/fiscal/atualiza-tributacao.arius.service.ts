@@ -11,7 +11,7 @@ import ErroException from '@exceptions/erro.exception';
 import numberUtil from '@utils/number.util';
 import Divergencia from '../../../../../models/divergencia.model';
 import validacaoService from '../../validacao.service';
-import estadoModel from '@modules/core/models/estado.model';
+import estadoModel from '@modules/core/estados/models/estado.model';
 
 const atualizar = async (produto: Produto, produtoAtualizacao: Partial<Produto>) => {
   const validacao = await validacaoService.validarFiscal(_.merge({}, produto, produtoAtualizacao));

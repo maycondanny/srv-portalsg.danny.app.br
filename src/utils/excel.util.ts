@@ -1,3 +1,4 @@
+import ErroException from '@exceptions/erro.exception';
 import fs from 'fs';
 import xlsx from 'xlsx';
 
@@ -12,7 +13,7 @@ function lerDados(planilha: any) {
     });
   } catch (erro) {
     console.error(erro);
-    throw new Error('Não foi possivel ler os dados da planilha.');
+    throw new ErroException('Não foi possivel ler os dados da planilha.');
   }
 }
 

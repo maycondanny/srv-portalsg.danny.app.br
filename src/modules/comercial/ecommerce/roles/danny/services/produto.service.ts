@@ -6,7 +6,7 @@ import produtoRepository from '../repositories/produto.repository';
 import _ from 'lodash';
 import CapaProdutoResponseDTO from '../dtos/capa-produto-response.dto';
 import ErroException from '@exceptions/erro.exception';
-import fornecedorService from '@modules/core/services/fornecedor.service';
+import fornecedorService from '@modules/core/fornecedores/services/fornecedor.service';
 import produtoMapper from '../mappers/produto.mapper';
 import numberUtil from '@utils/number.util';
 import divergenciasService from './divergencias.service';
@@ -95,7 +95,7 @@ async function obterProdutoEan(eanCodigo: string) {
 }
 
 async function atualizar(produtoDTO: ProdutoDTO) {
-  if (!produtoDTO) throw new Error('Produto não informado para atualização');
+  if (!produtoDTO) throw new ErroException('Produto não informado para atualização');
   const produto = produtoMapper.toProduto(produtoDTO);
   const validacao = validacaoService.validar(produto);
 

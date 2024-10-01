@@ -5,6 +5,7 @@ import stringUtil from '@utils/string.util';
 import Ecommerce from './ecommerce.model';
 import numberUtil from '@utils/number.util';
 import Divergencia from './divergencia.model';
+import ErroException from '@exceptions/erro.exception';
 
 export const TAMANHO_DESCRICAO_ABREVIADA = 30;
 export const TAMANHO_DESCRICAO_CLASSIFICACAO = 128;
@@ -175,7 +176,7 @@ function obterTipoTributacao(cst: string): string {
     case '90':
       return 'O';
     default:
-      throw new Error('Tipo da situação tributária não encontrada');
+      throw new ErroException('Tipo da situação tributária não encontrada');
   }
 }
 

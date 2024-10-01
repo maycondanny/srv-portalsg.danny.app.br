@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import comercialModule from './modules/comercial/comercial.module';
 import integradoresModule from './modules/integradores/integradores.module';
+import autenticacaoModule from './modules/autenticacao/autenticacao.module';
 import coreModule from './modules/core/core.module';
 import httpStatusEnum from '@enums/http-status.enum';
 
@@ -13,6 +14,7 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+app.use('/api/autenticacao', autenticacaoModule);
 app.use('/api/comercial', comercialModule);
 app.use('/api/integradores', integradoresModule);
 app.use('/api/core', coreModule);

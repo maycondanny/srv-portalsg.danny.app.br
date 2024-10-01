@@ -1,5 +1,6 @@
 import https from 'https';
 import axios from 'axios';
+import ErroException from '@exceptions/erro.exception';
 
 const AUTH_URI = '/auth/portal';
 
@@ -24,7 +25,7 @@ async function get(url: string, headers?: any) {
     return resposta.data;
   } catch (erro) {
     console.error(erro);
-    throw new Error(erro);
+    throw new ErroException(erro);
   }
 }
 
@@ -40,7 +41,7 @@ async function post<T>(url: string, data: T, headers?: any) {
     return resposta.data ?? {};
   } catch (erro) {
     console.error(erro);
-    throw new Error(erro);
+    throw new ErroException(erro);
   }
 }
 
@@ -56,7 +57,7 @@ async function put<T>(url: string, data: T, headers?: any) {
     return resposta.data ?? {};
   } catch (erro) {
     console.error(erro);
-    throw new Error(erro);
+    throw new ErroException(erro);
   }
 }
 
@@ -67,7 +68,7 @@ async function obterTokenAcessoHub() {
     password: process.env.HUB_AUTH_PASSWORD,
   });
   const token = resposta.data?.token;
-  if (!token) throw new Error('Nao foi possivel obter o token de acesso do HUB');
+  if (!token) throw new ErroException('Nao foi possivel obter o token de acesso do HUB');
   return token;
 }
 
@@ -75,5 +76,5 @@ export default {
   get,
   post,
   put,
-  obterTokenAcessoHub,
+  obterTokenAcessoHub
 };

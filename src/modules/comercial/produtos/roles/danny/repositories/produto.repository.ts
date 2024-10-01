@@ -1,6 +1,7 @@
 import getDbInstance from "@db/db";
 import _ from "lodash";
 import CapaProdutoResponseDTO from "../dtos/capa-produto-response.dto";
+import ErroException from "@exceptions/erro.exception";
 
 async function obterTodosAgrupados(): Promise<CapaProdutoResponseDTO[]> {
   const db = getDbInstance();
@@ -22,7 +23,7 @@ async function obterTodosAgrupados(): Promise<CapaProdutoResponseDTO[]> {
     }));
   } catch (erro) {
     console.log(erro);
-    throw new Error("Não foi possivel obter os produtos.");
+    throw new ErroException("Não foi possivel obter os produtos.");
   } finally {
     db.destroy();
   }

@@ -17,7 +17,7 @@ import produtoMapper from '../mappers/produto.mapper';
 import AprovacaoResponseDTO from '../dtos/aprovacao-response.dto';
 import tabelaFornecedor from '@modules/integradores/arius/comercial/services/tabela-fornecedor';
 import tabelaFornecedorUf from '@modules/integradores/arius/comercial/services/tabela-fornecedor-uf';
-import estadoModel from '@modules/core/models/estado.model';
+import estadoModel from '@modules/core/estados/models/estado.model';
 
 export const LINHA_GERAL = 1;
 
@@ -63,8 +63,8 @@ const aprovarFiscal = async (produto: Produto, produtoAtualizacao: Partial<Produ
 };
 
 const validarSituacaoTributaria = ({ st_compra, tipo_tributacao }): boolean => {
-  if (!st_compra) throw new Error('Situação tributária do produto não informada.');
-  if (!tipo_tributacao) throw new Error('Tipo situação tributária do produto não informada.');
+  if (!st_compra) throw new ErroException('Situação tributária do produto não informada.');
+  if (!tipo_tributacao) throw new ErroException('Tipo situação tributária do produto não informada.');
   const tipoTributacao = produtoModel.obterTipoTributacao(st_compra);
   return tipoTributacao === tipo_tributacao;
 };
@@ -82,7 +82,7 @@ async function inserirProdutoFornecedor({ produtoId, fornecedorId, referencia })
     });
   } catch (erro) {
     console.log(erro);
-    throw new Error(erro.response.data.processedException?.causeMessage);
+    throw new ErroException(erro.response.data.processedException?.causeMessage);
   }
 }
 
@@ -114,7 +114,7 @@ async function inserirTabelaFornecedor({ produtoId, fornecedorId }) {
     });
   } catch (erro) {
     console.log(erro);
-    throw new Error(erro.response.data.processedException?.causeMessage);
+    throw new ErroException(erro.response.data.processedException?.causeMessage);
   }
 }
 
@@ -150,7 +150,7 @@ async function inserirTabelaFornecedorUF({ estado, produtoId, fornecedorId, prec
     });
   } catch (erro) {
     console.log(erro);
-    throw new Error(erro.response.data.processedException?.causeMessage);
+    throw new ErroException(erro.response.data.processedException?.causeMessage);
   }
 }
 

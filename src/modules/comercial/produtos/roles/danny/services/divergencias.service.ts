@@ -1,3 +1,4 @@
+import ErroException from '@exceptions/erro.exception';
 import Divergencia from '@modules/comercial/produtos/models/divergencia.model';
 import produtoModel, { Produto } from '@modules/comercial/produtos/models/produto.model';
 import produtoPortalService from '@modules/integradores/hub/produtos/services/produto.service';
@@ -7,7 +8,7 @@ import _ from 'lodash';
 
 async function obterTodas(produto: Produto): Promise<Divergencia[]> {
   if (numberUtil.isMenorOuIgualZero(produto.eans.length)) {
-    throw new Error('Eans não encontrados.');
+    throw new ErroException('Eans não encontrados.');
   }
   const codigos = produtoModel.obterCodigosEans(produto.eans);
   const divergencia = await produtoPortalService.obterTodosPorEans(codigos);

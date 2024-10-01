@@ -17,13 +17,13 @@ import produtoMapper from '../mappers/produto.mapper';
 import ErroException from '@exceptions/erro.exception';
 import httpStatusEnum from '@enums/http-status.enum';
 import validacaoService from './validacao.service';
-import { Fornecedor } from '@modules/core/models/fornecedor.model';
-import fornecedorService from '@modules/core/services/fornecedor.service';
+import { Fornecedor } from '@modules/core/fornecedores/models/fornecedor.model';
+import fornecedorService from '@modules/core/fornecedores/services/fornecedor.service';
 
 async function obterTodosPorFornecedor(fornecedorId: number, role: ERole): Promise<ProdutoFornecedorResponse> {
   try {
     if (!fornecedorId) {
-      throw new Error('Fornecedor não encontrado');
+      throw new ErroException('Fornecedor não encontrado');
     }
 
     const fornecedor = await buscarFornecedor(fornecedorId);
@@ -52,7 +52,7 @@ async function obterTodosPorFornecedor(fornecedorId: number, role: ERole): Promi
     };
   } catch (erro) {
     console.error(erro);
-    throw new Error('Não foi possivel obter os produtos.');
+    throw new ErroException('Não foi possivel obter os produtos.');
   }
 }
 
@@ -134,8 +134,8 @@ function agrupar(produtos: CapaProdutoResponseDTO[]): CapaProdutoResponseDTO[] {
 }
 
 async function atualizar(role: ERole, produto: Produto) {
-  if (!role) throw new Error('Role não informada');
-  if (!produto) throw new Error('Produto não informada');
+  if (!role) throw new ErroException('Role não informada');
+  if (!produto) throw new ErroException('Produto não informada');
 
   if (role === ERole.FISCAL) {
     const validacao = await validacaoService.validarFiscal(produto);

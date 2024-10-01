@@ -6,7 +6,7 @@ import produtoModel, { EFiscalStatus, Produto } from "@modules/comercial/produto
 import produtoService from "@modules/comercial/produtos/services/produto.service";
 import validacaoService from "../../validacao.service";
 import ErroException from "@exceptions/erro.exception";
-import estadoModel from "@modules/core/models/estado.model";
+import estadoModel from "@modules/core/estados/models/estado.model";
 
 async function cadastrar(produto: Produto) {
   const validacao = await validacaoService.validarFiscal(produto);

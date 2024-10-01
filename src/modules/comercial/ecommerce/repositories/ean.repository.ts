@@ -25,7 +25,7 @@ async function obterPorId(ecommerceId: number): Promise<Ean[]> {
     return await db.select('*').from('produtos_ecommerce_eans AS p').where('p.ecommerce_id', '=', ecommerceId);
   } catch (erro) {
     console.error(erro);
-    throw new Error('Não foi possivel obter os eans.');
+    throw new ErroException('Não foi possivel obter os eans.');
   } finally {
     db.destroy();
   }

@@ -9,7 +9,7 @@ import _ from 'lodash';
 import objectUtil from '@utils/object.util';
 import produtoCompradorService from '@modules/integradores/arius/comercial/services/produto-comprador.service';
 import ErroException from '@exceptions/erro.exception';
-import estadoModel from '@modules/core/models/estado.model';
+import estadoModel from '@modules/core/estados/models/estado.model';
 
 async function atualizar(produto: Produto, produtoAtualizacao: Partial<Produto>) {
   if (!produto.produto_arius) throw new ErroException('Produto não encontrado!');

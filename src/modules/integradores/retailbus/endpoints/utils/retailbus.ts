@@ -1,3 +1,4 @@
+import ErroException from "@exceptions/erro.exception";
 import axios from "axios";
 import dotenv from "dotenv";
 dotenv.config();
@@ -15,7 +16,7 @@ const get = async (url: string, headers?: any) => {
     return resposta.data;
   } catch (erro) {
     console.error(erro);
-    throw new Error(erro);
+    throw new ErroException(erro);
   }
 };
 

@@ -1,5 +1,6 @@
 import getDbInstance from '@db/db';
 import { Estado } from '../models/estado.model';
+import ErroException from '@exceptions/erro.exception';
 
 async function obterTodos(): Promise<Estado[]> {
   const db = getDbInstance();
@@ -8,7 +9,7 @@ async function obterTodos(): Promise<Estado[]> {
     return await db.select('*').from('sigla_estados');
   } catch (erro) {
     console.error(erro);
-    throw new Error('Não foi possível obter os estados');
+    throw new ErroException('Não foi possível obter os estados');
   } finally {
     await db.destroy();
   }

@@ -1,11 +1,12 @@
 import cacheUtil from '@utils/cache.util';
 import Produto from '../models/produto.model';
 import hubUtil from '@utils/hub.util';
+import ErroException from '@exceptions/erro.exception';
 
 const CHAVE_DIVERGENCIAS_ECOMMERCE = 'divergencias_ecommerce';
 
 async function obterTodos(produtoId: number): Promise<Produto[]> {
-  if (!produtoId) throw new Error('ID do produto não informado.');
+  if (!produtoId) throw new ErroException('ID do produto não informado.');
   const chaveCache = `${CHAVE_DIVERGENCIAS_ECOMMERCE}_${produtoId}`;
   const produtosCache = await cacheUtil.obter(chaveCache);
   if (produtosCache) return produtosCache;

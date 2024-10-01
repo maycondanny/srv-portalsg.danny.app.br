@@ -1,5 +1,6 @@
 import getDbInstance from '@db/db';
 import { Fornecedor } from '../models/fornecedor.model';
+import ErroException from '@exceptions/erro.exception';
 
 async function cadastrar(fornecedor: Fornecedor): Promise<number> {
   const db = getDbInstance();
@@ -21,7 +22,7 @@ async function cadastrar(fornecedor: Fornecedor): Promise<number> {
     });
   } catch (erro) {
     console.error(erro);
-    throw new Error('Não foi possível cadastrar ou atualizar um fornecedor.');
+    throw new ErroException('Não foi possível cadastrar ou atualizar um fornecedor.');
   } finally {
     await db.destroy();
   }
@@ -34,7 +35,7 @@ async function obterPorId(fornecedorId: number): Promise<Fornecedor> {
     return await db.into('fornecedores AS f').where('f.id', '=', fornecedorId).first();
   } catch (erro) {
     console.error(erro);
-    throw new Error('Não foi possível cadastrar ou atualizar um fornecedor.');
+    throw new ErroException('Não foi possível cadastrar ou atualizar um fornecedor.');
   } finally {
     await db.destroy();
   }

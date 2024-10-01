@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Confirmação de Cadastro</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        color: #333;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+      }
+      .container {
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        padding: 20px;
+        border: 1px solid #dddddd;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        font-size: 24px;
+        color: #333333;
+      }
+      p {
+        font-size: 16px;
+        line-height: 1.5;
+      }
+      .container-button {
+        text-align: center;
+      }
+      .button {
+        display: inline-block;
+        padding: 10px 20px;
+        font-size: 16px;
+        color: #ffffff !important;
+        background-color: #007bff;
+        text-decoration: none;
+        border-radius: 5px;
+        margin: 20px 0;
+      }
+      .footer {
+        font-size: 14px;
+        color: #888888;
+        text-align: center;
+        margin-top: 20px;
+      }
+      .logo {
+        display: block;
+        margin: 0 auto 20px;
+        width: 150px;
+        height: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Olá %NOME%,</h1>
+      <p>
+        Recebemos sua solicitação para redefinir a senha de acesso à sua conta.
+        Para prosseguir com a alteração, clique no botão abaixo:
+      </p>
+      <div class="container-button">
+        <a href="%LINK%" class="button">Alterar minha senha</a>
+      </div>
+      <p>
+        Se você não fez essa solicitação, por favor, ignore este e-mail. Não se
+        preocupe, sua senha não será alterada até que você clique no botão acima
+        e crie uma nova senha.
+      </p>
+      <p>
+        Caso tenha qualquer dúvida ou necessite de assistência adicional entre em contato com nossa equipe de suporte.
+      </p>
+      <div class="footer">
+        <p>Atenciosamente, <br />Equipe Danny Cosméticos</p>
+      </div>
+    </div>
+  </body>
+</html>

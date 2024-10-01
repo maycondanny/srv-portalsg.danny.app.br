@@ -24,13 +24,13 @@ async function obterTodos(fornecedorId: number): Promise<ProdutoDTO[]> {
 }
 
 async function obterPorId(id: number): Promise<ProdutoDTO> {
-  if (!id) throw new Error('ID do produto não informado');
+  if (!id) throw new ErroException('ID do produto não informado');
   const produto = await produtoService.obterPorId(id);
   return produtoMapper.toDTO(produto);
 }
 
 async function atualizar(produtoDTO: ProdutoDTO): Promise<void> {
-  if (!produtoDTO) throw new Error('Produto não informado para atualização');
+  if (!produtoDTO) throw new ErroException('Produto não informado para atualização');
   const produto = produtoMapper.toProduto(produtoDTO);
   const validacao = await validacaoService.validar(produto);
 
