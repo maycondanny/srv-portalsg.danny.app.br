@@ -5,4 +5,5 @@ export default interface ProdutoPlanilhaDTO {
   modo_uso: string;
   imagens: string[];
   eans: string[];
+  status: number;
 }

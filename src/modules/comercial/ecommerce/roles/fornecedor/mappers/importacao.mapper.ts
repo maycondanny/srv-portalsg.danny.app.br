@@ -13,6 +13,7 @@ function toProduto(fornecedorId: number, produtoPlanilhaDTO: ProdutoPlanilhaDTO)
     fornecedor_id: fornecedorId,
     eans: obterEans(produtoPlanilhaDTO),
     imagens: obterImagens(produtoPlanilhaDTO),
+    status: produtoPlanilhaDTO.status
   };
 }
 

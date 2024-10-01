@@ -1,6 +1,6 @@
 import ProdutoPlanilhaDTO from '../dtos/produto-planilha.dto';
 import importacaoMapper from '../mappers/importacao.mapper';
-import { Produto } from '@modules/comercial/ecommerce/models/produto.model';
+import { EStatus, Produto } from '@modules/comercial/ecommerce/models/produto.model';
 import ErroException from '@exceptions/erro.exception';
 import ImportacaoRequestDTO from '../dtos/importacao.request.dto';
 import httpStatusEnum from '@enums/http-status.enum';
@@ -53,6 +53,7 @@ const obterProduto = (fornecedorId: number, dadosPlanilha: any): Produto => {
     modo_uso: dadosPlanilha['MODO DE USO']?.trim(),
     imagens: obterImagensFormatadas(dadosPlanilha['Link para vídeos e Imagens']),
     eans: limparEans(dadosPlanilha['EAN']),
+    status: EStatus.NOVO
   };
 
   return importacaoMapper.toProduto(fornecedorId, produtoPlanilha);

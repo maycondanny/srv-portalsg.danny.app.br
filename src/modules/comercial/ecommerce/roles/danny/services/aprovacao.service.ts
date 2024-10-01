@@ -33,15 +33,29 @@ async function aprovarEmLote({ produtos }: AprovacaoEmLoteRequestDTO): Promise<v
     throw new ErroException('Produtos para aprovação não encontrados');
   }
 
+  const produtosValidos = [];
+  const produtosInvalidos = [];
+
   for (const produtoDTO of produtos) {
     const produto = produtoMapper.toProduto(produtoDTO);
-
     const validacao = validacaoService.validar(produto);
 
-    if (!validacao.valido) {
-      throw new ErroException('Erro ao aprovar o produto', validacao, httpStatusEnum.Status.ERRO_REQUISICAO);
+    if (validacao.valido) {
+      produtosValidos.push(produto);
+    } else {
+      produtosInvalidos.push(validacao);
     }
+  }
 
+  if (numberUtil.isMaiorZero(produtosInvalidos.length)) {
+    throw new ErroException(
+      `Não foi possivel fazer a aprovação de ${produtosInvalidos.length} produtos, verifique`,
+      produtosInvalidos,
+      httpStatusEnum.Status.ERRO_REQUISICAO
+    );
+  }
+
+  for (const produto of produtosValidos) {
     await cadastraEcommerceAriusEmLoteJob.add({ produto });
   }
 }

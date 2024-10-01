@@ -12,7 +12,7 @@ import httpStatusEnum from '@enums/http-status.enum';
 
 async function atualizar(produto: Produto, produtoAtualizacao: Produto) {
   if (!produtoModel.possuiDivergencias(produto)) {
-    throw new ErroException("Dados do produto cadastrado não informados");
+    throw new ErroException('Dados do produto cadastrado não informados');
   }
   const divergencia: Divergencia = produto.divergencias[0];
 
@@ -50,11 +50,11 @@ const atualizarArius = async (produtoAtualizacao: Produto, divergencia: Divergen
         caracteristicaHtml: produtoAtualizacao.caracteristica,
       }),
       ...(produtoAtualizacao.modo_uso && { modoUso: produtoAtualizacao.modo_uso }),
-      ...(produtoAtualizacao.ativo && {
+      ...(typeof produtoAtualizacao.ativo !== undefined && {
         tipoSituacaoProdutoEcommerce: produtoAtualizacao.ativo ? 'ATIVO' : 'INATIVO',
       }),
-      ...(produtoAtualizacao.lancamento && { lancamento: produtoAtualizacao.lancamento }),
-      ...(produtoAtualizacao.destaque && { destaque: produtoAtualizacao.destaque }),
+      ...(typeof produtoAtualizacao.lancamento !== undefined && { lancamento: produtoAtualizacao.lancamento }),
+      ...(typeof produtoAtualizacao.destaque !== undefined && { destaque: produtoAtualizacao.destaque }),
     };
 
     if (objectUtil.isVazio(campos)) {
@@ -83,6 +83,9 @@ const atualizarBaseDados = async (produto: Produto, produtoAtualizacao: Produto,
     ativo: produtoAtualizacao?.ativo ?? divergencia.ativo,
     lancamento: produtoAtualizacao?.lancamento ?? divergencia.lancamento,
     destaque: produtoAtualizacao?.destaque ?? divergencia.destaque,
+    imagens: numberUtil.isMaiorZero(produtoAtualizacao?.imagens?.length)
+      ? produtoAtualizacao.imagens
+      : divergencia.imagens,
   };
 
   if (objectUtil.isVazio(campos)) {
@@ -94,7 +97,6 @@ const atualizarBaseDados = async (produto: Produto, produtoAtualizacao: Produto,
       id: produto.id,
       status: EStatus.APROVADO,
       produto_arius: divergencia.produto_id,
-      imagens: produtoAtualizacao?.imagens ?? divergencia.imagens,
       ...campos,
     });
   } catch (erro) {
