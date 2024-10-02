@@ -33,7 +33,7 @@ async function cadastrar(produtoDTO: ProdutoDTO): Promise<void> {
   const referenciaFornecedor = produto.codigo_produto_fornecedor;
 
   await cacheUtil.add(
-    `${CODIGO_REFERENCIA_FORNECEDOR_CACHE}_${referenciaFornecedor}`,
+    `${CODIGO_REFERENCIA_FORNECEDOR_CACHE}_${produto.fornecedor_id}_${referenciaFornecedor}`,
     referenciaFornecedor,
     ETempoExpiracao.UMA_SEMANA
   );

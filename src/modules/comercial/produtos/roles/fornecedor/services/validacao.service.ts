@@ -32,7 +32,7 @@ async function validarCodigoFornecedorCache(produto: Produto): Promise<string[]>
   const referencia = produto.codigo_produto_fornecedor;
 
   const produtoFornecedorCache = await cacheUtil.obter(
-    `${CODIGO_REFERENCIA_FORNECEDOR_CACHE}_${referencia}`
+    `${CODIGO_REFERENCIA_FORNECEDOR_CACHE}_${produto.fornecedor_id}_${referencia}`
   );
 
   if (produtoFornecedorCache) {

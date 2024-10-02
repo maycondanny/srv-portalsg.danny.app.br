@@ -9,8 +9,10 @@ async function cadastrar(usuario: Usuario): Promise<number> {
     if (usuarioExiste) {
       throw new ErroException('O email fornecido já está sendo utilizado');
     }
-    usuario.senha = encryptacaoUtil.encriptar(usuario.senha);
-    return await usuariosRepository.cadastrar(usuario);
+    return await usuariosRepository.cadastrar({
+      ...usuario,
+      senha: encryptacaoUtil.encriptar("123mudar") // mudar
+    });
   } catch (erro) {
     console.error(erro);
     throw erro;

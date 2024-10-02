@@ -12,6 +12,10 @@ import fornecedorRepository from '@modules/core/fornecedores/repositories/fornec
 import { REGEX_LIMPAR_CARACTERES_CNPJ } from '@utils/regex.util';
 import ErroException from '@exceptions/erro.exception';
 import objectUtil from '@utils/object.util';
+import ConfirmaCadastroRequestDTO from '../dtos/confirma-cadastro-request.dto';
+import ConfirmaCadastroResponseDTO from '../dtos/confirma-cadastro-response.dto';
+import dotenv from 'dotenv';
+dotenv.config();
 
 async function carregarSessao(usuario: any) {
   const fornecedor = await usuarioFornecedorRepository.obterPorUsuario(usuario.id);
@@ -97,7 +101,7 @@ async function registrar(registroFornecedorDTO: RegistroFornecedorDTO): Promise<
   await emailConfirmacaoCadastroJob.add({ nome, email, token });
 }
 
-async function confirmarCadastro(token: string) {
+async function confirmarCadastro({ token }: ConfirmaCadastroRequestDTO): Promise<ConfirmaCadastroResponseDTO> {
   if (!token) throw new ErroException('Token não encontrado.');
 
   const dados = await usuarioFornecedorRepository.obterPorToken(token);
@@ -123,7 +127,11 @@ async function confirmarCadastro(token: string) {
 }
 
 function gerarTokenConfirmacao({ email, cnpj, role }): string {
-  return jwtUtil.sign({ payload: { email, cnpj, role } });
+  return jwtUtil.sign({
+    payload: { email, cnpj, role },
+    expiracao: Number(process.env.TEMPO_CONFIRMACAO_CONTA),
+    chave: process.env.CHAVE_TOKEN_JWT,
+  });
 }
 
 function obterCnpjLimpo(cnpj: string): string {

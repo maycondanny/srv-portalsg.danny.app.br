@@ -9,12 +9,18 @@ import EmailRedefinicaoSenhaRequestDTO from '../dtos/email-redefinicao-senha-req
 import RedefineSenhaRequestDTO from '../dtos/redefine-senha-request.dto';
 import Usuario from '@modules/core/usuarios/models/usuario.model';
 import autenticacaoService from '../services/autenticacao.service';
+import ConfirmaCadastroRequestDTO from '../dtos/confirma-cadastro-request.dto';
+import ConfirmaCadastroResponseDTO from '../dtos/confirma-cadastro-response.dto';
+import encryptacaoUtil from '@utils/encryptacao.util';
 
 async function login(
   req: Request<{}, {}, LoginRequestDTO, {}>,
   res: Response<ResponseDTO<LoginResponseDTO>>,
   next: NextFunction
 ) {
+
+  console.log(encryptacaoUtil.encriptar("123mudar"));
+
   try {
     const { token, tokenHub } = await autenticacaoService.login(req.body);
     return res.status(httpStatusEnum.Status.SUCESSO).json({
@@ -52,7 +58,7 @@ async function redefinirSenha(
   try {
     await autenticacaoService.redefinirSenha(req.body);
     return res.status(httpStatusEnum.Status.SUCESSO).json({
-      mensagem: 'Senha redefinida com sucesso',
+      mensagem: 'Senha redefinida com sucesso'
     });
   } catch (error) {
     next(error);
@@ -89,10 +95,27 @@ async function enviarEmailRedefinicaoSenha(
   }
 }
 
+async function confirmarCadastro(
+  req: Request<{}, {}, ConfirmaCadastroRequestDTO, {}>,
+  res: Response<ResponseDTO<ConfirmaCadastroResponseDTO>>,
+  next: NextFunction
+) {
+  try {
+    const retorno = await autenticacaoService.confirmarCadastro(req.body);
+    return res.status(httpStatusEnum.Status.SUCESSO).json({
+      mensagem: 'Cadastro confirmado com sucesso',
+      dados: retorno
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 export default {
   registrar,
   login,
   carregarSessao,
   enviarEmailRedefinicaoSenha,
   redefinirSenha,
+  confirmarCadastro
 };

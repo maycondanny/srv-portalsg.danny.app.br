@@ -8,5 +8,6 @@ router.post('/login', autenticacaoController.login);
 router.post('/redefine-senha', autenticacaoController.redefinirSenha);
 router.post('/carrega-sessao', autenticacaoController.carregarSessao);
 router.post('/email-redefinicao-senha', autenticacaoController.enviarEmailRedefinicaoSenha);
+router.post('/confirma-cadastro', autenticacaoController.confirmarCadastro);
 
 export default router;

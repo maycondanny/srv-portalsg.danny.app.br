@@ -21,7 +21,7 @@ function obterUrl(id: number): string {
   const token = jwtUtil.sign<any>({
     payload,
     chave: secret,
-    expiracao: Math.round(Date.now() / 1000) + 10 * 60 * Number(expiresIn)
+    expiracao: Number(expiresIn)
   });
 
   return url + '/embed/dashboard/' + token + '#bordered=true&titled=true&theme=night';

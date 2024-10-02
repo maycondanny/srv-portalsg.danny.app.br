@@ -1,5 +1,5 @@
 export default interface RedefineSenhaRequestDTO {
-  usuarioId: number;
+  token: string;
   senha: string;
   confirmacaoSenha: string;
 }

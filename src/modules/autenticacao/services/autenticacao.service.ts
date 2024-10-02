@@ -15,8 +15,13 @@ import emailRedefinicaoSenhaJob from '../jobs/email-redefinicao-senha.job';
 import EmailRedefinicaoSenhaRequestDTO from '../dtos/email-redefinicao-senha-request.dto';
 import RedefineSenhaRequestDTO from '../dtos/redefine-senha-request.dto';
 import ErroException from '@exceptions/erro.exception';
-
-const TEMPO_EXPIRACAO_REDEFINICAO_SENHA = 15 * 60;
+import ConfirmaCadastroRequestDTO from '../dtos/confirma-cadastro-request.dto';
+import ConfirmaCadastroResponseDTO from '../dtos/confirma-cadastro-response.dto';
+import RedefineSenhaDTO from '../dtos/redefine-senha.dto';
+import RedefineSenhaResponseDTO from '../dtos/redefine-senha-response.dto';
+import dotenv from 'dotenv';
+import objectUtil from '@utils/object.util';
+dotenv.config();
 
 async function login({ email, senha }: LoginRequestDTO): Promise<LoginResponseDTO> {
   const usuario = await usuariosService.obterUsuarioPorEmail(email);
@@ -40,6 +45,8 @@ async function login({ email, senha }: LoginRequestDTO): Promise<LoginResponseDT
   }
 
   const token = jwtUtil.sign({
+    expiracao: Number(process.env.TEMPO_EXPIRACAO_TOKEN_JWT),
+    chave: process.env.CHAVE_TOKEN_JWT,
     payload: {
       usuario_id: usuario.id,
       role: usuario.role,
@@ -89,12 +96,33 @@ async function enviarEmailRedefinicaoSenha({ email }: EmailRedefinicaoSenhaReque
 
   if (!usuario) throw new ErroException('Email não cadastrado');
 
-  const token = jwtUtil.sign({ payload: { id: usuario.id }, expiracao: TEMPO_EXPIRACAO_REDEFINICAO_SENHA });
+  const token = jwtUtil.sign({
+    payload: { usuarioId: usuario.id },
+    expiracao: Number(process.env.TEMPO_EXPIRACAO_REDEFINICAO_SENHA),
+    chave: process.env.CHAVE_TOKEN_JWT,
+  });
+
   await emailRedefinicaoSenhaJob.add({ nome: usuario.nome, email, token });
 }
 
-async function redefinirSenha({ usuarioId, senha, confirmacaoSenha }: RedefineSenhaRequestDTO) {
-  await usuariosService.redefinirSenha({ id: usuarioId, senha, confirmacaoSenha });
+async function redefinirSenha(dto: RedefineSenhaRequestDTO): Promise<void> {
+  if (!objectUtil.isCamposExiste(dto, ['token', 'senha', 'confirmacaoSenha'])) {
+    throw new ErroException('Não foi possivel redefinir sua senha');
+  }
+
+  const isValido = jwtUtil.validate({ token: dto.token, chave: process.env.CHAVE_TOKEN_JWT });
+
+  if (!isValido) {
+    throw new ErroException('Link expirado');
+  }
+
+  const { usuarioId } = jwtUtil.decode<RedefineSenhaDTO>(dto.token);
+
+  await usuariosService.redefinirSenha({ id: usuarioId, senha: dto.senha, confirmacaoSenha: dto.confirmacaoSenha });
+}
+
+async function confirmarCadastro({ token }: ConfirmaCadastroRequestDTO): Promise<ConfirmaCadastroResponseDTO> {
+  return await fornecedorService.confirmarCadastro({ token });
 }
 
 export default {
@@ -103,4 +131,5 @@ export default {
   carregarSessao,
   enviarEmailRedefinicaoSenha,
   redefinirSenha,
+  confirmarCadastro,
 };

@@ -38,7 +38,7 @@ const worker = new Worker(
       produto_id: produtoId,
     });
 
-    await cacheUtil.add(`${CODIGO_REFERENCIA_FORNECEDOR_CACHE}_${referencia}`, referencia, ETempoExpiracao.UMA_SEMANA);
+    await cacheUtil.add(`${CODIGO_REFERENCIA_FORNECEDOR_CACHE}_${produto.fornecedor_id}_${referencia}`, referencia, ETempoExpiracao.UMA_SEMANA);
   },
   { connection, removeOnFail: { count: 0 }, removeOnComplete: { count: 0 } }
 );

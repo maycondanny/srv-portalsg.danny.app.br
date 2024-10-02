@@ -1,6 +1,6 @@
 import cacheUtil from '@utils/cache.util';
 import hubUtil from '@utils/hub.util';
-import Marca from '../../produtos/models/marca.model';
+import Marca from '../models/marca.model';
 
 const CHAVE_HUB_MARCAS_ECOMMERCE_CACHE = 'hub_marcas_ecommerce';
 

@@ -1,5 +1,5 @@
 import hubUtil from '@utils/hub.util';
-import ProdutoFornecedor from '../../produtos/models/produto-fornecedor.model';
+import ProdutoFornecedor from '../models/produto-fornecedor.model';
 
 async function obterPorReferencia(referencia: string): Promise<ProdutoFornecedor> {
   const URL = `/supplier_products?reference=${referencia}`;

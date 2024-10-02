@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  redis_queue:
+    image: redis:7.2.4
+    container_name: redis_queue
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  redis_cache:
+    image: redis:7.2.4
+    container_name: redis_cache
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_cache_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:
+  redis_cache_data:
