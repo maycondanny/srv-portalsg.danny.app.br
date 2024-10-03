@@ -7,8 +7,8 @@ import httpStatusEnum from '@enums/http-status.enum';
 import excelUtil from '@utils/excel.util';
 import _ from 'lodash';
 import numberUtil from '@utils/number.util';
-import validacaoService from './validacao.service';
 import cadastroProdutoJob from '../jobs/cadastro-produto.job';
+import validacaoService from '@modules/comercial/ecommerce/services/validacao.service';
 
 async function importar({ planilha, fornecedorId }: ImportacaoRequestDTO): Promise<void> {
   if (!planilha) throw new ErroException('Planilha não enviada', httpStatusEnum.Status.ERRO_REQUISICAO);

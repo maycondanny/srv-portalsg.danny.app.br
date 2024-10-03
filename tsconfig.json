@@ -23,6 +23,6 @@
       "@repositories/*": ["repositories/*"]
     }
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "src/app.ts"],
   "exclude": ["node_modules", "dist"]
 }

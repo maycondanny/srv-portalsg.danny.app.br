@@ -1,11 +1,11 @@
 import { Divergencia } from '@modules/comercial/ecommerce/models/divergencia.model';
-import produtosServiceHub from '@modules/integradores/hub/ecommerce/services/produtos.service';
+import produtoService from '@modules/integradores/hub/ecommerce/services/produto.service';
 import numberUtil from '@utils/number.util';
 import objectUtil from '@utils/object.util';
 import _ from 'lodash';
 
 async function obterTodas(produtoId: number): Promise<Divergencia[]> {
-  const divergencias = await produtosServiceHub.obterTodos(produtoId);
+  const divergencias = await produtoService.obterTodos(produtoId);
   return numberUtil.isMaiorZero(divergencias.length) ? [tratarDivergencia(divergencias[0])] : [];
 }
 

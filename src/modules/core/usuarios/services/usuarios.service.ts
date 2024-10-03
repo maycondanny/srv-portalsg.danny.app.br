@@ -2,6 +2,8 @@ import Usuario from '../models/usuario.model';
 import encryptacaoUtil from '@utils/encryptacao.util';
 import usuariosRepository from '../repositories/usuarios.repository';
 import ErroException from '@exceptions/erro.exception';
+import dotenv from 'dotenv';
+dotenv.config();
 
 async function cadastrar(usuario: Usuario): Promise<number> {
   try {
@@ -9,10 +11,8 @@ async function cadastrar(usuario: Usuario): Promise<number> {
     if (usuarioExiste) {
       throw new ErroException('O email fornecido já está sendo utilizado');
     }
-    return await usuariosRepository.cadastrar({
-      ...usuario,
-      senha: encryptacaoUtil.encriptar("123mudar") // mudar
-    });
+    usuario.senha = encryptacaoUtil.encriptar(usuario.senha || process.env.SENHA_PADRAO_NOVO_USUARIO);
+    return await usuariosRepository.cadastrar(usuario);
   } catch (erro) {
     console.error(erro);
     throw erro;

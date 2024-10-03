@@ -1,4 +1,5 @@
-import nodemailer from "nodemailer";
+import nodemailer from 'nodemailer';
+import { Attachment } from 'nodemailer/lib/mailer';
 
 interface EmailProps {
   assunto: string;
@@ -7,35 +8,32 @@ interface EmailProps {
   cc?: string[];
   bcc?: string[];
   corpo: string;
-  anexos?: any;
+  anexos?: Attachment[];
 }
 
-const enviar = async (email: EmailProps) => {
+async function enviar(email: EmailProps) {
   try {
     const transporter = obterTransport();
     await sender(transporter, email);
   } catch (erro) {
-    console.log("Erro ao enviar email...", erro);
+    console.log('Erro ao enviar email...', erro);
     throw erro;
   }
-};
+}
 
-const enviarEmLote = async (emails: EmailProps[]) => {
+async function enviarEmLote(emails: EmailProps[]) {
   try {
     const transporter = obterTransport();
     for (const email of emails) {
       await sender(transporter, email);
     }
   } catch (erro) {
-    console.log("Erro ao enviar email...", erro);
+    console.log('Erro ao enviar email...', erro);
     throw erro;
   }
-};
+}
 
-const sender = async (
-  transporter,
-  { assunto, destinatario, remetente, cc, bcc, corpo, anexos }: EmailProps
-) => {
+async function sender(transporter, { assunto, destinatario, remetente, cc, bcc, corpo, anexos }: EmailProps) {
   await transporter.sendMail({
     subject: assunto,
     to: destinatario,
@@ -45,13 +43,13 @@ const sender = async (
     attachments: anexos,
     html: corpo,
   });
-};
+}
 
-const obterTransport = () => {
+function obterTransport() {
   return nodemailer.createTransport({
     host: process.env.MAIL_HOST,
     port: Number(process.env.MAIL_PORT),
-    secure: process.env.MAIL_SECURE === "true" ? true : false,
+    secure: process.env.MAIL_SECURE === 'true' ? true : false,
     tls: {
       rejectUnauthorized: Boolean(process.env.MAIL_TLS),
     },
@@ -60,7 +58,7 @@ const obterTransport = () => {
       pass: process.env.MAIL_PASS,
     },
   });
-};
+}
 
 export default {
   enviar,

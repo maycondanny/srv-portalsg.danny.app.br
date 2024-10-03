@@ -1,20 +1,15 @@
 import ariusUtil from '@utils/arius.util';
 import cacheUtil, { ETempoExpiracao } from '@utils/cache.util';
-
-interface Familia {
-  id?: number;
-  descricao: string;
-  dataCadastro?: Date;
-  dataAlteracao?: Date;
-  maxDesconto?: number;
-}
+import Familia from '../models/familia.model';
 
 const URI = '/AriusERP/v2/Familia';
 const CHAVE_CACHE = 'familia';
 
-async function cadastrar(familia: Familia): Promise<Familia> {
+async function cadastrar(nome: string): Promise<Familia> {
   try {
-    const resposta = await ariusUtil.post(URI, familia);
+    const resposta = await ariusUtil.post<Familia>(URI, {
+      descricao: nome,
+    });
     cacheUtil.add(`${CHAVE_CACHE}_${resposta.id}`, resposta, ETempoExpiracao.UMA_SEMANA);
     return resposta;
   } catch (erro) {

@@ -40,6 +40,10 @@ const worker = new Worker(
         destinatario: email,
         remetente: 'nao.responda@dannycosmeticos.com.br',
         corpo: obterTemplateCamposSubstituidos(conteudoTemplate, nome, link),
+        anexos: [
+          { path: path.join(process.cwd(), 'public', 'docs', 'Importação de Produtos Cadastro Geral.pdf'), filename: 'Importação de Produtos Cadastro Geral.pdf' },
+          { path: path.join(process.cwd(), 'public', 'docs', 'Importação de Produtos no Ecommerce.pdf'), filename: 'Importação de Produtos no Ecommerce.pdf' },
+        ],
       });
     } catch (erro) {
       throw new ErroException('Erro ao enviar email de confirmação de cadastro');

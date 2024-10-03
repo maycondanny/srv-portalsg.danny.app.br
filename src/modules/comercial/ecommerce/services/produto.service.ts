@@ -5,9 +5,17 @@ import eanService from './ean.service';
 import imagemService from './imagem.service';
 import numberUtil from '@utils/number.util';
 import ErroException from '@exceptions/erro.exception';
+import validacaoService from './validacao.service';
+import httpStatusEnum from '@enums/http-status.enum';
 
 async function cadastrar(produto: Produto) {
   try {
+    const validacao = await validacaoService.validar(produto);
+
+    if (!validacao.valido) {
+      throw new ErroException('Erro ao cadastrar novo produto', validacao, httpStatusEnum.Status.ERRO_REQUISICAO);
+    }
+
     const eans = produto.eans;
     const imagens = produto.imagens;
     const produtoTratado = _.omit(produto, ['eans', 'imagens']) as Produto;
@@ -22,12 +30,12 @@ async function cadastrar(produto: Produto) {
 
 async function obterTodosPorFornecedor(fornecedorId: number): Promise<Produto[]> {
   try {
-    if (!fornecedorId) throw new ErroException("Fornecedor não informado");
+    if (!fornecedorId) throw new ErroException('Fornecedor não informado');
     const produtos = await produtoRepository.obterTodosPorFornecedor(fornecedorId);
-    const produtosFornecedor = _.map(produtos, async produto => ({
+    const produtosFornecedor = _.map(produtos, async (produto) => ({
       ...produto,
       eans: await eanService.obterPorId(produto.id),
-      imagens: await imagemService.obterPorId(produto.id)
+      imagens: await imagemService.obterPorId(produto.id),
     }));
     return await Promise.all(produtosFornecedor);
   } catch (erro) {
@@ -52,7 +60,7 @@ async function obterPorProdutoId(produtoId: number) {
 async function obterPorId(id: number) {
   try {
     const produto = await produtoRepository.obterPorId(id);
-    if (!produto) throw new ErroException("Produto não encontrado");
+    if (!produto) throw new ErroException('Produto não encontrado');
     const eans = await eanService.obterPorId(produto?.id);
     const imagens = await imagemService.obterPorId(produto?.id);
     return { ...produto, eans, imagens };
@@ -104,5 +112,5 @@ export default {
   atualizarPorProdutoId,
   obterTodosPorFornecedor,
   obterPorId,
-  atualizar
+  atualizar,
 };

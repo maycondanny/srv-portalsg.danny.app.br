@@ -1,10 +1,10 @@
-import validacaoService from './validacao.service';
 import ErroException from '@exceptions/erro.exception';
 import httpStatusEnum from '@enums/http-status.enum';
 import ProdutoDTO from '../dtos/produto.dto';
 import produtoService from '@modules/comercial/ecommerce/services/produto.service';
 import produtoMapper from '../mappers/produto.mapper';
 import _ from 'lodash';
+import validacaoService from '@modules/comercial/ecommerce/services/validacao.service';
 
 async function cadastrar(produtoDTO: ProdutoDTO) {
   const produto = produtoMapper.toProduto(produtoDTO);

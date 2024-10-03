@@ -77,8 +77,7 @@ async function inserirProdutoFornecedor({ produtoId, fornecedorId, referencia })
         fornecedorId,
       },
       linha: LINHA_GERAL,
-      referencia,
-      sif: 0,
+      referencia
     });
   } catch (erro) {
     console.log(erro);
