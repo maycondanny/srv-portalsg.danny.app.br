@@ -11,16 +11,12 @@ import Usuario from '@modules/core/usuarios/models/usuario.model';
 import autenticacaoService from '../services/autenticacao.service';
 import ConfirmaCadastroRequestDTO from '../dtos/confirma-cadastro-request.dto';
 import ConfirmaCadastroResponseDTO from '../dtos/confirma-cadastro-response.dto';
-import encryptacaoUtil from '@utils/encryptacao.util';
 
 async function login(
   req: Request<{}, {}, LoginRequestDTO, {}>,
   res: Response<ResponseDTO<LoginResponseDTO>>,
   next: NextFunction
 ) {
-
-  console.log(encryptacaoUtil.encriptar("123mudar"));
-
   try {
     const { token, tokenHub } = await autenticacaoService.login(req.body);
     return res.status(httpStatusEnum.Status.SUCESSO).json({

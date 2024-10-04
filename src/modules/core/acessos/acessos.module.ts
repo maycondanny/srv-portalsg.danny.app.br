@@ -3,6 +3,6 @@ import acessoRoutes from './routes/acesso.route';
 
 const router = Router();
 
-router.use('/acessos', acessoRoutes);
+router.use('/', acessoRoutes);
 
 export default router;

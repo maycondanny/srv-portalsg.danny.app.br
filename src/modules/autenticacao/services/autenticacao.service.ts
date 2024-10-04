@@ -1,4 +1,4 @@
-import usuariosService from '@modules/core/usuarios/services/usuarios.service';
+import usuarioService from '@modules/core/usuarios/services/usuario.service';
 import LoginRequestDTO from '../dtos/login-request.dto';
 import encryptacaoUtil from '@utils/encryptacao.util';
 import { ERole } from '@modules/core/usuarios/models/usuario-role.model';
@@ -18,13 +18,12 @@ import ErroException from '@exceptions/erro.exception';
 import ConfirmaCadastroRequestDTO from '../dtos/confirma-cadastro-request.dto';
 import ConfirmaCadastroResponseDTO from '../dtos/confirma-cadastro-response.dto';
 import RedefineSenhaDTO from '../dtos/redefine-senha.dto';
-import RedefineSenhaResponseDTO from '../dtos/redefine-senha-response.dto';
 import dotenv from 'dotenv';
 import objectUtil from '@utils/object.util';
 dotenv.config();
 
 async function login({ email, senha }: LoginRequestDTO): Promise<LoginResponseDTO> {
-  const usuario = await usuariosService.obterUsuarioPorEmail(email);
+  const usuario = await usuarioService.obterUsuarioPorEmail(email);
 
   if (!usuario) {
     throw new ErroException('Usuário não encontrado');
@@ -80,7 +79,7 @@ async function registrar(dados: RegistroRequestDTO) {
 async function carregarSessao({ token }: CarregaSessaoRequestDTO) {
   const { usuario_id, role } = jwtUtil.decode<{ usuario_id: number; role: ERole }>(token);
 
-  let usuario = await usuariosService.obterPorId(usuario_id);
+  let usuario = await usuarioService.obterPorId(usuario_id);
 
   if (!usuario) throw new ErroException('Usuário não encontrado');
 
@@ -92,7 +91,7 @@ async function carregarSessao({ token }: CarregaSessaoRequestDTO) {
 
 async function enviarEmailRedefinicaoSenha({ email }: EmailRedefinicaoSenhaRequestDTO) {
   if (!email) throw new ErroException('Email não informado');
-  const usuario = await usuariosService.obterUsuarioPorEmail(email);
+  const usuario = await usuarioService.obterUsuarioPorEmail(email);
 
   if (!usuario) throw new ErroException('Email não cadastrado');
 
@@ -118,7 +117,7 @@ async function redefinirSenha(dto: RedefineSenhaRequestDTO): Promise<void> {
 
   const { usuarioId } = jwtUtil.decode<RedefineSenhaDTO>(dto.token);
 
-  await usuariosService.redefinirSenha({ id: usuarioId, senha: dto.senha, confirmacaoSenha: dto.confirmacaoSenha });
+  await usuarioService.redefinirSenha({ id: usuarioId, senha: dto.senha, confirmacaoSenha: dto.confirmacaoSenha });
 }
 
 async function confirmarCadastro({ token }: ConfirmaCadastroRequestDTO): Promise<ConfirmaCadastroResponseDTO> {

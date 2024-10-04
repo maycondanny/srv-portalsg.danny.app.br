@@ -1,6 +1,7 @@
 import getDbInstance from "@db/db";
 import Acesso from "../models/acesso.model";
 import Grupo from "@modules/core/grupos/models/grupo.model";
+import ErroException from "@exceptions/erro.exception";
 
 async function obterTodos(ativo?: boolean): Promise<Acesso[]> {
   const db = getDbInstance();
@@ -29,7 +30,7 @@ async function obterTodos(ativo?: boolean): Promise<Acesso[]> {
     return acessos;
   } catch (erro) {
     console.error(erro);
-    throw new Error("Não foi possivel obter os acessos.");
+    throw new ErroException("Não foi possivel obter os acessos.");
   } finally {
     db.destroy();
   }
@@ -46,7 +47,7 @@ async function obterGrupos(acesso: Acesso) {
       .andWhere("g.ativo", "=", 1);
   } catch (erro) {
     console.error(erro);
-    throw new Error("Não foi possivel obter os grupos do acesso.");
+    throw new ErroException("Não foi possivel obter os grupos do acesso.");
   } finally {
     db.destroy();
   }
@@ -63,7 +64,7 @@ async function obterTodosPorSetores(setores: number[]): Promise<Acesso[]> {
       .andWhere("s.ativo", "=", 1);
   } catch (erro) {
     console.error(erro);
-    throw new Error("Não foi possivel obter os acessos.");
+    throw new ErroException("Não foi possivel obter os acessos.");
   } finally {
     db.destroy();
   }
@@ -85,12 +86,11 @@ async function cadastrar(acesso: Acesso) {
         })
         .into("acessos")
         .returning("id");
-      await trx.commit();
       await cadastrarGrupos(id, acesso.grupos);
     });
   } catch (erro) {
     console.error(erro);
-    throw new Error("Não foi possivel cadastrar um novo acesso.");
+    throw new ErroException("Não foi possivel cadastrar um novo acesso.");
   } finally {
     db.destroy();
   }
@@ -108,11 +108,10 @@ async function cadastrarGrupos(acessoId: number, grupos: Grupo[]) {
           })
           .into("acessos_grupos");
       }
-      await trx.commit();
     });
   } catch (erro) {
     console.error(erro);
-    throw new Error("Não foi possivel cadastrar os grupos do acesso.");
+    throw new ErroException("Não foi possivel cadastrar os grupos do acesso.");
   } finally {
     db.destroy();
   }
@@ -143,11 +142,10 @@ async function atualizar(acesso: Acesso) {
         .del();
 
       await cadastrarGrupos(acesso.id, acesso.grupos);
-      await trx.commit();
     });
   } catch (erro) {
     console.error(erro);
-    throw new Error("Não foi possivel atualizar os acessos.");
+    throw new ErroException("Não foi possivel atualizar os acessos.");
   } finally {
     db.destroy();
   }

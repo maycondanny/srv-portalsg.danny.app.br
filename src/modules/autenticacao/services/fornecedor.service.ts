@@ -2,7 +2,7 @@ import RegistroFornecedorDTO from '../dtos/registro-request.dto';
 import usuarioFornecedorRepository from '../repositories/usuario-fornecedor.repository';
 import emailConfirmacaoCadastroJob from '../jobs/email-confirmacao-cadastro.job';
 import jwtUtil from '@utils/jwt.util';
-import usuariosService from '@modules/core/usuarios/services/usuarios.service';
+import usuarioService from '@modules/core/usuarios/services/usuario.service';
 import fornecedorService from '@modules/integradores/hub/fornecedores/services/fornecedor.service';
 import { ESetores } from '@modules/core/setores/models/setor.model';
 import { EGrupos } from '@modules/core/grupos/models/grupo.model';
@@ -37,7 +37,7 @@ async function registrar(registroFornecedorDTO: RegistroFornecedorDTO): Promise<
     throw new ErroException('As senhas informadas não são iguais.');
   }
 
-  const emailExiste = await usuariosService.obterUsuarioPorEmail(registroFornecedorDTO.email);
+  const emailExiste = await usuarioService.obterUsuarioPorEmail(registroFornecedorDTO.email);
 
   if (emailExiste) {
     throw new ErroException('O email informado já está cadastrado em nosso sistema por favor tente novamente.');
@@ -70,7 +70,7 @@ async function registrar(registroFornecedorDTO: RegistroFornecedorDTO): Promise<
 
   let role = registroFornecedorDTO.transportadora ? ERole.TRANSPORTADORA : ERole.FORNECEDOR;
 
-  const usuario_id = await usuariosService.cadastrar({
+  const usuario_id = await usuarioService.cadastrar({
     email,
     nome,
     senha,

@@ -1,26 +1,21 @@
 import Usuario from '../models/usuario.model';
 import encryptacaoUtil from '@utils/encryptacao.util';
-import usuariosRepository from '../repositories/usuarios.repository';
+import usuarioRepository from '../repositories/usuario.repository';
 import ErroException from '@exceptions/erro.exception';
 import dotenv from 'dotenv';
 dotenv.config();
 
 async function cadastrar(usuario: Usuario): Promise<number> {
-  try {
-    const usuarioExiste = await obterUsuarioPorEmail(usuario.email);
-    if (usuarioExiste) {
-      throw new ErroException('O email fornecido já está sendo utilizado');
-    }
-    usuario.senha = encryptacaoUtil.encriptar(usuario.senha || process.env.SENHA_PADRAO_NOVO_USUARIO);
-    return await usuariosRepository.cadastrar(usuario);
-  } catch (erro) {
-    console.error(erro);
-    throw erro;
+  const usuarioExiste = await obterUsuarioPorEmail(usuario.email);
+  if (usuarioExiste) {
+    throw new ErroException('O email fornecido já está sendo utilizado');
   }
+  usuario.senha = encryptacaoUtil.encriptar(usuario.senha || process.env.SENHA_PADRAO_NOVO_USUARIO);
+  return await usuarioRepository.cadastrar(usuario);
 }
 
 async function obterTodos(): Promise<any[]> {
-  let usuarios = await usuariosRepository.obterTodos();
+  let usuarios = await usuarioRepository.obterTodos();
 
   return await Promise.all(
     usuarios.map(async (usuario) => {
@@ -40,7 +35,7 @@ async function obterTodos(): Promise<any[]> {
 }
 
 async function obterPorId(id: number): Promise<any> {
-  const usuario = await usuariosRepository.obterPorId(id);
+  const usuario = await usuarioRepository.obterPorId(id);
 
   if (!usuario) throw new ErroException('Usuario não encontrado.');
 
@@ -57,7 +52,7 @@ async function obterPorId(id: number): Promise<any> {
 }
 
 async function obterUsuarioPorEmail(email: string): Promise<any> {
-  const usuario = await usuariosRepository.obterUsuarioPorEmail(email);
+  const usuario = await usuarioRepository.obterUsuarioPorEmail(email);
 
   if (!usuario) return false;
 
@@ -74,63 +69,56 @@ async function obterUsuarioPorEmail(email: string): Promise<any> {
 }
 
 async function atualizar(usuario: Usuario) {
-  try {
-    const usuarioDados = await obterPorId(usuario.id);
-    const usuarioExiste = await obterUsuarioPorEmail(usuario.email);
-    if (usuarioDados.email !== usuarioExiste.email && usuarioExiste) {
-      throw new ErroException('O email fornecido já está sendo usado.');
-    }
-    usuario.senha = encryptacaoUtil.encriptar(usuario.senha);
-    await usuariosRepository.atualizar(usuario);
-    return await obterPorId(usuario.id);
-  } catch (erro) {
-    console.error(erro);
-    throw erro;
+  const usuarioDados = await obterPorId(usuario.id);
+  const usuarioExiste = await obterUsuarioPorEmail(usuario.email);
+  if (usuarioDados.email !== usuarioExiste.email && usuarioExiste) {
+    throw new ErroException('O email fornecido já está sendo usado.');
   }
+  usuario.senha = encryptacaoUtil.encriptar(usuario.senha);
+  await usuarioRepository.atualizar(usuario);
+  return await obterPorId(usuario.id);
 }
 
 async function obterSetores(usuario_id: number): Promise<any[]> {
-  return await usuariosRepository.obterSetores(usuario_id);
+  return await usuarioRepository.obterSetores(usuario_id);
 }
 
 async function obterGrupos(usuario_id: number): Promise<any[]> {
-  return await usuariosRepository.obterGrupos(usuario_id);
+  return await usuarioRepository.obterGrupos(usuario_id);
 }
 
 async function obterAcessos(usuario_id: number): Promise<any[]> {
-  return await usuariosRepository.obterAcessos(usuario_id);
+  return await usuarioRepository.obterAcessos(usuario_id);
 }
 
 async function trocarSenhaPrimeiroAcesso({ id, senha }) {
-  try {
-    const usuario = await obterPorId(id);
-    if (!usuario) {
-      throw new ErroException('Usuario não encontrado!');
-    }
-    usuario.senha = encryptacaoUtil.encriptar(senha);
-    usuario.troca_senha = 1;
-    await usuariosRepository.atualizar(usuario);
-  } catch (erro) {
-    console.error(erro);
-    throw erro;
+  if (!id) {
+    throw new ErroException('ID do usuario não enviado');
   }
+
+  if (!senha) {
+    throw new ErroException('Nova senha do usuario não enviada');
+  }
+
+  const usuario = await obterPorId(id);
+  if (!usuario) {
+    throw new ErroException('Usuario não encontrado');
+  }
+  usuario.senha = encryptacaoUtil.encriptar(senha);
+  usuario.troca_senha = 1;
+  await usuarioRepository.atualizar(usuario);
 }
 
 async function redefinirSenha({ id, senha, confirmacaoSenha }) {
-  try {
-    const usuario = await obterPorId(id);
-    if (!usuario) throw new ErroException('Usuario não encontrado!');
-    if (!checarSenhasIguais(senha, confirmacaoSenha)) throw new ErroException('As senhas não correspondem');
-    usuario.senha = encryptacaoUtil.encriptar(senha);
-    await usuariosRepository.atualizar(usuario);
-  } catch (erro) {
-    console.error(erro);
-    throw erro;
-  }
+  const usuario = await obterPorId(id);
+  if (!usuario) throw new ErroException('Usuario não encontrado!');
+  if (!checarSenhasIguais(senha, confirmacaoSenha)) throw new ErroException('As senhas não correspondem');
+  usuario.senha = encryptacaoUtil.encriptar(senha);
+  await usuarioRepository.atualizar(usuario);
 }
 
 async function obterPorCNPJ(cnpj: string) {
-  const usuario = await usuariosRepository.obterPorCNPJ(cnpj);
+  const usuario = await usuarioRepository.obterPorCNPJ(cnpj);
 
   if (!usuario) return false;
 

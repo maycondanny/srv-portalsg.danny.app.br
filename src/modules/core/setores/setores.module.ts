@@ -1,8 +1,8 @@
 import { Router } from "express";
-import estadoRoutes from './routes/estado.route';
+import setorRoutes from './routes/setor.route';
 
 const router = Router();
 
-router.use('/', estadoRoutes);
+router.use('/', setorRoutes);
 
 export default router;

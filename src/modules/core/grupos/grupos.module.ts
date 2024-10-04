@@ -1,8 +1,8 @@
 import { Router } from "express";
-import estadoRoutes from './routes/estado.route';
+import grupoRoutes from './routes/grupo.route';
 
 const router = Router();
 
-router.use('/', estadoRoutes);
+router.use('/', grupoRoutes);
 
 export default router;
