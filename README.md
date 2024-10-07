@@ -17,8 +17,6 @@ npm run migrate:up
 npm run migrate:down
 
 ## Production Build
-
-- Upload Code on MAIN BRANCH !!!
 - Access SSH Server ssh mateus@192.168.0.209
 - danny-123
 
