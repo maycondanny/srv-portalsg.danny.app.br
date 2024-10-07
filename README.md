@@ -13,10 +13,6 @@ docker compose -f docker-compose.yml up --build
   cat command-srv | bash
   - rodar comando que aparecer p subir em prod
 
-## entrar e executar docker
-docker exec -it hub bash
-
-
 ## Run Migrations
 npm run migrate:up
 
@@ -29,7 +25,7 @@ npm run migrate:down
 - Terc@Danny2509
 
 - Run :
-  cat command | bash
+  cat command-srv | bash
   - rodar comando que aparecer p subir em prod
 
 ...
