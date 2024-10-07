@@ -32,9 +32,3 @@ npm run migrate:down
 - Run :
   cat command | bash
   - rodar comando que aparecer p subir em prod
-
-...
-Token GT
-git clone https://maycondanny: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@github.com/maycondanny/hub.danny.app.br.git
-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
-...
