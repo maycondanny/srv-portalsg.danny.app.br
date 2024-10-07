@@ -4,7 +4,7 @@ import { Redis } from 'ioredis';
 const redis = new Redis(config);
 
 redis.on('ready', () => console.log('Servidor de cacheamento iniciado com SUCESSO...'));
-redis.on('error', (error) => console.log('Erro nao iniciar servidor de cacheamento!', error));
+redis.on('error', (error) => console.log('Erro ao iniciar servidor de cacheamento!', error));
 
 export enum ETempoExpiracao {
   QUINZE_MINUTOS = 60 * 15,

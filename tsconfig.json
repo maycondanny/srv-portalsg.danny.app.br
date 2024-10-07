@@ -8,7 +8,6 @@
     "rootDir": "./src",
     "strict": false,
     "esModuleInterop": true,
-    "noEmit": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "paths": {
@@ -20,7 +19,8 @@
       "@enums/*": ["enums/*"],
       "@configs/*": ["configs/*"],
       "@services/*": ["services/*"],
-      "@repositories/*": ["repositories/*"]
+      "@repositories/*": ["repositories/*"],
+      "@middlewares/*": ["middlewares/*"]
     }
   },
   "include": ["src/**/*.ts", "src/app.ts"],

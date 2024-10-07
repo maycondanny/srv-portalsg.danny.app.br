@@ -1,25 +1,35 @@
 version: '3'
 
 services:
-  redis_queue:
+  app:
+    container_name: backend
+    restart: always
+    build:
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    depends_on:
+      - queue
+      - cache
+
+  queue:
     image: redis:7.2.4
     container_name: redis_queue
     restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:
-      - redis_data:/data
+      - queue_data:/data
 
-  redis_cache:
+  cache:
     image: redis:7.2.4
     container_name: redis_cache
     restart: unless-stopped
     ports:
       - "6380:6379"
     volumes:
-      - redis_cache_data:/data
+      - cache_data:/data
 
 volumes:
-  postgres_data:
-  redis_data:
-  redis_cache_data:
+  queue_data:
+  cache_data:

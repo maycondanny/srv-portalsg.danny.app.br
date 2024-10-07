@@ -1,16 +1,14 @@
 {
   "name": "backend_portalsg",
   "version": "1.0.0",
-  "description": "",
+  "description": "Backend portal danny cosméticos",
   "main": "index.js",
   "private": true,
   "scripts": {
-    "start": "nodemon",
-    "start:prod": "npm run install && pm2 start dist/index.js --name 'backend' --log-date-format 'YYYY-MM-DD HH:mm:ss' --output logs/output.log --error logs/error.log && pm2 save",
+    "dev": "nodemon",
+    "start:prod": "tsc && node dist/app.js",
     "stop:prod": "pm2 stop backend",
     "restart:prod": "pm2 restart backend",
-    "build": "tsc",
-    "serve": "node dist/index.js",
     "migrate:make": "ts-node -r dotenv/config ./node_modules/knex/bin/cli.js migrate:make --knexfile=src/db/knexfile.ts",
     "migrate:up": "ts-node -r dotenv/config ./node_modules/knex/bin/cli.js migrate:up --knexfile=src/db/knexfile.ts",
     "migrate:down": "ts-node -r dotenv/config ./node_modules/knex/bin/cli.js migrate:down --knexfile=src/db/knexfile.ts",
@@ -36,6 +34,7 @@
     "jsonwebtoken": "^9.0.2",
     "knex": "^3.1.0",
     "lodash": "^4.17.21",
+    "module-alias": "^2.2.3",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.8",
     "pg": "^8.12.0",
@@ -60,5 +59,17 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.5.4"
+  },
+  "_moduleAliases": {
+    "@db": "dist/db",
+    "@utils": "dist/utils",
+    "@modules": "dist/modules",
+    "@models": "dist/models",
+    "@exceptions": "dist/exceptions",
+    "@enums": "dist/enums",
+    "@configs": "dist/configs",
+    "@services": "dist/services",
+    "@repositories": "dist/repositories",
+    "@middlewares": "dist/middlewares"
   }
 }

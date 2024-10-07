@@ -1,3 +1,4 @@
+require('module-alias/register');
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -6,7 +7,7 @@ import integradoresModule from './modules/integradores/integradores.module';
 import autenticacaoModule from './modules/autenticacao/autenticacao.module';
 import coreModule from './modules/core/core.module';
 import httpStatusEnum from '@enums/http-status.enum';
-import authMiddleware from 'middlewares/auth.middleware';
+import authMiddleware from '@middlewares/auth.middleware';
 
 dotenv.config();
 const app = express();
@@ -17,8 +18,8 @@ app.use(express.json());
 
 app.use('/api/autenticacao', autenticacaoModule);
 app.use('/api/comercial', authMiddleware, comercialModule);
-app.use('/api/integradores', integradoresModule);
-app.use('/api/core', coreModule);
+app.use('/api/integradores', authMiddleware, integradoresModule);
+app.use('/api/core', authMiddleware, coreModule);
 
 app.listen(port, () => {
   console.log(`Servidor rodando na porta: ${port}`);
