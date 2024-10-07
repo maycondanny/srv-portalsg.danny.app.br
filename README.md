@@ -35,7 +35,7 @@ npm run migrate:down
 
 ...
 Token GT
-git clone https://maycondanny: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@github.com/maycondanny/hub.danny.app.br.git
+git clone https://maycondanny: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@github.com/maycondanny/srv-portalsg.danny.app.br.git
 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
 ...
 

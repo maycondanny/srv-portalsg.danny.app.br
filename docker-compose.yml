@@ -17,7 +17,7 @@ services:
     container_name: redis_queue
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "6390:6379"
     volumes:
       - queue_data:/data
 
@@ -26,7 +26,7 @@ services:
     container_name: redis_cache
     restart: unless-stopped
     ports:
-      - "6380:6379"
+      - "6391:6379"
     volumes:
       - cache_data:/data
 
