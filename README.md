@@ -1,4 +1,4 @@
-# Backend PortalSG Ambiente [QA]
+# Backend PortalSG Ambiente [PROD]
 
 ## Run Container DEV
 
