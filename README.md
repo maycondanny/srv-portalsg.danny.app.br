@@ -11,7 +11,7 @@ docker compose -f docker-compose-dev.yml up --build
 
 ## destruir container e criar novo c nova versao
 ## Run :
-  cat command | bash
+  cat command-srv | bash
   - rodar comando que aparecer p subir em prod
 
 ## entrar e executar docker
