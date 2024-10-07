@@ -170,7 +170,7 @@ async function atualizar(role: ERole, produto: Produto) {
       );
     }
 
-    produto = produtoModel.formatarTexto(produto);
+    produto = produtoModel.formatarDescritivo(produto);
     await produtoService.atualizar({
       id: produto.id,
       codigo_produto_fornecedor: produto?.codigo_produto_fornecedor,

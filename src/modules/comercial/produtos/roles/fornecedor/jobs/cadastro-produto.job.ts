@@ -26,7 +26,6 @@ const worker = new Worker(
     let { produto } = data;
     const referencia = produto.codigo_produto_fornecedor;
     const produtoId = await produtoService.cadastrar(produto);
-
     try {
       await produtoEcommerceService.cadastrar({
         caracteristica: produto.ecommerce.caracteristica,

@@ -38,17 +38,15 @@ function toProduto(dto: ProdutoDTO): Produto {
     }
   };
 
-  produtoModel.formatarTexto(produto);
-
-  return produto;
+  return produtoModel.formatarDescritivo(produto);;
 }
 
 function toDTO(produto: Produto): ProdutoDTO {
   return {
     id: produto.id,
-    codigo_produto_fornecedor: produto.codigo_produto_fornecedor,
-    descritivo_pdv: produto.descritivo_pdv,
-    descritivo: produto.descritivo,
+    codigo_produto_fornecedor: produto.codigo_produto_fornecedor?.toLocaleUpperCase(),
+    descritivo_pdv: produto.descritivo_pdv?.toLocaleUpperCase(),
+    descritivo: produto.descritivo?.toLocaleUpperCase(),
     origem: produto.origem,
     estado: produto.estado,
     preco: produto.preco,
