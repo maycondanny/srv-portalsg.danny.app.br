@@ -2,8 +2,7 @@
 
 ## Run Container DEV
 
-docker compose -f docker-compose-dev.yml up --build
-
+docker compose -f docker-compose.yml up --build
 
 ## excutar cmd
  Access SSH Server ssh mateus@192.168.0.209
