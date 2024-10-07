@@ -1,10 +1,5 @@
 import dotenv from 'dotenv';
 dotenv.config();
-
-if (process.env.NODE_ENV === 'production') {
-  require('module-alias/register');
-}
-
 import express from 'express';
 import cors from 'cors';
 import comercialModule from './modules/comercial/comercial.module';
