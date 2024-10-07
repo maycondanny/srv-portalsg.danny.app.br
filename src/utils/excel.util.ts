@@ -1,5 +1,4 @@
 import ErroException from '@exceptions/erro.exception';
-import fs from 'fs';
 import xlsx from 'xlsx';
 
 function lerDados(planilha: any) {

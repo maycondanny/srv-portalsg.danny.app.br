@@ -1,6 +1,6 @@
-import excelUtil from '@utils/excel.util';
 import _ from 'lodash';
 import ErroException from '@exceptions/erro.exception';
+import excelUtil from '@utils/excel.util';
 import ImportacaoRequestDTO from '../dtos/importacao.request.dto';
 import httpStatusEnum from '@enums/http-status.enum';
 import numberUtil from '@utils/number.util';

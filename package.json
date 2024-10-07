@@ -5,10 +5,8 @@
   "main": "index.js",
   "private": true,
   "scripts": {
-    "dev": "cross-env NODE_ENV=development nodemon",
-    "start:prod": "cross-env NODE_ENV=production tsc && node dist/app.js",
-    "stop:prod": "pm2 stop backend",
-    "restart:prod": "pm2 restart backend",
+    "dev": "nodemon",
+    "start": "tsc && node dist/app.js",
     "migrate:make": "ts-node -r dotenv/config ./node_modules/knex/bin/cli.js migrate:make --knexfile=src/db/knexfile.ts",
     "migrate:up": "ts-node -r dotenv/config ./node_modules/knex/bin/cli.js migrate:up --knexfile=src/db/knexfile.ts",
     "migrate:down": "ts-node -r dotenv/config ./node_modules/knex/bin/cli.js migrate:down --knexfile=src/db/knexfile.ts",
@@ -63,7 +61,6 @@
   },
   "_moduleAliases": {
     "@db": "dist/db",
-    "@utils": "dist/utils",
     "@modules": "dist/modules",
     "@models": "dist/models",
     "@exceptions": "dist/exceptions",
@@ -71,6 +68,7 @@
     "@configs": "dist/configs",
     "@services": "dist/services",
     "@repositories": "dist/repositories",
-    "@middlewares": "dist/middlewares"
+    "@middlewares": "dist/middlewares",
+    "@utils": "dist/utils"
   }
 }

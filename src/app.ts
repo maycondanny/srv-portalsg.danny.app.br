@@ -1,17 +1,18 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+dotenv.config();
+
+if (process.env.NODE_ENV !== 'production') {
+  require('module-alias/register');
+}
+
 import comercialModule from './modules/comercial/comercial.module';
 import integradoresModule from './modules/integradores/integradores.module';
 import autenticacaoModule from './modules/autenticacao/autenticacao.module';
 import coreModule from './modules/core/core.module';
 import httpStatusEnum from '@enums/http-status.enum';
 import authMiddleware from '@middlewares/auth.middleware';
-dotenv.config();
-
-if (process.env.NODE_ENV === 'production') {
-  require('module-alias/register');
-}
 
 const app = express();
 const port = process.env.PORT || 3000;
