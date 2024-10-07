@@ -1,5 +1,3 @@
-# Backend PortalSG Ambiente [QA]
-
 ## Run Container DEV
 
 docker compose -f docker-compose-dev.yml up -d --build
