@@ -2,7 +2,7 @@
 
 ## Run Container DEV
 
-docker compose -f docker-compose-dev.yml up --build
+docker compose -f docker-compose.yml up --build
 
 ## excutar cmd
  Access SSH Server ssh suporte02.temp@189.113.44.242 -p14901
@@ -10,7 +10,7 @@ docker compose -f docker-compose-dev.yml up --build
 
 ## destruir container e criar novo c nova versao
 ## Run :
-  cat command | bash
+  cat command-srv | bash
   - rodar comando que aparecer p subir em prod
 
 ## entrar e executar docker
@@ -34,7 +34,7 @@ npm run migrate:down
 
 ...
 Token GT
-git clone https://maycondanny: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@github.com/maycondanny/hub.danny.app.br.git
+git clone https://maycondanny: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@github.com/maycondanny/srv-portalsg.danny.app.br.git
 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
 ...
 
