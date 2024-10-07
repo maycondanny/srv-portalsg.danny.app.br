@@ -22,7 +22,7 @@ app.use(express.json());
 
 app.use('/api/autenticacao', autenticacaoModule);
 app.use('/api/comercial', authMiddleware, comercialModule);
-app.use('/api/integradores', authMiddleware, integradoresModule);
+app.use('/api/integradores', integradoresModule);
 app.use('/api/core', authMiddleware, coreModule);
 
 app.listen(port, () => {
