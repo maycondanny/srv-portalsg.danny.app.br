@@ -26,20 +26,17 @@ const worker = new Worker(
     let { produto } = data;
     const referencia = produto.codigo_produto_fornecedor;
     const produtoId = await produtoService.cadastrar(produto);
-    try {
-      await produtoEcommerceService.cadastrar({
-        caracteristica: produto.ecommerce.caracteristica,
-        descricao: produto.ecommerce.descricao,
-        eans: produto.eans,
-        fornecedor_id: produto.fornecedor_id,
-        imagens: produto.ecommerce.imagens,
-        modo_uso: produto.ecommerce.modo_uso,
-        nome: produto.descritivo_pdv,
-        produto_id: produtoId,
-      });
-    } catch (erro) {
-      console.log('O produto não foi cadastrado no ecommerce pois o mesmo não existe');
-    }
+
+    await produtoEcommerceService.cadastrar({
+      caracteristica: produto.ecommerce.caracteristica,
+      descricao: produto.ecommerce.descricao,
+      eans: produto.eans,
+      fornecedor_id: produto.fornecedor_id,
+      imagens: produto.ecommerce.imagens,
+      modo_uso: produto.ecommerce.modo_uso,
+      nome: produto.descritivo_pdv,
+      produto_id: produtoId,
+    });
 
     await cacheUtil.add(
       `${CODIGO_REFERENCIA_FORNECEDOR_CACHE}_${produto.fornecedor_id}_${referencia}`,
