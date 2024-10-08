@@ -1,7 +1,7 @@
-require('module-alias/register');
+import dotenv from 'dotenv';
+dotenv.config();
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import comercialModule from './modules/comercial/comercial.module';
 import integradoresModule from './modules/integradores/integradores.module';
 import autenticacaoModule from './modules/autenticacao/autenticacao.module';
@@ -9,7 +9,6 @@ import coreModule from './modules/core/core.module';
 import httpStatusEnum from '@enums/http-status.enum';
 import authMiddleware from '@middlewares/auth.middleware';
 
-dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -18,7 +17,7 @@ app.use(express.json());
 
 app.use('/api/autenticacao', autenticacaoModule);
 app.use('/api/comercial', authMiddleware, comercialModule);
-app.use('/api/integradores', authMiddleware, integradoresModule);
+app.use('/api/integradores', integradoresModule);
 app.use('/api/core', authMiddleware, coreModule);
 
 app.listen(port, () => {
@@ -32,6 +31,6 @@ app.use((error, req, res, next) => {
     codigo: codigo,
     mensagem: error.message,
     dados: error.dados,
-    stacktrace: error.stack
+    stacktrace: error.stack,
   });
 });

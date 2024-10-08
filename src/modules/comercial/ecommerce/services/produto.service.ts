@@ -5,17 +5,9 @@ import eanService from './ean.service';
 import imagemService from './imagem.service';
 import numberUtil from '@utils/number.util';
 import ErroException from '@exceptions/erro.exception';
-import validacaoService from './validacao.service';
-import httpStatusEnum from '@enums/http-status.enum';
 
 async function cadastrar(produto: Produto) {
   try {
-    const validacao = await validacaoService.validar(produto);
-
-    if (!validacao.valido) {
-      throw new ErroException('Erro ao cadastrar novo produto', validacao, httpStatusEnum.Status.ERRO_REQUISICAO);
-    }
-
     const eans = produto.eans;
     const imagens = produto.imagens;
     const produtoTratado = _.omit(produto, ['eans', 'imagens']) as Produto;

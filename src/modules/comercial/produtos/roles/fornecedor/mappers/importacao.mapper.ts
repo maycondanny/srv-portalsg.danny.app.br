@@ -47,9 +47,7 @@ function toProduto({ fornecedorId, produto }: ProdutoProps): Produto {
     fornecedor_id: fornecedorId,
   };
 
-  produtoModel.formatarTexto(retorno);
-
-  return retorno;
+  return produtoModel.formatarDescritivo(retorno);
 }
 
 function tratarImagens(imagens: string) {

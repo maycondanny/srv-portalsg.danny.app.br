@@ -87,12 +87,9 @@ export interface Produto {
   created_at?: Date;
 }
 
-function formatarTexto(produto: Produto): Produto {
+function formatarDescritivo(produto: Produto): Produto {
   produto.descritivo = stringUtil.cortar(produto.descritivo, TAMANHO_DESCRICAO_CLASSIFICACAO);
   produto.descritivo_pdv = stringUtil.cortar(produto.descritivo_pdv, TAMANHO_DESCRICAO_ABREVIADA);
-  produto.codigo_produto_fornecedor = produto.codigo_produto_fornecedor?.toLocaleUpperCase();
-  produto.descritivo_pdv = produto.descritivo_pdv?.toLocaleUpperCase();
-  produto.descritivo = produto.descritivo?.toLocaleUpperCase();
   return produto;
 }
 
@@ -183,7 +180,7 @@ function obterTipoTributacao(cst: string): string {
 export default {
   juntarEansDuns,
   possuiDivergencias,
-  formatarTexto,
+  formatarDescritivo,
   obterQuantidadeEmbalagem,
   obterTipoEmbalagem,
   limparNCM,

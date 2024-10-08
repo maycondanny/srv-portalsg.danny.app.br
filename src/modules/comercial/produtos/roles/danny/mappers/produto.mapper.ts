@@ -2,7 +2,7 @@ import produtoModel, { Produto } from "@modules/comercial/produtos/models/produt
 import ProdutoDTO from "../dtos/produto.dto";
 
 function toProduto(produtoDTO: Partial<ProdutoDTO>): Produto {
-  return {
+  const produto = {
     id: produtoDTO?.id,
     codigo_produto_fornecedor: produtoDTO?.codigo_produto_fornecedor,
     descritivo: produtoDTO?.descritivo,
@@ -39,14 +39,16 @@ function toProduto(produtoDTO: Partial<ProdutoDTO>): Produto {
     st_compra: produtoDTO?.st_compra,
     tipo_tributacao: produtoDTO?.tipo_tributacao,
   }
+
+  return produtoModel.formatarDescritivo(produto);
 }
 
 function toProdutoFornecedorDTO(produto: Produto): ProdutoDTO {
   return {
     id: produto.id,
-    codigo_produto_fornecedor: produto.codigo_produto_fornecedor,
-    descritivo: produto.descritivo,
-    descritivo_pdv: produto.descritivo_pdv,
+    codigo_produto_fornecedor: produto.codigo_produto_fornecedor?.toLocaleUpperCase(),
+    descritivo: produto.descritivo?.toLocaleUpperCase(),
+    descritivo_pdv: produto.descritivo_pdv?.toLocaleUpperCase(),
     classificacao_fiscal: produto.classificacao_fiscal,
     origem: produto.origem,
     estado: produto.estado,
