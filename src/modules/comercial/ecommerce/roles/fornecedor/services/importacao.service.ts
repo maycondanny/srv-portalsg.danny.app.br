@@ -8,7 +8,7 @@ import excelUtil from '@utils/excel.util';
 import _ from 'lodash';
 import numberUtil from '@utils/number.util';
 import cadastroProdutoJob from '../jobs/cadastro-produto.job';
-import validacaoService from '@modules/comercial/ecommerce/services/validacao.service';
+import validacaoService from '@modules/comercial/ecommerce/roles/fornecedor/services/validacao.service';
 
 async function importar({ planilha, fornecedorId }: ImportacaoRequestDTO): Promise<void> {
   if (!planilha) throw new ErroException('Planilha não enviada', httpStatusEnum.Status.ERRO_REQUISICAO);
