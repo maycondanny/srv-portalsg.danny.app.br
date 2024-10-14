@@ -5,16 +5,6 @@ import { REGEX_APENAS_NUMEROS } from '@utils/regex.util';
 import stringUtil from '@utils/string.util';
 import _ from 'lodash';
 import { ETamanho } from '../models/ean.model';
-import produtoEanService from '@modules/integradores/arius/comercial/services/produto-ean.service';
-import objectUtil from '@utils/object.util';
-
-async function validar(produto: Produto): Promise<ErroValidacaoResponseDTO> {
-  let erros: string[] = [];
-  erros = _.concat(erros, validarCamposObrigatorios(produto));
-  erros = _.concat(erros, validarEan(produto));
-  erros = _.concat(erros, await validarEanEstaoCadastrados(produto));
-  return montarRespostaRetorno(produto, erros);
-}
 
 function validarCamposObrigatorios(produto: Produto): string[] {
   const mensagens = [];
@@ -39,19 +29,6 @@ function validarCamposObrigatorios(produto: Produto): string[] {
   return mensagens;
 }
 
-async function validarEanEstaoCadastrados(produto: Produto): Promise<string[]> {
-  const mensagens = [];
-
-  for (const ean of produto.eans) {
-    const produtoArius = await produtoEanService.obterPorCodigo(ean.codigo);
-    if (objectUtil.isVazio(produtoArius)) {
-      mensagens.push('Produto não cadastrado');
-    }
-  }
-
-  return mensagens;
-}
-
 function validarEan(produto: Produto): string[] {
   const mensagens = [];
 
@@ -64,10 +41,8 @@ function validarEan(produto: Produto): string[] {
     return mensagens;
   }
 
-  const apenasNumeros = produto.eans.every((ean) => REGEX_APENAS_NUMEROS.test(ean.codigo));
-
-  if (!apenasNumeros) {
-    mensagens.push('É permitido apenas números nos códigos EANs');
+  if (!validarEansContemApenasNumeros(produto)) {
+    mensagens.push('Código EAN inválido');
     return mensagens;
   }
 
@@ -80,6 +55,10 @@ function validarEan(produto: Produto): string[] {
   return mensagens;
 }
 
+function validarEansContemApenasNumeros(produto: Produto): boolean {
+  return produto.eans.every((ean) => REGEX_APENAS_NUMEROS.test(ean.codigo));
+}
+
 function montarRespostaRetorno(produto: Produto, erros: string[]): ErroValidacaoResponseDTO {
   return {
     valido: numberUtil.isMenorOuIgualZero(erros.length),
@@ -89,8 +68,8 @@ function montarRespostaRetorno(produto: Produto, erros: string[]): ErroValidacao
 }
 
 export default {
-  validar,
   validarCamposObrigatorios,
   validarEan,
-  montarRespostaRetorno
+  montarRespostaRetorno,
+  validarEansContemApenasNumeros
 };

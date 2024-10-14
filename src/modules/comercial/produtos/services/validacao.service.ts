@@ -42,7 +42,7 @@ function validarEan(produto: Produto): string[] {
   const apenasNumeros = produto.eans.concat(produto.duns).every((ean) => REGEX_APENAS_NUMEROS.test(ean.codigo));
 
   if (!apenasNumeros) {
-    mensagens.push('É permitido apenas números nos códigos EANs e DUNs');
+    mensagens.push('Código EAN inválido');
     return mensagens;
   }
 
