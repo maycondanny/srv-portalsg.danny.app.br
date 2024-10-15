@@ -108,7 +108,7 @@ async function atualizar(produtoDTO: ProdutoDTO) {
 
 const agruparPorFornecedor = (produtos: CapaProdutoResponseDTO[]): CapaProdutoResponseDTO[] => {
   return _.chain(produtos)
-    .groupBy('fornecedor_id')
+    .groupBy('fornecedorId')
     .map((grupo) => grupo[0])
     .value();
 };
