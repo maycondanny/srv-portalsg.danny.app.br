@@ -24,7 +24,7 @@ function obterUrl(id: number): string {
     expiracao: Number(expiresIn)
   });
 
-  return url + '/embed/dashboard/' + token + '#bordered=true&titled=true&theme=night';
+  return url + '/embed/dashboard/' + token + '#bordered=true&titled=true';
 }
 
 export default {
