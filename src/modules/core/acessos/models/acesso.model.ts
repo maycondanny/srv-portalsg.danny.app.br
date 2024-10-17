@@ -1,9 +1,9 @@
 import Grupo from '@modules/core/grupos/models/grupo.model';
 
 export enum EAcessos {
-  FE_ListagemProdutos = 51,
+  FE_ListagemProdutos = 1,
   FE_AgendamentoPedidos = 6,
-  FE_Ecommerce = 54,
+  FE_Ecommerce = 14,
 }
 
 export default interface Acesso {
