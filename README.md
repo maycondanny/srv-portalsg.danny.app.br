@@ -3,8 +3,8 @@
 docker compose -f docker-compose-dev.yml up -d --build
 
 ## excutar cmd
- Access SSH Server ssh mateus@192.168.0.209
-- danny-123
+ Access SSH Server ssh suporte02.temp@189.113.44.242 -p14901
+- Terc@Danny2509
 
 ## destruir container e criar novo c nova versao
 ## Run :
@@ -17,8 +17,10 @@ npm run migrate:up
 npm run migrate:down
 
 ## Production Build
-- Access SSH Server ssh mateus@192.168.0.209
-- danny-123
+
+- Upload Code on MAIN BRANCH !!!
+- Access SSH Server ssh suporte02.temp@189.113.44.242 -p14901
+- Terc@Danny2509
 
 - Run :
   cat command-srv | bash

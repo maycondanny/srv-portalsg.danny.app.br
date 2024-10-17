@@ -14,8 +14,8 @@ async function cadastrar(produto: Produto) {
     throw new ErroException('Erro ao aprovar o produto', validacao, httpStatusEnum.Status.ERRO_REQUISICAO);
   }
 
-  await cadastrarArius(produto);
-  await aprovacaoService.salvarImagens(produto);
+  // await cadastrarArius(produto);
+  // await aprovacaoService.salvarImagens(produto);
   await atualizarBaseDados(produto);
 }
 
