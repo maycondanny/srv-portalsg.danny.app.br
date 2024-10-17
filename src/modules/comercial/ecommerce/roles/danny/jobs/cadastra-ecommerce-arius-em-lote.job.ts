@@ -1,8 +1,6 @@
 import { Queue, Worker } from 'bullmq';
 import connection from '@configs/queue.config';
-import produtoService from '@modules/comercial/ecommerce/services/produto.service';
 import cadastraEcommerceAriusService from '../services/gateways/cadastra-ecommerce-arius.service';
-import aprovacaoService from '../services/aprovacao.service';
 
 const nome = 'COM_Danny_CadastraProdutosEcommerceAriusEmLoteJob';
 
@@ -24,9 +22,7 @@ const worker = new Worker(
   async ({ data }) => {
     const { produto } = data;
     try {
-      cadastraEcommerceAriusService.cadastrar(produto);
-      aprovacaoService.salvarImagens(produto);
-      cadastraEcommerceAriusService.atualizarBaseDados(produto);
+      await cadastraEcommerceAriusService.cadastrar(produto);
     } catch (erro) {
       throw erro;
     }

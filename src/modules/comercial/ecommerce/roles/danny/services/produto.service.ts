@@ -51,7 +51,7 @@ async function obterTodosPorFornecedor(fornecedorId: number) {
     if (numberUtil.isMenorOuIgualZero(eans.length)) throw new ErroException('Não foi encontrado nenhum EAN para esse produto.');
 
     for (const ean of eans) {
-      const produtoEan = await produtoEanServiceArius.obterPorCodigo(ean.codigo);
+      const produtoEan = await obterProdutoEan(ean.codigo);
 
       if (objectUtil.isVazio(produtoEan)) {
         return produtoMapper.toDTO({ ...produto, status: EStatus.NAO_CADASTRADO });
@@ -82,6 +82,16 @@ async function obterTodosPorFornecedor(fornecedorId: number) {
     fornecedor,
     produtos: await Promise.all(resultado),
   };
+}
+
+async function obterProdutoEan(eanCodigo: string) {
+  const chaveCache = `${CHAVE_PRODUTO_EAN_ECOMMERCE}_${eanCodigo}`;
+  let produtoEan = await cacheUtil.obter(chaveCache);
+  if (!produtoEan) {
+    produtoEan = await produtoEanServiceArius.obterPorCodigo(eanCodigo);
+    await cacheUtil.add(chaveCache, produtoEan, ETempoExpiracao.QUINZE_MINUTOS);
+  }
+  return produtoEan;
 }
 
 async function atualizar(produtoDTO: ProdutoDTO) {
