@@ -114,6 +114,7 @@ async function atualizar(usuario: Usuario) {
           senha: usuario.senha,
           troca_senha: usuario.troca_senha,
           role: usuario.role,
+          online: usuario.online
         })
         .from('usuarios')
         .where('id', '=', usuario.id);
@@ -221,6 +222,18 @@ async function obterSetores(usuario_id: number): Promise<any[]> {
   }
 }
 
+async function obterTodosOnline(): Promise<Usuario[]> {
+  const db = getDbInstance();
+  try {
+    return await db.select('u.id', 'u.nome', 'u.email', 'u.role').from('usuarios AS u').where('u.online', '=', 1);
+  } catch (erro) {
+    console.error(erro);
+    throw new ErroException('Não foi possivel obter os usuários onlines');
+  } finally {
+    db.destroy();
+  }
+}
+
 export default {
   obterUsuarioPorEmail,
   obterPorId,
@@ -231,4 +244,5 @@ export default {
   atualizar,
   cadastrar,
   obterPorCNPJ,
+  obterTodosOnline
 };

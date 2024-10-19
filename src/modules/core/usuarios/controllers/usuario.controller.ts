@@ -54,9 +54,21 @@ async function trocarSenhaPrimeiroAcesso(
   }
 }
 
+async function obterTodosOnline(req: Request, res: Response<ResponseDTO<Usuario[]>>, next: NextFunction) {
+  try {
+    const usuarios = await usuarioService.obterTodosOnline();
+    return res.status(httpStatusEnum.Status.SUCESSO).json({
+      dados: usuarios,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 export default {
   cadastrar,
   obterTodos,
   atualizar,
   trocarSenhaPrimeiroAcesso,
+  obterTodosOnline,
 };

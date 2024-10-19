@@ -20,6 +20,7 @@ import ConfirmaCadastroResponseDTO from '../dtos/confirma-cadastro-response.dto'
 import RedefineSenhaDTO from '../dtos/redefine-senha.dto';
 import dotenv from 'dotenv';
 import objectUtil from '@utils/object.util';
+import usuarioRepository from '@modules/core/usuarios/repositories/usuario.repository';
 dotenv.config();
 
 async function login({ email, senha }: LoginRequestDTO): Promise<LoginResponseDTO> {
@@ -53,6 +54,11 @@ async function login({ email, senha }: LoginRequestDTO): Promise<LoginResponseDT
       grupos: usuario.grupos?.map((grupo) => grupo.id),
       acessos: usuario.acessos?.map((acesso) => acesso.id),
     },
+  });
+
+  await usuarioRepository.atualizar({
+    ...usuario,
+    online: 1,
   });
 
   await logAcessosService.registrar({
@@ -124,6 +130,20 @@ async function confirmarCadastro({ token }: ConfirmaCadastroRequestDTO): Promise
   return await fornecedorService.confirmarCadastro({ token });
 }
 
+async function logout(token: string) {
+  if (!token) throw new ErroException('Token não encontrado');
+  const { usuario_id } = jwtUtil.decode<{ usuario_id: number }>(token);
+
+  let usuario = await usuarioService.obterPorId(usuario_id);
+
+  if (!usuario) throw new ErroException('Usuário não encontrado');
+
+  await usuarioRepository.atualizar({
+    ...usuario,
+    online: 0,
+  });
+}
+
 export default {
   login,
   registrar,
@@ -131,4 +151,5 @@ export default {
   enviarEmailRedefinicaoSenha,
   redefinirSenha,
   confirmarCadastro,
+  logout,
 };

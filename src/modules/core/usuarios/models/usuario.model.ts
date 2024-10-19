@@ -13,6 +13,7 @@ export default interface Usuario {
   setores: Setor[];
   role: ERole;
   troca_senha?: number;
+  online?: number;
   created_at?: Date;
   updated_at?: Date;
 }

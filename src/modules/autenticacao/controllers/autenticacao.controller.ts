@@ -54,7 +54,7 @@ async function redefinirSenha(
   try {
     await autenticacaoService.redefinirSenha(req.body);
     return res.status(httpStatusEnum.Status.SUCESSO).json({
-      mensagem: 'Senha redefinida com sucesso'
+      mensagem: 'Senha redefinida com sucesso',
     });
   } catch (error) {
     next(error);
@@ -100,7 +100,23 @@ async function confirmarCadastro(
     const retorno = await autenticacaoService.confirmarCadastro(req.body);
     return res.status(httpStatusEnum.Status.SUCESSO).json({
       mensagem: 'Cadastro confirmado com sucesso',
-      dados: retorno
+      dados: retorno,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function logout(
+  req: Request<{}, {}, { token: string }, {}>,
+  res: Response<ResponseDTO<void>>,
+  next: NextFunction
+) {
+  try {
+    const { token } = req.body;
+    await autenticacaoService.logout(token);
+    return res.status(httpStatusEnum.Status.SUCESSO).json({
+      mensagem: 'Logout realizado com sucesso',
     });
   } catch (error) {
     next(error);
@@ -113,5 +129,6 @@ export default {
   carregarSessao,
   enviarEmailRedefinicaoSenha,
   redefinirSenha,
-  confirmarCadastro
+  confirmarCadastro,
+  logout,
 };

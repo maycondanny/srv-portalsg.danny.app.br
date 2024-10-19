@@ -134,6 +134,10 @@ async function obterPorCNPJ(cnpj: string) {
   };
 }
 
+async function obterTodosOnline(): Promise<Usuario[]> {
+  return await usuarioRepository.obterTodosOnline();
+}
+
 function checarSenhasIguais(senha: string, confirmacaoSenha: string) {
   return senha === confirmacaoSenha;
 }
@@ -147,4 +151,5 @@ export default {
   trocarSenhaPrimeiroAcesso,
   obterPorCNPJ,
   redefinirSenha,
+  obterTodosOnline,
 };

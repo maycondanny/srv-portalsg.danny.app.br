@@ -6,6 +6,7 @@ const router = Router();
 
 router.post('/registro', autenticacaoController.registrar);
 router.post('/login', autenticacaoController.login);
+router.post('/logout', autenticacaoController.logout);
 router.post('/redefine-senha', autenticacaoController.redefinirSenha);
 router.post('/carrega-sessao', authMiddleware, autenticacaoController.carregarSessao);
 router.post('/email-redefinicao-senha', autenticacaoController.enviarEmailRedefinicaoSenha);
