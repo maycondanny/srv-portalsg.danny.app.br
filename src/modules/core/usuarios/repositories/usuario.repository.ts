@@ -58,7 +58,10 @@ async function cadastrar(usuario: Usuario): Promise<number> {
 async function obterTodos(): Promise<Usuario[]> {
   const db = getDbInstance();
   try {
-    return await db.select('u.*').from('usuarios AS u');
+    return await db
+      .select('u.*')
+      .from('usuarios AS u')
+      .orderBy([{ column: 'online', order: 'desc' }]);
   } catch (erro) {
     console.error(erro);
     throw new ErroException('Não foi possivel carregar os usuarios!');
@@ -114,7 +117,7 @@ async function atualizar(usuario: Usuario) {
           senha: usuario.senha,
           troca_senha: usuario.troca_senha,
           role: usuario.role,
-          online: usuario.online
+          online: usuario.online,
         })
         .from('usuarios')
         .where('id', '=', usuario.id);
@@ -244,5 +247,5 @@ export default {
   atualizar,
   cadastrar,
   obterPorCNPJ,
-  obterTodosOnline
+  obterTodosOnline,
 };
