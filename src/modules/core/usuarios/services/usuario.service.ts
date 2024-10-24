@@ -5,6 +5,7 @@ import ErroException from '@exceptions/erro.exception';
 import dotenv from 'dotenv';
 import usuarioModuloService from './usuario-modulo.service';
 import _ from 'lodash';
+import numberUtil from '@utils/number.util';
 dotenv.config();
 
 async function cadastrar(usuario: Usuario): Promise<number> {
@@ -13,7 +14,14 @@ async function cadastrar(usuario: Usuario): Promise<number> {
     throw new ErroException('O email fornecido já está sendo utilizado');
   }
   usuario.senha = encryptacaoUtil.encriptar(usuario.senha || process.env.SENHA_PADRAO_NOVO_USUARIO);
-  return await usuarioRepository.cadastrar(usuario);
+
+  const usuario_id = await usuarioRepository.cadastrar(usuario);
+
+  if (numberUtil.isMaiorZero(usuario.modulos.length)) {
+    await usuarioModuloService.cadastrar(_.map(usuario.modulos, (modulo) => ({ modulo_id: modulo.id, usuario_id })));
+  }
+
+  return usuario_id;
 }
 
 async function obterTodos(): Promise<any[]> {

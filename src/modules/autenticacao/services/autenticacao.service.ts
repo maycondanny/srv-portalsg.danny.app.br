@@ -1,7 +1,6 @@
 import usuarioService from '@modules/core/usuarios/services/usuario.service';
 import LoginRequestDTO from '../dtos/login-request.dto';
 import encryptacaoUtil from '@utils/encryptacao.util';
-import { ERole } from '@modules/core/usuarios/models/usuario-role.model';
 import jwtUtil from '@utils/jwt.util';
 import logAcessosService from './log-acessos.service';
 import Usuario from '@modules/core/usuarios/models/usuario.model';
@@ -18,10 +17,13 @@ import ErroException from '@exceptions/erro.exception';
 import ConfirmaCadastroRequestDTO from '../dtos/confirma-cadastro-request.dto';
 import ConfirmaCadastroResponseDTO from '../dtos/confirma-cadastro-response.dto';
 import RedefineSenhaDTO from '../dtos/redefine-senha.dto';
-import dotenv from 'dotenv';
 import objectUtil from '@utils/object.util';
 import usuarioRepository from '@modules/core/usuarios/repositories/usuario.repository';
+import dotenv from 'dotenv';
 dotenv.config();
+
+const FORNECEDOR = Number(process.env.ROLE_FORNECEDOR);
+const TRANSPORTADORA = Number(process.env.ROLE_TRANSPORTADORA);
 
 async function login({ email, senha }: LoginRequestDTO): Promise<LoginResponseDTO> {
   const usuario = await usuarioService.obterUsuarioPorEmail(email);
@@ -37,7 +39,7 @@ async function login({ email, senha }: LoginRequestDTO): Promise<LoginResponseDT
     throw new ErroException('Não foi possivel efetuar o login');
   }
 
-  if (usuario.role === ERole.FORNECEDOR || usuario.role === ERole.TRANSPORTADORA) {
+  if (usuario.role === FORNECEDOR || usuario.role === TRANSPORTADORA) {
     const contaAtivada = await verificarContaAtivada(usuario);
     if (!contaAtivada) {
       throw new ErroException('Conta não ativada');
@@ -83,13 +85,13 @@ async function registrar(dados: RegistroRequestDTO) {
 }
 
 async function carregarSessao({ token }: CarregaSessaoRequestDTO) {
-  const { usuario_id, role } = jwtUtil.decode<{ usuario_id: number; role: ERole }>(token);
+  const { usuario_id, role } = jwtUtil.decode<{ usuario_id: number; role: number }>(token);
 
   let usuario = await usuarioService.obterPorId(usuario_id);
 
   if (!usuario) throw new ErroException('Usuário não encontrado');
 
-  if (role === ERole.FORNECEDOR || role === ERole.TRANSPORTADORA) {
+  if (role === FORNECEDOR || role === TRANSPORTADORA) {
     return await fornecedorService.carregarSessao(usuario);
   }
   return usuario;

@@ -25,12 +25,6 @@ export const CODIGOS_PIS_COFINS = {
   T: "TRIBUTADO"
 };
 
-export enum ERole {
-  CADASTRO = 'cadastro',
-  FISCAL = 'fiscal',
-  ECOMMERCE = 'ecommerce',
-}
-
 export enum ECadastroStatus {
   NOVO = 1,
   APROVADO = 2,

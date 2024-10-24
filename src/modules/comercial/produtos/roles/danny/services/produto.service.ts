@@ -1,7 +1,6 @@
 import produtoModel, {
   ECadastroStatus,
   EFiscalStatus,
-  ERole,
   Produto,
 } from '@modules/comercial/produtos/models/produto.model';
 import CapaProdutoResponseDTO from '../dtos/capa-produto-response.dto';
@@ -19,8 +18,13 @@ import httpStatusEnum from '@enums/http-status.enum';
 import validacaoService from './validacao.service';
 import { Fornecedor } from '@modules/core/fornecedores/models/fornecedor.model';
 import fornecedorService from '@modules/core/fornecedores/services/fornecedor.service';
+import dotenv from 'dotenv';
+dotenv.config();
 
-async function obterTodosPorFornecedor(fornecedorId: number, role: ERole): Promise<ProdutoFornecedorResponse> {
+const ROLE_APROVACAO_CADASTRO = Number(process.env.ROLE_APROVACAO_CADASTRO);
+const ROLE_FISCAL = Number(process.env.ROLE_FISCAL);
+
+async function obterTodosPorFornecedor(fornecedorId: number, role: number): Promise<ProdutoFornecedorResponse> {
   try {
     if (!fornecedorId) {
       throw new ErroException('Fornecedor não encontrado');
@@ -35,11 +39,11 @@ async function obterTodosPorFornecedor(fornecedorId: number, role: ERole): Promi
 
       produto.divergencias = divergencias;
 
-      if (role === ERole.CADASTRO) {
+      if (role === ROLE_APROVACAO_CADASTRO) {
         mapearProdutoCadastro(produto);
       }
 
-      if (role === ERole.FISCAL) {
+      if (role === ROLE_FISCAL) {
         mapearProdutoFiscal(produto);
       }
 
@@ -133,11 +137,11 @@ function agrupar(produtos: CapaProdutoResponseDTO[]): CapaProdutoResponseDTO[] {
   return _.values(resultado);
 }
 
-async function atualizar(role: ERole, produto: Produto) {
+async function atualizar(role: number, produto: Produto) {
   if (!role) throw new ErroException('Role não informada');
   if (!produto) throw new ErroException('Produto não informada');
 
-  if (role === ERole.FISCAL) {
+  if (role === ROLE_FISCAL) {
     const validacao = await validacaoService.validarFiscal(produto);
 
     if (!validacao.valido) {
@@ -159,7 +163,7 @@ async function atualizar(role: ERole, produto: Produto) {
     return;
   }
 
-  if (role === ERole.CADASTRO) {
+  if (role === ROLE_APROVACAO_CADASTRO) {
     const validacao = await validacaoService.validarCadastro(produto);
 
     if (!validacao.valido) {

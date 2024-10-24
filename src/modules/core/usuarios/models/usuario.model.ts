@@ -1,4 +1,3 @@
-import { ERole } from './usuario-role.model';
 import Setor from '@modules/core/setores/models/setor.model';
 import Modulo from '@modules/core/modulos/models/modulo.model';
 
@@ -9,7 +8,7 @@ export default interface Usuario {
   email: string;
   setores: Setor[];
   modulos: Modulo[];
-  role: ERole;
+  role: number;
   troca_senha?: number;
   online?: number;
   created_at?: Date;

@@ -2,7 +2,6 @@ import ariusProdutoFornecedor from '@modules/integradores/arius/comercial/servic
 import produtoModel, {
   ECadastroStatus,
   EFiscalStatus,
-  ERole,
   Produto,
 } from '@modules/comercial/produtos/models/produto.model';
 import AprovacaoRequestDTO from '../dtos/aprovacao-request.dto';
@@ -18,18 +17,23 @@ import AprovacaoResponseDTO from '../dtos/aprovacao-response.dto';
 import tabelaFornecedor from '@modules/integradores/arius/comercial/services/tabela-fornecedor';
 import tabelaFornecedorUf from '@modules/integradores/arius/comercial/services/tabela-fornecedor-uf';
 import estadoModel from '@modules/core/estados/models/estado.model';
+import dotenv from 'dotenv';
+dotenv.config();
 
 export const LINHA_GERAL = 1;
 
 export const CST_SUBSTITUIDO = '260';
 export const TRIBUTACAO_SUBSTITUIDO = 'F';
 
+const ROLE_APROVACAO_CADASTRO = Number(process.env.ROLE_APROVACAO_CADASTRO);
+const ROLE_FISCAL = Number(process.env.ROLE_FISCAL);
+
 async function aprovar({ role, produto, dadosAtualizacao }: AprovacaoRequestDTO): Promise<AprovacaoResponseDTO> {
   if (objectUtil.isVazio(produto)) throw new ErroException('Produto não informado para a aprovação!');
   switch (role) {
-    case ERole.CADASTRO:
+    case ROLE_APROVACAO_CADASTRO:
       return await aprovarCadastro(produtoMapper.toProduto(produto), produtoMapper.toProduto(dadosAtualizacao));
-    case ERole.FISCAL:
+    case ROLE_FISCAL:
       return await aprovarFiscal(produtoMapper.toProduto(produto), produtoMapper.toProduto(dadosAtualizacao));
   }
 }

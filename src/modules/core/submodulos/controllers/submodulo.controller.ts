@@ -17,8 +17,6 @@ async function obterTodos(req: Request, res: Response<ResponseDTO<SubModulo[]>>,
 
 async function cadastrar(req: Request<{}, {}, SubModulo>, res: Response<ResponseDTO<void>>, next: NextFunction) {
   try {
-    console.log(req.body);
-
     await submoduloService.cadastrar(req.body);
     return res.status(httpStatusEnum.Status.CRIADO).json({
       mensagem: 'Submodulo cadastrado com sucesso',

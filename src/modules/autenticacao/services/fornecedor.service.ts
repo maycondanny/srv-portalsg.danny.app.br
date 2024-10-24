@@ -5,9 +5,6 @@ import jwtUtil from '@utils/jwt.util';
 import usuarioService from '@modules/core/usuarios/services/usuario.service';
 import fornecedorService from '@modules/integradores/hub/fornecedores/services/fornecedor.service';
 import { ESetores } from '@modules/core/setores/models/setor.model';
-import { EGrupos } from '@modules/core/grupos/models/grupo.model';
-import { EAcessos } from '@modules/core/acessos/models/acesso.model';
-import { ERole } from '@modules/core/usuarios/models/usuario-role.model';
 import fornecedorRepository from '@modules/core/fornecedores/repositories/fornecedor.repository';
 import { REGEX_LIMPAR_CARACTERES_CNPJ } from '@utils/regex.util';
 import ErroException from '@exceptions/erro.exception';
@@ -16,6 +13,9 @@ import ConfirmaCadastroRequestDTO from '../dtos/confirma-cadastro-request.dto';
 import ConfirmaCadastroResponseDTO from '../dtos/confirma-cadastro-response.dto';
 import dotenv from 'dotenv';
 dotenv.config();
+
+const FORNECEDOR = Number(process.env.ROLE_FORNECEDOR);
+const TRANSPORTADORA = Number(process.env.ROLE_TRANSPORTADORA);
 
 async function carregarSessao(usuario: any) {
   const fornecedor = await usuarioFornecedorRepository.obterPorUsuario(usuario.id);
@@ -53,22 +53,15 @@ async function registrar(registroFornecedorDTO: RegistroFornecedorDTO): Promise<
   }
 
   let setores: any = [{ id: ESetores.Comercial }];
-  let grupos = [];
-  let acessos = [];
+  let modulos = [];
 
   if (transportadora) {
-    grupos = [{ id: EGrupos.Transportadora }];
-    acessos = [{ id: EAcessos.FE_AgendamentoPedidos }];
+    modulos = [{ id: process.env.MODULO_PRODUTOS }, { id: process.env.MODULO_AGENDAMENTO }];
   } else {
-    grupos = [{ id: EGrupos.Fornecedores_Externos }];
-    acessos = [
-      { id: EAcessos.FE_ListagemProdutos },
-      { id: EAcessos.FE_AgendamentoPedidos },
-      { id: EAcessos.FE_Ecommerce },
-    ];
+    modulos = [{ id: process.env.MODULO_PRODUTOS }];
   }
 
-  let role = registroFornecedorDTO.transportadora ? ERole.TRANSPORTADORA : ERole.FORNECEDOR;
+  const role = registroFornecedorDTO.transportadora ? TRANSPORTADORA : FORNECEDOR;
 
   const usuario_id = await usuarioService.cadastrar({
     email,
@@ -76,7 +69,7 @@ async function registrar(registroFornecedorDTO: RegistroFornecedorDTO): Promise<
     senha,
     role,
     setores,
-    modulos: []
+    modulos,
   });
 
   const fornecedor_id = await fornecedorRepository.cadastrar({
