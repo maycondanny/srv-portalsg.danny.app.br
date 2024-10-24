@@ -76,8 +76,7 @@ async function registrar(registroFornecedorDTO: RegistroFornecedorDTO): Promise<
     senha,
     role,
     setores,
-    grupos,
-    acessos,
+    modulos: []
   });
 
   const fornecedor_id = await fornecedorRepository.cadastrar({

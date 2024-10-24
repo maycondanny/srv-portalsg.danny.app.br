@@ -27,23 +27,6 @@ async function cadastrar(usuario: Usuario): Promise<number> {
           }))
         )
         .into('usuarios_setores');
-      await trx
-        .insert(
-          usuario.grupos.map((grupo) => ({
-            usuario_id: id,
-            grupo_id: grupo.id,
-          }))
-        )
-        .into('usuarios_grupos');
-      await trx
-        .insert(
-          usuario.acessos.map((acesso) => ({
-            usuario_id: id,
-            acesso_id: acesso.id,
-          }))
-        )
-        .into('usuarios_acessos');
-
       return id;
     });
     return id;
@@ -123,26 +106,10 @@ async function atualizar(usuario: Usuario) {
         .where('id', '=', usuario.id);
 
       await trx.from('usuarios_setores AS us').where('us.usuario_id', '=', usuario.id).del();
-      await trx.from('usuarios_grupos AS ug').where('ug.usuario_id', '=', usuario.id).del();
-      await trx.from('usuarios_acessos AS ua').where('ua.usuario_id', '=', usuario.id).del();
 
       await trx.from('usuarios_setores AS us').insert(
         usuario.setores.map((setor) => ({
           setor_id: setor.id,
-          usuario_id: usuario.id,
-        }))
-      );
-
-      await trx.from('usuarios_grupos AS ug').insert(
-        usuario.grupos.map((grupo) => ({
-          grupo_id: grupo.id,
-          usuario_id: usuario.id,
-        }))
-      );
-
-      await trx.from('usuarios_acessos AS ua').insert(
-        usuario.acessos.map((acesso) => ({
-          acesso_id: acesso.id,
           usuario_id: usuario.id,
         }))
       );

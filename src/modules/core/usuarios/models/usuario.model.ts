@@ -1,16 +1,14 @@
-import Acesso from "@modules/core/acessos/models/acesso.model";
-import { ERole } from "./usuario-role.model";
-import Grupo from "@modules/core/grupos/models/grupo.model";
-import Setor from "@modules/core/setores/models/setor.model";
+import { ERole } from './usuario-role.model';
+import Setor from '@modules/core/setores/models/setor.model';
+import Modulo from '@modules/core/modulos/models/modulo.model';
 
 export default interface Usuario {
   id?: number;
   nome: string;
   senha: string;
   email: string;
-  grupos: Grupo[];
-  acessos: Acesso[];
   setores: Setor[];
+  modulos: Modulo[];
   role: ERole;
   troca_senha?: number;
   online?: number;

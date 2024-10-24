@@ -3,6 +3,8 @@ import encryptacaoUtil from '@utils/encryptacao.util';
 import usuarioRepository from '../repositories/usuario.repository';
 import ErroException from '@exceptions/erro.exception';
 import dotenv from 'dotenv';
+import usuarioModuloService from './usuario-modulo.service';
+import _ from 'lodash';
 dotenv.config();
 
 async function cadastrar(usuario: Usuario): Promise<number> {
@@ -20,15 +22,13 @@ async function obterTodos(): Promise<any[]> {
   return await Promise.all(
     usuarios.map(async (usuario) => {
       usuario.senha = encryptacaoUtil.descriptar(usuario.senha);
-      const grupos = await obterGrupos(usuario.id);
-      const acessos = await obterAcessos(usuario.id);
       const setores = await obterSetores(usuario.id);
+      const modulos = await usuarioModuloService.obterPorUsuarioId(usuario.id);
 
       return {
         ...usuario,
-        grupos,
-        acessos,
         setores,
+        modulos,
       };
     })
   );
@@ -39,15 +39,13 @@ async function obterPorId(id: number): Promise<any> {
 
   if (!usuario) throw new ErroException('Usuario não encontrado.');
 
-  const grupos = await obterGrupos(id);
-  const acessos = await obterAcessos(id);
   const setores = await obterSetores(id);
+  const modulos = await usuarioModuloService.obterPorUsuarioId(id);
 
   return {
     ...usuario,
-    grupos,
-    acessos,
     setores,
+    modulos,
   };
 }
 
@@ -56,15 +54,13 @@ async function obterUsuarioPorEmail(email: string): Promise<any> {
 
   if (!usuario) return false;
 
-  const grupos = await obterGrupos(usuario.id);
-  const acessos = await obterAcessos(usuario.id);
   const setores = await obterSetores(usuario.id);
+  const modulos = await usuarioModuloService.obterPorUsuarioId(usuario.id);
 
   return {
     ...usuario,
-    grupos,
-    acessos,
     setores,
+    modulos,
   };
 }
 
@@ -76,19 +72,14 @@ async function atualizar(usuario: Usuario) {
   }
   usuario.senha = encryptacaoUtil.encriptar(usuario.senha);
   await usuarioRepository.atualizar(usuario);
+  await usuarioModuloService.cadastrar(
+    _.map(usuario.modulos, (modulo) => ({ modulo_id: modulo.id, usuario_id: usuario.id }))
+  );
   return await obterPorId(usuario.id);
 }
 
 async function obterSetores(usuario_id: number): Promise<any[]> {
   return await usuarioRepository.obterSetores(usuario_id);
-}
-
-async function obterGrupos(usuario_id: number): Promise<any[]> {
-  return await usuarioRepository.obterGrupos(usuario_id);
-}
-
-async function obterAcessos(usuario_id: number): Promise<any[]> {
-  return await usuarioRepository.obterAcessos(usuario_id);
 }
 
 async function trocarSenhaPrimeiroAcesso({ id, senha }) {
@@ -122,15 +113,13 @@ async function obterPorCNPJ(cnpj: string) {
 
   if (!usuario) return false;
 
-  const grupos = await obterGrupos(usuario.id);
-  const acessos = await obterAcessos(usuario.id);
   const setores = await obterSetores(usuario.id);
+  const modulos = await usuarioModuloService.obterPorUsuarioId(usuario.id);
 
   return {
     ...usuario,
-    grupos,
-    acessos,
     setores,
+    modulos,
   };
 }
 
